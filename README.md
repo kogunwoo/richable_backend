@@ -231,5 +231,5 @@ ex) 240919 홍길동 로그인 기능 추가
 
 ### 참고 자료
 
-https://inpa.tistory.com/entry/GIT-⚡️-github-flow-git-flow-📈-브랜치-전략
+https://inpa.tistory.com/entry/GIT-⚡️-github-flow-git-flow-📈-브랜치-전략 <br/>
 https://velog.io/@hwsa1004/JAVA-Java-Coding-Conventions#naming
