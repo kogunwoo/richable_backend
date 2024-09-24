@@ -1,13 +1,12 @@
 package com.idle.kb_i_dle_backend.consume.entity;
 
 import lombok.Getter;
-
 import javax.persistence.*;
 import java.util.Date;
 
 @Entity
 @Getter
-@Table(name = "outcome_user", catalog = "outcome") // Ensure this table exists or modify the name to match your DB structure
+@Table(name = "outcome_user") // Ensure this table exists or modify the name to match your DB structure
 public class OutcomeUser {
 
     // outcome_user fields

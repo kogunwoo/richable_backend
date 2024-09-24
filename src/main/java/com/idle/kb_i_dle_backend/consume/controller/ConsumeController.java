@@ -1,6 +1,7 @@
 package com.idle.kb_i_dle_backend.consume.controller;
 
 import com.idle.kb_i_dle_backend.consume.entity.Outcome;
+import com.idle.kb_i_dle_backend.consume.entity.OutcomeUser;
 import com.idle.kb_i_dle_backend.consume.service.ConsumeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +51,12 @@ public class ConsumeController {
         log.info("Fetching consume records where household size is greater than: {}", size);
         return consumeService.findByHouseholdSizeGreaterThan(size);
     }
-
+    // Get consume records by user ID (from outcome_user)
+    @GetMapping("/user/{uid}")
+    public List<OutcomeUser> getConsumesByUserId(@PathVariable int uid) {
+        log.info("Fetching consume records for user with ID: {}", uid);
+        return consumeService.findByUid(uid);
+    }
     // Save or update a consume record
     @PostMapping("/save")
     public Outcome saveConsume(@RequestBody Outcome consume) {
