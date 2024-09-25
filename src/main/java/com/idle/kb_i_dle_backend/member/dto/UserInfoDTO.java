@@ -9,8 +9,9 @@ public class UserInfoDTO {
     private Integer uid;
     private String id;
     private String nickname;
+    private String auth;
 
     public static UserInfoDTO of(MemberDTO member) {
-        return new UserInfoDTO(member.getUid() ,member.getId(), member.getNickname());
+        return new UserInfoDTO(member.getUid() ,member.getId(), member.getNickname(), member.getAuth().toString());
     }
 }

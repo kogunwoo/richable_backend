@@ -18,9 +18,11 @@ public final class JwtProcessor {
     private Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
 
     // JWT generation
-    public String generateToken(String subject) {
+    public String generateToken(String subject, Integer uid,String nickname) {
         return Jwts.builder()
                 .setSubject(subject)
+                .claim("uid", uid)
+                .claim("nickname", nickname)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + TOKEN_VALID_MILISECOND))
                 .signWith(key)
