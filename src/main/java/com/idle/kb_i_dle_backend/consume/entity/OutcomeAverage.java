@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Entity
 @Getter
-@Table(name = "outcome_average")
+@Table(name = "outcome_average",catalog = "outcome")
 public class OutcomeAverage {
 
     @Id
@@ -19,7 +19,7 @@ public class OutcomeAverage {
     private String ageGroup;
 
     @Column(name = "outcome_expenditure_category")  // 실제 테이블의 컬럼과 매핑
-    private String outcomeExp;
+    private String category;
 
     @Column(name = "outcome")
     private Integer outcome;
