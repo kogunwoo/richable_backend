@@ -1,66 +1,62 @@
 package com.idle.kb_i_dle_backend.consume.controller;
 
-import com.idle.kb_i_dle_backend.consume.entity.Outcome;
-import com.idle.kb_i_dle_backend.consume.entity.OutcomeUser;
+import com.idle.kb_i_dle_backend.consume.dto.OutcomeAverageDTO;
+import com.idle.kb_i_dle_backend.consume.dto.OutcomeUserDTO;
 import com.idle.kb_i_dle_backend.consume.service.ConsumeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/consume")
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class ConsumeController {
 
     private final ConsumeService consumeService;
 
-    // Get all consume records
-    @GetMapping("/all")
-    public List<Outcome> getAllConsumes() {
-        log.info("Fetching all consume records");
-        return consumeService.findAll();
+    //전체조회
+    @GetMapping("/")
+    public ResponseEntity<List<OutcomeAverageDTO>> getAll() {
+        List<OutcomeAverageDTO> outcomeAverage = consumeService.getAll();
+        return ResponseEntity.ok(outcomeAverage);
     }
 
-    // Get consume records by household head age group (from outcome_average)
-    @GetMapping("/age-group/{ageGroup}")
-    public List<Outcome> getConsumesByHouseholdHeadAgeGroup(@PathVariable String ageGroup) {
-        log.info("Fetching consume records for household head age group: {}", ageGroup);
-        return consumeService.findByHouseholdHeadAgeGroup(ageGroup);
+    @GetMapping("/detail")
+    public ResponseEntity<List<OutcomeUserDTO>> getAllUser() {
+        List<OutcomeUserDTO> outcomeUser = consumeService.getAllUser();
+        return ResponseEntity.ok(outcomeUser);
     }
 
-    // Get consume records by outcome expenditure category
-    @GetMapping("/category/{category}")
-    public List<Outcome> getConsumesByOutcomeExpenditureCategory(@PathVariable String category) {
-        log.info("Fetching consume records for category: {}", category);
-        return consumeService.findByOutcomeExpenditureCategory(category);
+//    // 소비 상세 조회: /detail
+//    @GetMapping("/detail")
+//    public ResponseEntity<List<OutcomeAverageDTO>> getAll() {
+//        List<OutcomeAverageDTO> outcomeAverage = consumeService.getAll();
+//        return ResponseEntity.ok(outcomeAverage);
+//    }
+
+//    // 달, 카테고리별 소비 합계: /category/sum
+//    @GetMapping("/category/sum")
+//    public ResponseEntity<Map<String, Long>> getCategorySum(@RequestParam int outcome) {
+//        Map<String, Long> categorySum = consumeService.getExpCategory(outcome);
+//        return ResponseEntity.ok(categorySum);
+//    }
+//
+//    // 달의 일자별 소비 조회: /category/dailysum
+//    @GetMapping("/category/dailysum")
+//    public ResponseEntity<Map<String, Long>> getDailySum(@RequestParam String month) {
+//        Map<String, Long> dailySum = consumeService.getDailySum(month);
+//        return ResponseEntity.ok(dailySum);
+//    }
+//
+//    // 평균 대비 카테고리 별 소비량: /compare
+//    @GetMapping("/compare")
+//    public ResponseEntity<Map<String, Long>> compareWithAverage(@RequestParam int uid, @RequestParam String month) {
+//        Map<String, Long> comparison = consumeService.compareWithAverage(uid, month);
+//        return ResponseEntity.ok(comparison);
     }
 
-    // Get consume records by household head age group and category
-    @GetMapping("/age-group/{ageGroup}/category/{category}")
-    public List<Outcome> getConsumesByAgeGroupAndCategory(@PathVariable String ageGroup, @PathVariable String category) {
-        log.info("Fetching consume records for age group: {} and category: {}", ageGroup, category);
-        return consumeService.findByHouseholdHeadAgeGroupAndOutcomeExpenditureCategory(ageGroup, category);
-    }
 
-    // Get consume records by household size greater than a given value (from outcome_average)
-    @GetMapping("/household-size/{size}")
-    public List<Outcome> getConsumesByHouseholdSizeGreaterThan(@PathVariable double size) {
-        log.info("Fetching consume records where household size is greater than: {}", size);
-        return consumeService.findByHouseholdSizeGreaterThan(size);
-    }
-    // Get consume records by user ID (from outcome_user)
-    @GetMapping("/user/{uid}")
-    public List<OutcomeUser> getConsumesByUserId(@PathVariable int uid) {
-        log.info("Fetching consume records for user with ID: {}", uid);
-        return consumeService.findByUid(uid);
-    }
-    // Save or update a consume record
-    @PostMapping("/save")
-    public Outcome saveConsume(@RequestBody Outcome consume) {
-        log.info("Saving consume record: {}", consume);
-        return consumeService.saveConsume(consume);
-    }
-}
