@@ -27,8 +27,8 @@ import java.io.IOException;
 
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories(basePackages = "com.idle.kb_i_dle_backend.**.repository")
-@MapperScan(basePackages = {"com.idle.kb_i_dle_backend.**.mapper.**"})
+//@EnableJpaRepositories(basePackages = "com.idle.kb_i_dle_backend.**.repository")
+@MapperScan(basePackages = {"com.idle.kb_i_dle_backend.member.mapper"})
 @PropertySource({"classpath:/application.properties"})
 public class DBConfig {
 

@@ -37,16 +37,17 @@ public class SecurityConfig{
     private final JwtProcessor jwtProcessor;
     private final CustomAccessDeniedHandler accessDeniedHandler;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
-    private final CustomUserDetailsService userDetailsService;
+//    private final CustomUserDetailsService userDetailsService;
 
     public SecurityConfig(JwtProcessor jwtProcessor,
                           CustomAccessDeniedHandler accessDeniedHandler,
-                          CustomAuthenticationEntryPoint authenticationEntryPoint,
-                          CustomUserDetailsService userDetailsService) {
+                          CustomAuthenticationEntryPoint authenticationEntryPoint
+//                          CustomUserDetailsService userDetailsService
+    ) {
         this.jwtProcessor = jwtProcessor;
         this.accessDeniedHandler = accessDeniedHandler;
         this.authenticationEntryPoint = authenticationEntryPoint;
-        this.userDetailsService = userDetailsService;
+//        this.userDetailsService = userDetailsService;
     }
 
 
@@ -83,7 +84,7 @@ public class SecurityConfig{
      * @throws Exception
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter,CustomUserDetailsService userDetailsService) throws Exception {
         http
                 .csrf().disable()
                 .addFilterBefore(corsFilter(), UsernamePasswordAuthenticationFilter.class)
@@ -91,7 +92,7 @@ public class SecurityConfig{
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/api/auth/**").permitAll()
+                .antMatchers("/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

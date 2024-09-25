@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class MemberJoinDTO {
     String id;
     String nickname;
-    char gender;
+    String gender;
     String email;
     String password;
     String birth_year;
