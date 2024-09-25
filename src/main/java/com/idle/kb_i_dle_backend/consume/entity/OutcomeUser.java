@@ -6,7 +6,7 @@ import java.util.Date;
 
 @Entity
 @Getter
-@Table(name = "outcome_user")
+@Table(name = "outcome_user",catalog = "outcome")
 public class OutcomeUser {
 
     @Id
@@ -16,7 +16,7 @@ public class OutcomeUser {
     private int uid;
 
     @Column(name = "outcome_expenditure_category")  // 실제 테이블의 컬럼과 매핑
-    private String expCategory;
+    private String category;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date date;

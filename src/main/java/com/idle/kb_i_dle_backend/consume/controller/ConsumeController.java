@@ -1,5 +1,6 @@
 package com.idle.kb_i_dle_backend.consume.controller;
 
+import com.idle.kb_i_dle_backend.consume.dto.CategorySumDTO;
 import com.idle.kb_i_dle_backend.consume.dto.OutcomeAverageDTO;
 import com.idle.kb_i_dle_backend.consume.dto.OutcomeUserDTO;
 import com.idle.kb_i_dle_backend.consume.service.ConsumeService;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/consume")
@@ -31,6 +33,22 @@ public class ConsumeController {
         return ResponseEntity.ok(outcomeUser);
     }
 
+//         달, 카테고리별 소비 합계: /category/sum
+    @GetMapping("/category/sum")
+    public ResponseEntity<List<CategorySumDTO>> getCategorySum(int uid, int year, int month) {
+        //Map<String, Long>  map;
+
+//        System.out.printf("uid: %d year:%d month:%d\n", uid, year, month);
+//        System.out.printf("uid: %d year:%d month:%d\n", uid, year, month);
+//        System.out.printf("uid: %d year:%d month:%d\n", uid, year, month);
+//        System.out.printf("uid: %d year:%d month:%d\n", uid, year, month);
+//        System.out.printf("uid: %d year:%d month:%d\n", uid, year, month);
+
+        List<CategorySumDTO> categorySum = consumeService.getCategorySum(uid, year, month);
+        return ResponseEntity.ok(categorySum);
+    }
+
+
 //    // 소비 상세 조회: /detail
 //    @GetMapping("/detail")
 //    public ResponseEntity<List<OutcomeAverageDTO>> getAll() {
@@ -38,12 +56,7 @@ public class ConsumeController {
 //        return ResponseEntity.ok(outcomeAverage);
 //    }
 
-//    // 달, 카테고리별 소비 합계: /category/sum
-//    @GetMapping("/category/sum")
-//    public ResponseEntity<Map<String, Long>> getCategorySum(@RequestParam int outcome) {
-//        Map<String, Long> categorySum = consumeService.getExpCategory(outcome);
-//        return ResponseEntity.ok(categorySum);
-//    }
+
 //
 //    // 달의 일자별 소비 조회: /category/dailysum
 //    @GetMapping("/category/dailysum")
