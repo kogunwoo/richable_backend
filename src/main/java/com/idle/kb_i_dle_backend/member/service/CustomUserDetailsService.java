@@ -25,6 +25,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         if (member == null) {
             throw new UsernameNotFoundException("User not found with username: " + username);
         }
-        return new CustomUser(member);
+        return CustomUser.from(member);
     }
 }

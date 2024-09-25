@@ -11,9 +11,9 @@ import lombok.NoArgsConstructor;
 @Builder
 public class MemberJoinDTO {
     String id;
-    String nickname;
-    String gender;
-    String email;
     String password;
+    String nickname;
+    char gender;
+    String email;
     String birth_year;
 }
