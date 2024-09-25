@@ -6,18 +6,17 @@ import java.util.Date;
 
 @Entity
 @Getter
-@Table(name = "outcome_user") // Ensure this table exists or modify the name to match your DB structure
+@Table(name = "outcome_user")
 public class OutcomeUser {
 
-    // outcome_user fields
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int index;
 
     private int uid;
 
-    @Column(name = "outcome_expenditure_category")
-    private String category;
+    @Column(name = "outcome_expenditure_category")  // 실제 테이블의 컬럼과 매핑
+    private String expCategory;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date date;
@@ -27,5 +26,4 @@ public class OutcomeUser {
     private String descript;
 
     private String memo;
-
 }
