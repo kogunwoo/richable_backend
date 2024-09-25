@@ -3,6 +3,7 @@ package com.idle.kb_i_dle_backend.member.service;
 import com.idle.kb_i_dle_backend.member.dto.MemberDTO;
 import com.idle.kb_i_dle_backend.member.dto.MemberJoinDTO;
 import com.idle.kb_i_dle_backend.member.mapper.MemberMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ public class MemberServiceImpl implements MemberService {
     private final MemberMapper memberMapper;
     private final PasswordEncoder passwordEncoder;
 
+    @Autowired
     public MemberServiceImpl(MemberMapper memberMapper, @Lazy PasswordEncoder passwordEncoder) {
         this.memberMapper = memberMapper;
         this.passwordEncoder = passwordEncoder;
@@ -34,9 +36,28 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public MemberJoinDTO getMemberJoin(String id) {
-        // Implement this method using memberMapper
-        return memberMapper.getMemberJoin(id);
+    @Transactional
+    public void MemberJoin(MemberJoinDTO memberjoindto) {
+        if(memberMapper.checkDupl(memberjoindto.getId())){
+            throw new IllegalStateException("User already exists");
+        }
+        if (memberjoindto.getNickname() == null || memberjoindto.getNickname().length() > 50) {
+            throw new IllegalArgumentException("Nickname must not be null and should not exceed 50 characters");
+        }
+        // Perform necessary checks and add try-catch blocks for any exceptions.
+        if (memberjoindto.getId() == null || memberjoindto.getId().isEmpty()) {
+            throw new IllegalStateException("User ID is required");
+        }
+        String encodePassword = passwordEncoder.encode(memberjoindto.getPassword());
+
+        String nickname = memberjoindto.getNickname();
+        if (nickname != null && nickname.length() > 50) {
+            nickname = nickname.substring(0, 50);
+        }
+        MemberJoinDTO newUser = new MemberJoinDTO(memberjoindto.getId(),encodePassword,
+                memberjoindto.getNickname(),memberjoindto.getGender(),
+                memberjoindto.getEmail(),memberjoindto.getBirth_year());
+        memberMapper.insertNewMember(newUser);
     }
 
     @Override

@@ -29,6 +29,9 @@ public class MemberDTO {
     boolean is_certification;
     String auth;
 
+    public MemberDTO(String id, String encodePassword, String nickname, String gender, String email, String birthYear) {
+    }
+
     public List<SimpleGrantedAuthority> getAuth() {
         return Arrays.stream(this.auth.split(","))
                 .map(SimpleGrantedAuthority::new)

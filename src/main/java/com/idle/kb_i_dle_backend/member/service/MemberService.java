@@ -8,7 +8,7 @@ public interface MemberService {
 
     MemberDTO getMember(String id);
 
-    MemberJoinDTO getMemberJoin(String id);
+    void MemberJoin(MemberJoinDTO memberjoindto);
 
     // Add this method if it doesn't exist
     MemberDTO findById(String id);
