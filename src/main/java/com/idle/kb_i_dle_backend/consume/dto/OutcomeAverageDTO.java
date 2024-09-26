@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 public class OutcomeAverageDTO {
     private int index;
     private String ageGroup;
-    private String category;
+    private String outcomeExp;
     private int outcome;
     private BigDecimal householdSize;
     private String quater;
@@ -17,7 +17,7 @@ public class OutcomeAverageDTO {
     public OutcomeAverageDTO(int index, String ageGroup, String outcomeExp, int outcome, BigDecimal householdSize, String quater) {
         this.index = index;
         this.ageGroup = ageGroup;
-        this.category = outcomeExp;
+        this.outcomeExp = outcomeExp;
         this.outcome = outcome;
         this.householdSize = householdSize;
         this.quater = quater;

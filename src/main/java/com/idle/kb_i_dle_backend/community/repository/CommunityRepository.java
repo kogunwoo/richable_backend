@@ -11,5 +11,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
  *
  */
 public interface CommunityRepository extends JpaRepository<Board, Integer> {
-    List<Board> findAll();
+    //List<Board> findAll();
 }
