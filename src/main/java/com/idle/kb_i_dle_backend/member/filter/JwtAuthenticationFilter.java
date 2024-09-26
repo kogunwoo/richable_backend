@@ -32,7 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private Authentication getAuthentication(String token) {
-        String username = jwtProcessor.getUsername(token);
+        String username = jwtProcessor.getId(token);
         UserDetails principal = customUserDetailsService.loadUserByUsername(username);
         return new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
     }
@@ -46,7 +46,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // Validate token and set authentication if valid
         if (token != null && jwtProcessor.validateToken(token)) {
-            String username = jwtProcessor.getUsername(token);
+            String username = jwtProcessor.getId(token);
 
             // Load user details
             UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
