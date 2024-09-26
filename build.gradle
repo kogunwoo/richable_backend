@@ -83,15 +83,21 @@ dependencies {
     implementation group: 'com.zaxxer', name: 'HikariCP', version: '5.1.0'
 
 
-    //junit - 테스트 코드 작성
+    // junit 및 테스트 관련 의존성
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
     testImplementation 'org.springframework:spring-test:5.3.22'
+    testImplementation 'org.mockito:mockito-core:3.+'
+    testCompileOnly 'org.projectlombok:lombok:1.18.22'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
 
-    //spring security
-    implementation 'org.springframework.security:spring-security-core:5.7.9'
-    implementation 'org.springframework.security:spring-security-web:5.7.9'
-    implementation 'org.springframework.security:spring-security-config:5.7.9'
+// commons-fileupload
+    implementation group: 'commons-fileupload', name: 'commons-fileupload', version: '1.5'
+
+// JWT for Authentication
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
 
     //jpa
@@ -100,6 +106,8 @@ dependencies {
     //hibernate(jpa 구현체)
     implementation 'org.hibernate:hibernate-core:5.6.15.Final'
     implementation 'javax.persistence:javax.persistence-api:2.2'
+    implementation 'org.hibernate.validator:hibernate-validator:6.0.13.Final'
+    implementation 'javax.validation:validation-api:2.0.1.Final'
 
 
     //hibernate validator
@@ -109,9 +117,14 @@ dependencies {
     //swagger
     implementation 'io.springfox:springfox-swagger2:2.9.2'
     implementation 'io.springfox:springfox-swagger-ui:2.9.2'
-//
+
     implementation group: 'commons-fileupload', name: 'commons-fileupload', version: '1.5'
 
+
+    // JWT for Authentication
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 }
 
 test {
