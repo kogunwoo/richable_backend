@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -62,6 +63,28 @@ public class MemberController {
         MemberDTO member = customUser.getMember();  // Retrieve the MemberDTO object
         return new UserInfoDTO(member.getUid(), member.getId(), member.getNickname(), member.getAuth().toString());
     }
+
+//    @PostMapping("/naver/callback")
+//    public ResponseEntity<?> handleNaverCallback(@RequestParam String code, @RequestParam String state) {
+//        try {
+//            // Step 1: Get access token using the provided code
+//            String accessToken = memberService.getNaverAccessToken(code, state);
+//
+//            // Step 2: Retrieve user profile from Naver
+//            Map<String, String> userProfile = memberService.getNaverUserProfile(accessToken);
+//
+//            // Step 3: Log in or sign up the user based on Naver profile info
+//            MemberDTO member = memberService.processNaverLogin(userProfile);
+//
+//            // Step 4: Generate JWT for the logged-in user
+//            String token = jwtProcessor.generateToken(member.getEmail());
+//
+//            return ResponseEntity.ok(new AuthResultDTO(token, new UserInfoDTO(member)));
+//        } catch (Exception e) {
+//            log.error("Naver login failed", e);
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Naver login failed");
+//        }
+//    }
 
     @PostMapping("/register")
     public ResponseEntity<?> signup(@RequestBody MemberJoinDTO signupDTO) {
