@@ -18,7 +18,7 @@ public interface CategorySumRepository extends JpaRepository<OutcomeUser, Intege
      */
     @Query("SELECT new com.idle.kb_i_dle_backend.consume.dto.CategorySumDTO(o.category, SUM(o.amount)) " +
             "FROM OutcomeUser o WHERE o.uid = :uid " +
-            "AND YEAR(o.date) = :year AND MONTH(o.date) = :month " +
+            "AND YEAR(o.date) = :year AND MONTH(o.date) = :month and where o.category = " +
             "GROUP BY o.category")
     List<CategorySumDTO> findCategorySumByUidAndYearAndMonth(@Param("uid") int uid, @Param("year") int year , @Param("month") int month);
 

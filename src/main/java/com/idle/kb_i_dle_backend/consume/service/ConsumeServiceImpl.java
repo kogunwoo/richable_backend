@@ -71,5 +71,6 @@ public class ConsumeServiceImpl implements ConsumeService {
                 outcomeUser.getDescript(),
                 outcomeUser.getMemo()
         );
+
 }
 }
