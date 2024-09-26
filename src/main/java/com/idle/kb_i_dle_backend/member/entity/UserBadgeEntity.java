@@ -7,8 +7,8 @@ import javax.persistence.*;
 
 @Getter
 @Setter
-@Entity
-@Table(name = "user_badge")
+//@Entity
+//@Table(name = "user_badge")
 public class UserBadgeEntity {
 
     @EmbeddedId

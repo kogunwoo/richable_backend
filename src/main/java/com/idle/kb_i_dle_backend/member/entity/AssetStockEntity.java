@@ -9,8 +9,8 @@ import java.util.Date;
 
 @Getter
 @Setter
-@Entity
-@Table(name = "stock")
+//@Entity
+//@Table(name = "stock")
 public class AssetStockEntity {
 
     @Id

@@ -8,8 +8,8 @@ import java.util.Date;
 
 @Getter
 @Setter
-@Entity
-@Table(name = "income")
+//@Entity
+//@Table(name = "income")
 public class AssetIncomeEntity {
 
     @Id
