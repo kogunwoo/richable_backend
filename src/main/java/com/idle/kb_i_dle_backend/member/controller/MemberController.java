@@ -10,6 +10,7 @@ import com.idle.kb_i_dle_backend.member.service.MemberService;
 import com.idle.kb_i_dle_backend.member.util.JwtProcessor;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequestMapping("/member")
 public class MemberController {
@@ -95,5 +97,84 @@ public class MemberController {
         response.put("success", success);
         return ResponseEntity.ok(response);
     }
+    @PostMapping("/findid")
+    public ResponseEntity<?> findId(@RequestBody Map<String, String> payload) {
+        String email = payload.get("email");
+        String id = memberService.findIdByEmail(email);
+        if (id != null) {
+            String verificationCode = memberService.generateAndSaveVerificationCode(email);
+            System.out.println(verificationCode);
+            log.info("verification code: " + verificationCode);
+            // TODO: 이메일로 verificationCode 전송 로직 구현
+            return ResponseEntity.ok(Map.of("message", "인증 코드가 이메일로 전송되었습니다."));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "해당 이메일로 등록된 아이디가 없습니다."));
+        }
+    }
+
+    @PostMapping("/findid/auth")
+    public ResponseEntity<?> verifyCode(@RequestBody Map<String, String> payload) {
+        String email = payload.get("email");
+        String code = payload.get("code");
+        boolean isValid = memberService.verifyCode(email, code);
+        if (isValid) {
+            String id = memberService.findIdByEmail(email);
+            return ResponseEntity.ok(Map.of("id", id));
+        } else {
+            return ResponseEntity.badRequest().body(Map.of("message", "잘못된 인증 코드입니다."));
+        }
+    }
+
+//    @GetMapping("/findid2/{id}")
+//    public ResponseEntity<?> confirmFoundId(@PathVariable String id) {
+//        // ID의 유효성을 확인하고 필요한 정보를 반환합니다.
+//        // 보안상의 이유로 전체 ID를 반환하지 않고 일부만 마스킹하여 반환할 수 있습니다.
+//        if (maskedId != null) {
+//            return ResponseEntity.ok(Map.of("maskedId", maskedId));
+//        } else {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "해당 아이디를 찾을 수 없습니다."));
+//        }
+//    }
+
+    @PostMapping("/find/pw/auth")
+    public ResponseEntity<?> findPw(@RequestBody Map<String, String> payload) {
+        String email = payload.get("email");
+        String id = memberService.findIdByEmail(email);
+        if (id != null) {
+            String verificationCode = memberService.generateAndSaveVerificationCode(email);
+            System.out.println(verificationCode);
+            log.info("verification code: " + verificationCode);
+            // TODO: 이메일로 verificationCode 전송 로직 구현
+            return ResponseEntity.ok(Map.of("message", "인증 코드가 이메일로 전송되었습니다."));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "해당 이메일로 등록된 아이디가 없습니다."));
+        }
+    }
+
+    @PostMapping("/find_pw_auth")
+    public ResponseEntity<?> verifyCode2(@RequestBody Map<String, String> payload) {
+        String email = payload.get("email");
+        String code = payload.get("code");
+        boolean isValid = memberService.verifyCode(email, code);
+        if (isValid) {
+            String id = memberService.findIdByEmail(email);
+            return ResponseEntity.ok(Map.of("id", id));
+        } else {
+            return ResponseEntity.badRequest().body(Map.of("message", "잘못된 인증 코드입니다."));
+        }
+    }
+
+    @PostMapping("/set/pw")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> payload) {
+        String id = payload.get("id");
+        String newPassword = payload.get("newPassword");
+        boolean success = memberService.resetPassword(id, newPassword);
+        if (success) {
+            return ResponseEntity.ok(Map.of("success", true, "message", "비밀번호가 성공적으로 재설정되었습니다."));
+        } else {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "비밀번호 재설정 중 오류가 발생했습니다."));
+        }
+    }
+
 
 }

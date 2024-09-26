@@ -3,6 +3,7 @@ package com.idle.kb_i_dle_backend.member.service;
 import com.idle.kb_i_dle_backend.member.dto.MemberDTO;
 import com.idle.kb_i_dle_backend.member.dto.MemberJoinDTO;
 import com.idle.kb_i_dle_backend.member.mapper.MemberMapper;
+import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,6 +15,12 @@ public class MemberServiceImpl implements MemberService {
 
     private final MemberMapper memberMapper;
     private final PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EmailService emailService;
+
+    // 임시로 인증 코드를 저장할 Map (실제 구현에서는 데이터베이스나 캐시를 사용해야 함)
+    private Map<String, String> verificationCodes = new HashMap<>();
 
     @Autowired
     public MemberServiceImpl(MemberMapper memberMapper, @Lazy PasswordEncoder passwordEncoder) {
@@ -86,8 +93,46 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
+    @Override
+    public String findIdByEmail(String email) {
+        return memberMapper.findIdByEmail(email);
+    }
+
+    @Override
+    public String generateAndSaveVerificationCode(String email) {
+        String verificationCode = generateRandomCode();
+        verificationCodes.put(email, verificationCode);
+
+        // 이메일 전송
+        String subject = "Richable 인증 코드";
+        String text = "귀하의 인증 코드는 " + verificationCode + " 입니다.";
+        emailService.sendSimpleMessage(email, subject, text);
+
+        return verificationCode;
+    }
+
+    @Override
+    public boolean verifyCode(String email, String code) {
+        String savedCode = verificationCodes.get(email);
+        return savedCode != null && savedCode.equals(code);
+    }
+    private String generateRandomCode() {
+        // 6자리 랜덤 숫자 생성 로직
+        return String.format("%06d", new Random().nextInt(1000000));
+    }
+
     public String encodePassword(String rawPassword) {
         return passwordEncoder.encode(rawPassword);
+    }
+
+    @Override
+    public boolean resetPassword(String id, String newPassword) {
+
+        // 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(newPassword);
+
+        // 데이터베이스에 새 비밀번호 저장
+        return memberMapper.resetPassword(id, encodedPassword) > 0;
     }
 
 }
