@@ -5,7 +5,6 @@ import com.idle.kb_i_dle_backend.member.handler.CustomAccessDeniedHandler;
 import com.idle.kb_i_dle_backend.member.handler.CustomAuthenticationEntryPoint;
 import com.idle.kb_i_dle_backend.member.service.CustomUserDetailsService;
 import com.idle.kb_i_dle_backend.member.util.JwtProcessor;
-import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -20,7 +19,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.filter.CorsFilter;
 
 @Configuration
@@ -33,24 +31,19 @@ import org.springframework.web.filter.CorsFilter;
         "com.idle.kb_i_dle_backend.member.util",
         "com.idle.kb_i_dle_backend.config"
 })
-public class SecurityConfig{
+public class SecurityConfig {
 
     private final JwtProcessor jwtProcessor;
     private final CustomAccessDeniedHandler accessDeniedHandler;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
-//    private final CustomUserDetailsService userDetailsService;
 
     public SecurityConfig(JwtProcessor jwtProcessor,
                           CustomAccessDeniedHandler accessDeniedHandler,
-                          CustomAuthenticationEntryPoint authenticationEntryPoint
-//                          CustomUserDetailsService userDetailsService
-    ) {
+                          CustomAuthenticationEntryPoint authenticationEntryPoint) {
         this.jwtProcessor = jwtProcessor;
         this.accessDeniedHandler = accessDeniedHandler;
         this.authenticationEntryPoint = authenticationEntryPoint;
-//        this.userDetailsService = userDetailsService;
     }
-
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -61,7 +54,6 @@ public class SecurityConfig{
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
-
 
     @Bean
     public CorsFilter corsFilter() {
@@ -77,15 +69,16 @@ public class SecurityConfig{
     }
 
     /**
-     * security csrf설정, corsfilter를 거치고
-     * 요청url에 대한 권한 확인을 한다.
+     * security 설정: CSRF 비활성화, JWT 및 CORS 필터 적용
      *
      * @param http
+     * @param jwtAuthenticationFilter
+     * @param userDetailsService
      * @return
      * @throws Exception
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter,CustomUserDetailsService userDetailsService) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter, CustomUserDetailsService userDetailsService) throws Exception {
         http
                 .csrf().disable()
                 .addFilterBefore(corsFilter(), UsernamePasswordAuthenticationFilter.class)
@@ -96,12 +89,10 @@ public class SecurityConfig{
                 .antMatchers("/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling()
                 .accessDeniedHandler(accessDeniedHandler)
                 .authenticationEntryPoint(authenticationEntryPoint);
 
         return http.build();
     }
-
 }

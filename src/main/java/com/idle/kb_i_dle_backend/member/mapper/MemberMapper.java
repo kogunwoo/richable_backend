@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.*;
 
 @Mapper
 public interface MemberMapper {
+
     @Select("SELECT COUNT(*) > 0 FROM user_info.user_info WHERE id = #{id}")
     boolean checkDupl(String id);
 
