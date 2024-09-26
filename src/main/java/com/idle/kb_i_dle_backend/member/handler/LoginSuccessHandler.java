@@ -2,6 +2,7 @@ package com.idle.kb_i_dle_backend.member.handler;
 
 import com.idle.kb_i_dle_backend.member.dto.AuthResultDTO;
 import com.idle.kb_i_dle_backend.member.dto.CustomUser;
+import com.idle.kb_i_dle_backend.member.dto.MemberDTO;
 import com.idle.kb_i_dle_backend.member.dto.UserInfoDTO;
 import com.idle.kb_i_dle_backend.member.util.JsonResponse;
 import com.idle.kb_i_dle_backend.member.util.JwtProcessor;
@@ -23,11 +24,16 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final JwtProcessor jwtProcessor;
 
     private AuthResultDTO makeAuthResult(CustomUser user) {
-        String username = user.getUsername();
+        MemberDTO member = user.getMember();
+        String username = member.getId();
+        Integer uid = member.getUid();
+        String nickname = member.getNickname();
+        String auth = member.getAuth().toString();
         // Generate token
-        String token = jwtProcessor.generateToken(username);
+        String token = jwtProcessor.generateToken(username, uid, nickname);
         // Combine token and user info into AuthResultDTO
-        return new AuthResultDTO(token, UserInfoDTO.of(user.getMember()));
+        UserInfoDTO userInfo = new UserInfoDTO(uid, username, nickname,auth);
+        return new AuthResultDTO(token, userInfo);
     }
 
     @Override

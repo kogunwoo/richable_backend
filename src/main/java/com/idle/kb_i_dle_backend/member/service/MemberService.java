@@ -14,4 +14,6 @@ public interface MemberService {
     MemberDTO findById(String id);
 
     boolean checkPassword(String rawPassword, String encodedPassword);
+
+    boolean checkAgree(boolean info, boolean finance,String id);
 }

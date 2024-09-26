@@ -50,13 +50,17 @@ public class MemberServiceImpl implements MemberService {
         }
         String encodePassword = passwordEncoder.encode(memberjoindto.getPassword());
 
-        String nickname = memberjoindto.getNickname();
-        if (nickname != null && nickname.length() > 50) {
-            nickname = nickname.substring(0, 50);
-        }
-        MemberJoinDTO newUser = new MemberJoinDTO(memberjoindto.getId(),encodePassword,
-                memberjoindto.getNickname(),memberjoindto.getGender(),
-                memberjoindto.getEmail(),memberjoindto.getBirth_year());
+        MemberJoinDTO newUser = new MemberJoinDTO(
+                memberjoindto.getId(),
+                encodePassword,
+                memberjoindto.getNickname(),
+                memberjoindto.getGender(),
+                memberjoindto.getEmail(),
+                memberjoindto.getBirth_year()
+        );
+
+        System.out.println("Inserting new user: " + newUser); // 디버깅을 위해 추가
+
         memberMapper.insertNewMember(newUser);
     }
 
@@ -69,6 +73,17 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public boolean checkPassword(String rawPassword, String encodedPassword) {
         return false;
+    }
+
+    @Override
+    public boolean checkAgree(boolean info, boolean finance, String id) {
+        try {
+            this.memberMapper.updateAgree(info, finance, id);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public String encodePassword(String rawPassword) {

@@ -18,9 +18,11 @@ public final class JwtProcessor {
     private Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
 
     // JWT generation
-    public String generateToken(String subject) {
+    public String generateToken(String subject, Integer uid,String nickname) {
         return Jwts.builder()
                 .setSubject(subject)
+                .claim("uid", uid)
+                .claim("nickname", nickname)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + TOKEN_VALID_MILISECOND))
                 .signWith(key)
@@ -28,13 +30,33 @@ public final class JwtProcessor {
     }
 
     // Extract username (subject) from JWT
-    public String getUsername(String token) {
+    public String getId(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
+    }
+
+    // Extract uid from JWT
+    public Integer getUid(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("uid", Integer.class);
+    }
+
+    // Extract nickname from JWT
+    public String getNickname(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("nickname", String.class);
     }
 
     // Validate JWT

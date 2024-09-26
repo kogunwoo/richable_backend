@@ -45,11 +45,10 @@ public class MemberController {
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // Generate JWT token
-        String jwtToken = jwtProcessor.generateToken(loginDTO.getId());
-
         // Assuming you have a method to fetch UserInfoDTO (e.g., from the authenticated user details)
         UserInfoDTO userInfo = getUserInfoFromAuthentication(authentication);
+        // Generate JWT token with uid
+        String jwtToken = jwtProcessor.generateToken(userInfo.getId(), userInfo.getUid(), userInfo.getNickname());
 
         // Return the AuthResultDTO with token and user info
         return ResponseEntity.ok(new AuthResultDTO(jwtToken, userInfo));
@@ -59,7 +58,7 @@ public class MemberController {
     private UserInfoDTO getUserInfoFromAuthentication(Authentication authentication) {
         CustomUser customUser = (CustomUser) authentication.getPrincipal();
         MemberDTO member = customUser.getMember();  // Retrieve the MemberDTO object
-        return new UserInfoDTO(member.getUid(), member.getEmail(), member.getAuth().toString());
+        return new UserInfoDTO(member.getUid(), member.getId(), member.getNickname(), member.getAuth().toString());
     }
 
     @PostMapping("/register")
@@ -81,4 +80,20 @@ public class MemberController {
         response.put("exists", exists);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/terms/{id}")
+    public ResponseEntity<Map<String, Boolean>> updateUserAgreement(
+            @PathVariable String id,
+            @RequestBody Map<String, Boolean> agreementData) {
+
+        boolean info = agreementData.get("info");
+        boolean finance = agreementData.get("finance");
+
+        boolean success = memberService.checkAgree(info, finance, id);
+
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("success", success);
+        return ResponseEntity.ok(response);
+    }
+
 }
