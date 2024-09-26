@@ -30,7 +30,8 @@ import org.springframework.web.filter.CorsFilter;
         "com.idle.kb_i_dle_backend.member.controller",
         "com.idle.kb_i_dle_backend.member.filter",
         "com.idle.kb_i_dle_backend.member.handler",
-        "com.idle.kb_i_dle_backend.member.util"
+        "com.idle.kb_i_dle_backend.member.util",
+        "com.idle.kb_i_dle_backend.config"
 })
 public class SecurityConfig{
 
