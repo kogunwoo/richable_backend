@@ -1,5 +1,6 @@
 package com.idle.kb_i_dle_backend.consume.controller;
 
+import com.idle.kb_i_dle_backend.consume.dto.AvgCategorySumDTO;
 import com.idle.kb_i_dle_backend.consume.dto.CategorySumDTO;
 import com.idle.kb_i_dle_backend.consume.dto.OutcomeAverageDTO;
 import com.idle.kb_i_dle_backend.consume.dto.OutcomeUserDTO;
@@ -46,6 +47,12 @@ public class ConsumeController {
 
         List<CategorySumDTO> categorySum = consumeService.getCategorySum(uid, year, month);
         return ResponseEntity.ok(categorySum);
+    }
+
+    @GetMapping("/category/average/sum")
+    public ResponseEntity<List<AvgCategorySumDTO>> getAvgCategorySum(@RequestParam String quater) {
+        List<AvgCategorySumDTO> avgCategorySum = consumeService.getAvgCategorySum(quater);
+        return ResponseEntity.ok(avgCategorySum);
     }
 
 
