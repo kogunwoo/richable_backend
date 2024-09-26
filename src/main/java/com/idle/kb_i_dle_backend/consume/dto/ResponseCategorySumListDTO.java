@@ -4,11 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
-public class CategorySumDTO {
-    //long -값타입 Long-WrapperClass
-    private String category;
+public class ResponseCategorySumListDTO {
+    private List<CategorySumDTO> categorys;
     private Long sum;
 }

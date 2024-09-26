@@ -4,11 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
-public class CategorySumDTO {
-    //long -값타입 Long-WrapperClass
-    private String category;
-    private Long sum;
+public class MonthConsumeDTO {
+    private int cntMonth;
+    private int cntYear;
+    private String cntDate;
+    List<Long> prices;
 }
