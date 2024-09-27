@@ -18,6 +18,7 @@ import java.security.SecureRandom;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -94,17 +95,22 @@ public class MemberController {
     private String redirectUri;
 
     @GetMapping("/naverlogin")
-    public ResponseEntity<?> naverlogin(HttpSession session) throws Exception {
+    public ResponseEntity<?> naverlogin(HttpServletRequest request) throws Exception {
         // 상태 토큰으로 사용할 랜덤 문자열 생성
         String state = generateState();
+
         // 세션 또는 별도의 저장 공간에 상태 토큰을 저장
+        HttpSession session = request.getSession();
         session.setAttribute("naverState", state);
-        log.error("naverState: " + state);
+        // 디버깅을 위한 세션 상태 로깅
+        log.error("생성된 상태 토큰: " + state);
+        log.error("세션 ID: " + session.getId());
 
         String naverAuthUrl = "https://nid.naver.com/oauth2.0/authorize?response_type=code"
                 + "&client_id=" + clientId
                 + "&redirect_uri=" + URLEncoder.encode(redirectUri, "UTF-8")
                 + "&state=" + state;
+        log.error("naverAuthUrl: {}", naverAuthUrl);
 
         return ResponseEntity.ok(Map.of("redirectUrl", naverAuthUrl, "state", state));
     }
@@ -115,23 +121,48 @@ public class MemberController {
     }
 
     @GetMapping("/naverCallback")
-    public ResponseEntity<?> naverCallback(@RequestParam String code, @RequestParam String state,
-                                           HttpSession session, RedirectAttributes redirectAttributes)
-            throws Exception {
+    public ResponseEntity<?> naverCallback(@RequestParam(required = false) String code,
+                                           @RequestParam(required = false) String state
+//            ,
+//                                           @RequestParam(required = false) String savedState,
+//                                           @RequestParam(required = false) String error,
+//                                           @RequestParam(required = false) String error_description
+    ) throws Exception {
 
-        Enumeration<String> attributeNames = session.getAttributeNames();
-        while (attributeNames.hasMoreElements()) {
-            String name = attributeNames.nextElement();
-            Object value = session.getAttribute(name);
-            log.error("Session attribute - Name: " + name + ", Value: " + value);
-        }
-        String sessionState = (String) session.getAttribute("naverState");
+        log.error("Received callback - code: {}, state: {}" +
+//                        ", savedState: {}, error: {}, error_description: {}",
+                code, state
+//                , savedState, error, error_description
+                );
 
-        if (!state.equals(sessionState)) {
-            redirectAttributes.addFlashAttribute("error", "Invalid State");
-            log.error("Invalid State. Session state: {}, Received state: {}", sessionState, state);
-            return ResponseEntity.badRequest().body("Invalid State");
-        }
+//        if (error != null) {
+//            log.error("Error during Naver login: {} - {}", error, error_description);
+//            return ResponseEntity.badRequest().body("Error during Naver login: " + error);
+//        }
+//
+//        if (code == null || state == null || savedState == null) {
+//            log.error("Missing required parameters: code, state or savedState");
+//            return ResponseEntity.badRequest().body("Missing required parameters");
+//        }
+//
+//        if (!state.equals(savedState)) {
+//            log.error("Invalid State. Saved state: {}, Received state: {}", savedState, state);
+//            return ResponseEntity.badRequest().body("Invalid State");
+//        }
+
+//        Enumeration<String> attributeNames = session.getAttributeNames();
+//        while (attributeNames.hasMoreElements()) {
+//            String name = attributeNames.nextElement();
+//            Object value = session.getAttribute(name);
+//            log.error("Session attribute - Name: " + name + ", Value: " + value);
+//        }
+//        String sessionState = (String) session.getAttribute("naverState");
+//        log.error("세션 상태: " + sessionState + " | 받은 상태: " + state);
+//        if (!state.equals(sessionState)) {
+//            redirectAttributes.addFlashAttribute("error", "Invalid State");
+//            log.error("Invalid State. Session state: {}, Received state: {}", sessionState, state);
+//            return ResponseEntity.badRequest().body("Invalid State");
+//        }
 
         // 최종 인증 값인 접근 토큰을 발급
         String tokenUrl = "https://nid.naver.com/oauth2.0/token?grant_type=authorization_code"
@@ -140,7 +171,8 @@ public class MemberController {
                 + "&code=" + code
                 + "&state=" + state;
         String authtoken = getHttpResponse(tokenUrl);
-        log.info("Token Response: {}", authtoken);
+        log.error("Token Response: {}", authtoken);
+        log.error("tokenUrl: {}", tokenUrl);
 
         // JSON 파싱
         JSONObject tokenJson = new JSONObject(authtoken);
