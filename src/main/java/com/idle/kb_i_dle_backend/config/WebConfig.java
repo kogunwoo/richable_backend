@@ -23,11 +23,7 @@ import java.nio.file.Paths;
 @EnableWebMvc
 @EnableTransactionManagement
 @ComponentScan(basePackages = {
-        "com.idle.kb_i_dle_backend.community",
-        "com.idle.kb_i_dle_backend.member",
-        "com.idle.kb_i_dle_backend.finance",
-        "com.idle.kb_i_dle_backend.goal",
-        "com.idle.kb_i_dle_backend.config"
+        "com.idle.kb_i_dle_backend"
 })
 @PropertySource("classpath:application.properties")
 public class WebConfig implements WebMvcConfigurer {

@@ -1,27 +1,25 @@
 package com.idle.kb_i_dle_backend.consume.service;
 
-import com.idle.kb_i_dle_backend.consume.dto.CategorySumDTO;
-import com.idle.kb_i_dle_backend.consume.dto.OutcomeAverageDTO;
-import com.idle.kb_i_dle_backend.consume.dto.OutcomeUserDTO;
+import com.idle.kb_i_dle_backend.consume.dto.*;
 import com.idle.kb_i_dle_backend.consume.entity.OutcomeAverage;
 import com.idle.kb_i_dle_backend.consume.entity.OutcomeUser;
-import com.idle.kb_i_dle_backend.consume.repository.CategorySumRepository;
 import com.idle.kb_i_dle_backend.consume.repository.ConsumeRepository;
 import com.idle.kb_i_dle_backend.consume.repository.OutcomeUserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ConsumeServiceImpl implements ConsumeService {
 
     private final ConsumeRepository consumeRepository;
     private final OutcomeUserRepository outcomeUserRepository;
-    private final CategorySumRepository categorySumRepository;
 
 
     @Override
@@ -55,7 +53,7 @@ public class ConsumeServiceImpl implements ConsumeService {
 
     @Override
     public List<CategorySumDTO> getCategorySum(int uid, int year, int month) {
-        return categorySumRepository.findCategorySumByUidAndYearAndMonth(uid, year, month);
+        return outcomeUserRepository.findCategorySumByUidAndYearAndMonth(uid, year, month);
     }
 
     private OutcomeUserDTO convertToOutcomeUserDTO(OutcomeUser outcomeUser) {
@@ -68,5 +66,35 @@ public class ConsumeServiceImpl implements ConsumeService {
                 outcomeUser.getDescript(),
                 outcomeUser.getMemo()
         );
-}
+    }
+    @Override
+    public ResponseCategorySumListDTO findCategorySum(Integer year, Integer month) {
+        List<CategorySumDTO> categorySumDTOS = outcomeUserRepository.findCategorySumByUidAndYearAndMonth(1 , year, month);
+        Long sum = categorySumDTOS.stream().mapToLong(CategorySumDTO::getSum).sum();
+        return new ResponseCategorySumListDTO(categorySumDTOS, sum);
+    }
+
+    @Override
+    public MonthConsumeDTO findMonthConsume(Integer year, Integer month) {
+        List<OutcomeUser> consumes = outcomeUserRepository.findAmountAllByUidAndYearAndMonth(1, year, month);
+        List<Long> dailyAmount = new ArrayList<>(Collections.nCopies(31, 0L));
+        for(OutcomeUser consume : consumes) {
+            Date date = consume.getDate();
+            int day = date.getDate();
+            System.out.println(date.toString() + " " + consume.getAmount());
+            dailyAmount.set(day -1 , dailyAmount.get(day -1 ) + consume.getAmount()) ;
+        }
+
+        // 누적합 계산
+        long cumulativeSum = 0L;
+        for (int i = 0; i < dailyAmount.size(); i++) {
+            cumulativeSum += dailyAmount.get(i);  // 이전까지의 합을 더함
+            dailyAmount.set(i, cumulativeSum);    // 누적합을 다시 리스트에 저장
+        }
+
+        System.out.println(consumes.toString());
+        MonthConsumeDTO monthConsumeDTO = new MonthConsumeDTO(month,year,dailyAmount);
+
+        return monthConsumeDTO;
+    }
 }
