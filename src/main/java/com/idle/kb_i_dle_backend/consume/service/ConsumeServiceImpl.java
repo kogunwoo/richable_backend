@@ -6,14 +6,16 @@ import com.idle.kb_i_dle_backend.consume.entity.OutcomeUser;
 import com.idle.kb_i_dle_backend.consume.repository.ConsumeRepository;
 import com.idle.kb_i_dle_backend.consume.repository.OutcomeUserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ConsumeServiceImpl implements ConsumeService {
 
     private final ConsumeRepository consumeRepository;
@@ -74,10 +76,24 @@ public class ConsumeServiceImpl implements ConsumeService {
 
     @Override
     public MonthConsumeDTO findMonthConsume(Integer year, Integer month) {
-        List<Long> prices = outcomeUserRepository.findAmountAllByUidAndYearAndMonth(1, year, month);
+        List<OutcomeUser> consumes = outcomeUserRepository.findAmountAllByUidAndYearAndMonth(1, year, month);
+        List<Long> dailyAmount = new ArrayList<>(Collections.nCopies(31, 0L));
+        for(OutcomeUser consume : consumes) {
+            Date date = consume.getDate();
+            int day = date.getDate();
+            System.out.println(date.toString() + " " + consume.getAmount());
+            dailyAmount.set(day -1 , dailyAmount.get(day -1 ) + consume.getAmount()) ;
+        }
 
-        LocalDate now = LocalDate.now();
-        MonthConsumeDTO monthConsumeDTO = new MonthConsumeDTO(month,year,now.toString(),prices);
+        // 누적합 계산
+        long cumulativeSum = 0L;
+        for (int i = 0; i < dailyAmount.size(); i++) {
+            cumulativeSum += dailyAmount.get(i);  // 이전까지의 합을 더함
+            dailyAmount.set(i, cumulativeSum);    // 누적합을 다시 리스트에 저장
+        }
+
+        System.out.println(consumes.toString());
+        MonthConsumeDTO monthConsumeDTO = new MonthConsumeDTO(month,year,dailyAmount);
 
         return monthConsumeDTO;
     }
