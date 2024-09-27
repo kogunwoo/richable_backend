@@ -14,7 +14,7 @@ public interface CategoryComRepository extends JpaRepository<OutcomeAverage, Int
 
     List<OutcomeAverage> findByAgeGroupAndCategoryAndQuater(String ageGroup, String category, String quater);
 
-    @Query("SELECT new com.idle.kb_i_dle_backend.consume.dto.CategoryComDTO(o.category, SUM(o.amount)) " +
+    @Query("SELECT new com.idle.kb_i_dle_backend.consume.dto.CategorySumDTO(o.category, SUM(o.amount)) " +
             "FROM OutcomeUser o " +
             "WHERE o.category = :category " +
             "AND o.date = :date ")
