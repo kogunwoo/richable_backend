@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
 public interface UserInfoRepository extends JpaRepository<UserInfoEntity, Long> {
     // 닉네임을 통해 유저 정보를 조회하는 메서드
     UserInfoEntity findByNickname(String nickname);
+    UserInfoEntity findByUid(int birthyear);
 }

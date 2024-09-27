@@ -23,4 +23,5 @@ public class UserInfoService {
         // 유저 정보에 저장된 token과 요청에서 받은 token을 비교
         return userInfoEntity.getApiStockToken().equals(token);
     }
+
 }
