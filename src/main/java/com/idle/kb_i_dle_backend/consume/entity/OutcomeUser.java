@@ -1,11 +1,14 @@
 package com.idle.kb_i_dle_backend.consume.entity;
 
 import lombok.Getter;
+import lombok.ToString;
+
 import javax.persistence.*;
 import java.util.Date;
 
 @Entity
 @Getter
+@ToString
 @Table(name = "outcome_user",catalog = "outcome")
 public class OutcomeUser {
 
