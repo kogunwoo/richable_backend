@@ -1,28 +1,16 @@
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
-//import org.springframework.mail.javamail.JavaMailSender;
-//import org.springframework.mail.javamail.JavaMailSenderImpl;
+//@GetMapping("/naverlogin")
+//public ResponseEntity<?> naverlogin(HttpSession session) throws Exception {
+//    // 상태 토큰으로 사용할 랜덤 문자열 생성
+//    String state = generateState();
+//    // 세션 또는 별도의 저장 공간에 상태 토큰을 저장
+//    session.setAttribute("naverState", state);
+//    log.info("naverState: " + state);
 //
-//import java.util.Properties;
+//    String naverAuthUrl = "https://nid.naver.com/oauth2.0/authorize?response_type=code"
+//            + "&client_id=" + clientId
+//            + "&redirect_uri=" + URLEncoder.encode(redirectUri, "UTF-8")
+//            + "&state=" + state;
 //
-//@Configuration
-//public class EmailConfig {
-//
-//    @Bean
-//    public JavaMailSender getJavaMailSender() {
-//        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-//        mailSender.setHost("smtp.gmail.com");
-//        mailSender.setPort(587);
-//
-//        mailSender.setUsername("RichableManager@gmail.com");
-//        mailSender.setPassword("your-app-password"); // Gmail 앱 비밀번호 사용
-//
-//        Properties props = mailSender.getJavaMailProperties();
-//        props.put("mail.transport.protocol", "smtp");
-//        props.put("mail.smtp.auth", "true");
-//        props.put("mail.smtp.starttls.enable", "true");
-//        props.put("mail.debug", "true");
-//
-//        return mailSender;
-//    }
+//    // state를 응답에 포함
+//    return ResponseEntity.ok(Map.of("redirectUrl", naverAuthUrl, "state", state));
 //}
