@@ -4,10 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PriceSumDTO {
-    private String prodCategory;
-    private Long amount;
+public class SpotDTO {
+    private Integer index;
+    private String category;
+    private String name;
+    private Long price;
+    private String addDate;
 }
