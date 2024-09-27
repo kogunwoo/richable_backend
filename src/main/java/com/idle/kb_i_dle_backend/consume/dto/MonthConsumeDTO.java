@@ -12,6 +12,5 @@ import java.util.List;
 public class MonthConsumeDTO {
     private int cntMonth;
     private int cntYear;
-    private String cntDate;
     List<Long> prices;
 }
