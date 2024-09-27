@@ -23,7 +23,8 @@ public interface OutcomeUserRepository extends JpaRepository<OutcomeUser, Intege
     @Query("SELECT new com.idle.kb_i_dle_backend.consume.dto.CategorySumDTO(o.category, SUM(o.amount)) " +
             "FROM OutcomeUser o WHERE o.uid = :uid " +
             "AND YEAR(o.date) = :year AND MONTH(o.date) = :month " +
-            "GROUP BY o.category")
+            "GROUP BY o.category " +
+            "order by SUM(o.amount) desc")
     List<CategorySumDTO> findCategorySumByUidAndYearAndMonth(@Param("uid") int uid, @Param("year") int year , @Param("month") int month);
 
     /**
@@ -33,9 +34,9 @@ public interface OutcomeUserRepository extends JpaRepository<OutcomeUser, Intege
      * @param month
      * @return
      */
-    @Query("SELECT o.amount " +
+    @Query("SELECT o " +
             "FROM OutcomeUser o " +
             "WHERE o.uid = :uid AND YEAR(o.date) = :year AND MONTH(o.date) = :month " +
-            "ORDER BY o.date")
-    List<Long> findAmountAllByUidAndYearAndMonth(@Param("uid") int uid, @Param("year") int year , @Param("month") int month);
+            "order by o.date")
+    List<OutcomeUser> findAmountAllByUidAndYearAndMonth(@Param("uid") int uid, @Param("year") int year , @Param("month") int month);
 }

@@ -3,26 +3,23 @@ package com.idle.kb_i_dle_backend.consume.service;
 import com.idle.kb_i_dle_backend.consume.dto.*;
 import com.idle.kb_i_dle_backend.consume.entity.OutcomeAverage;
 import com.idle.kb_i_dle_backend.consume.entity.OutcomeUser;
-//import com.idle.kb_i_dle_backend.consume.repository.AvgCategorySumRepository;
-import com.idle.kb_i_dle_backend.consume.repository.CategoryComRepository;
 import com.idle.kb_i_dle_backend.consume.repository.ConsumeRepository;
 import com.idle.kb_i_dle_backend.consume.repository.OutcomeUserRepository;
-import com.idle.kb_i_dle_backend.member.repository.UserInfoRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ConsumeServiceImpl implements ConsumeService {
 
     private final ConsumeRepository consumeRepository;
     private final OutcomeUserRepository outcomeUserRepository;
-    private final CategoryComRepository categoryComRepository;
-    private final UserInfoRepository userInfoRepository;
 
 
     @Override
@@ -79,39 +76,25 @@ public class ConsumeServiceImpl implements ConsumeService {
 
     @Override
     public MonthConsumeDTO findMonthConsume(Integer year, Integer month) {
-        List<Long> prices = outcomeUserRepository.findAmountAllByUidAndYearAndMonth(1, year, month);
+        List<OutcomeUser> consumes = outcomeUserRepository.findAmountAllByUidAndYearAndMonth(1, year, month);
+        List<Long> dailyAmount = new ArrayList<>(Collections.nCopies(31, 0L));
+        for(OutcomeUser consume : consumes) {
+            Date date = consume.getDate();
+            int day = date.getDate();
+            System.out.println(date.toString() + " " + consume.getAmount());
+            dailyAmount.set(day -1 , dailyAmount.get(day -1 ) + consume.getAmount()) ;
+        }
 
-        LocalDate now = LocalDate.now();
-        MonthConsumeDTO monthConsumeDTO = new MonthConsumeDTO(month,year,now.toString(),prices);
+        // 누적합 계산
+        long cumulativeSum = 0L;
+        for (int i = 0; i < dailyAmount.size(); i++) {
+            cumulativeSum += dailyAmount.get(i);  // 이전까지의 합을 더함
+            dailyAmount.set(i, cumulativeSum);    // 누적합을 다시 리스트에 저장
+        }
+
+        System.out.println(consumes.toString());
+        MonthConsumeDTO monthConsumeDTO = new MonthConsumeDTO(month,year,dailyAmount);
 
         return monthConsumeDTO;
     }
-
-    @Override
-    public List<AvgCategorySumDTO> findCompareWithAvg(Integer uid, String category, Integer year, Integer month) {
-        return List.of();
-    }
-
-//    @Override
-//    public List<AvgCategorySumDTO> findCompareWithAvg(Integer uid, String category, Integer year, Integer month) {
-//        //user_info repository에서 uid를 주고, 나이를 알아와야
-//        Integer brithYear = userInfoRepository.findByuid();
-//        //year랑 month로  => STring 값인 "2024년 1분기"
-//        categoryComRepository.findByAgeGroupAndCategoryAndQuater();
-//        //해당 카테고리의 평균 소비
-//        //=> avgCategorySumDTO에 넣어
-//        //유저의 해당 년도 해당 달의 해당카테고리의 소비
-//        //repo에서 가져와서
-//        //=> avgcategorysumDTO에 넣어야
-//    }
-//
-//
-//    @Override
-//    public CategoryComDTO findCategoryCom(Integer year, Integer month) {
-//        return null;
-//    }
-//
-//    public List<AvgCategorySumDTO> getAvgCategorySum(int uid, int year, int month) {
-//
-//    }
 }

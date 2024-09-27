@@ -9,8 +9,8 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 @Getter
 @Setter
-@Entity
-@Table(name = "user_goal")
+//@Entity
+//@Table(name = "user_goal")
 public class UserGoalEntity {
 
     @Id

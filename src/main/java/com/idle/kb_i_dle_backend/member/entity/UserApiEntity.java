@@ -8,8 +8,8 @@ import lombok.Setter;
 import javax.persistence.*;
 @Getter
 @Setter
-@Entity
-@Table(name = "user_api")
+//@Entity
+//@Table(name = "user_api")
 public class UserApiEntity {
 
     @Id

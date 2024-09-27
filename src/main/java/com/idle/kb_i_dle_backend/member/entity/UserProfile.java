@@ -2,8 +2,8 @@ package com.idle.kb_i_dle_backend.member.entity;
 
 import javax.persistence.*;
 
-@Entity
-@Table(name = "user_profile")
+//@Entity
+//@Table(name = "user_profile")
 public class UserProfile {
 
     @Id

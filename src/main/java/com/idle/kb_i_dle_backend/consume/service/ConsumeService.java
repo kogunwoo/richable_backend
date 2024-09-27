@@ -14,8 +14,4 @@ public interface ConsumeService {
     ResponseCategorySumListDTO findCategorySum(Integer year, Integer month);
 
     MonthConsumeDTO findMonthConsume(Integer year, Integer month);
-
-    List<AvgCategorySumDTO> findCompareWithAvg(Integer uid, String category,Integer year, Integer month);
-
-//    CategoryComDTO findCategoryCom(Integer year, Integer month);
 }

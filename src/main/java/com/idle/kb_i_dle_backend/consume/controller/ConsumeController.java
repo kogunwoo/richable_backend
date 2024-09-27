@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/consume")
@@ -32,18 +31,11 @@ public class ConsumeController {
         return ResponseEntity.ok(outcomeUser);
     }
 
-    // 달, 카테고리별 소비 합계 조회
-    @GetMapping("/category/sum")
-    public ResponseEntity<List<CategorySumDTO>> getCategorySum(@RequestParam int uid, @RequestParam int year, @RequestParam int month) {
-        List<CategorySumDTO> categorySum = consumeService.getCategorySum(uid, year, month);
-        return ResponseEntity.ok(categorySum);
-    }
-
-    // 평균 대비 카테고리 별 소비량 비교: /compare
-//    @GetMapping("/compare")
-//    public ResponseEntity<Map<String, Long>> compareWithAverage(@RequestParam int uid, @RequestParam String month) {
-//        Map<String, Long> comparison = consumeService.findCompareWithAvg(uid, month);
-//        return ResponseEntity.ok(comparison);
+//    // 달, 카테고리별 소비 합계 조회
+//    @GetMapping("/category/sum")
+//    public ResponseEntity<List<CategorySumDTO>> getCategorySum(@RequestParam int uid, @RequestParam int year, @RequestParam int month) {
+//        List<CategorySumDTO> categorySum = consumeService.getCategorySum(uid, year, month);
+//        return ResponseEntity.ok(categorySum);
 //    }
 
 //    // 소비 상세 조회: /detail
@@ -60,7 +52,12 @@ public class ConsumeController {
 //        return ResponseEntity.ok(dailySum);
 //    }
 //
-
+//    // 평균 대비 카테고리 별 소비량 비교: /compare
+//    @GetMapping("/compare")
+//    public ResponseEntity<Map<String, Long>> compareWithAverage(@RequestParam int uid, @RequestParam String month) {
+//        Map<String, Long> comparison = consumeService.compareWithAverage(uid, month);
+//        return ResponseEntity.ok(comparison);
+//    }
     @GetMapping("/category/sum/{cntYear}/{cntMonth}")
     public ResponseEntity<ResponseCategorySumListDTO> categorySumList(@PathVariable int cntYear, @PathVariable int cntMonth) {
         ResponseCategorySumListDTO responseCategorySumListDTO = consumeService.findCategorySum(cntYear, cntMonth);

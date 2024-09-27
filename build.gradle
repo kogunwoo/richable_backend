@@ -98,6 +98,13 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:3.+'
     testCompileOnly 'org.projectlombok:lombok:1.18.22'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
+    
+    // JavaMail API
+    implementation 'org.springframework:spring-context-support:5.3.29'  // Spring context support
+    implementation 'javax.mail:javax.mail-api:1.6.2'
+    implementation 'com.sun.mail:javax.mail:1.6.2'
+
+
 }
 
 test {
