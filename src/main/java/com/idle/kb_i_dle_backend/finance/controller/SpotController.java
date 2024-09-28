@@ -3,15 +3,12 @@ package com.idle.kb_i_dle_backend.finance.controller;
 import com.idle.kb_i_dle_backend.common.dto.SuccessResponseDTO;
 import com.idle.kb_i_dle_backend.finance.dto.PriceSumDTO;
 import com.idle.kb_i_dle_backend.finance.dto.SpotDTO;
-import com.idle.kb_i_dle_backend.finance.entity.Spot;
+import com.idle.kb_i_dle_backend.finance.entity.UserSpot;
 import com.idle.kb_i_dle_backend.finance.service.SpotService;
-import com.idle.kb_i_dle_backend.finance.service.SpotServiceImpl;
-import com.idle.kb_i_dle_backend.member.util.JwtProcessor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -78,13 +75,13 @@ public class SpotController {
         HttpSession session = request.getSession();
         Integer uid = (Integer) session.getAttribute("uid");
 
-        List<Spot> spots = spotService.getSpotList(uid);
+        List<UserSpot> userSpots = spotService.getSpotList(uid);
         List<SpotDTO> spotList = new ArrayList<>();
 
         // 날짜 형식을 변환할 포맷 설정 (예: "yyyy-MM-dd")
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-        for (Spot s : spots) {
+        for (UserSpot s : userSpots) {
             SpotDTO spotDTO = new SpotDTO();
             spotDTO.setIndex(s.getIndex());
             spotDTO.setCategory(s.getCategory());
@@ -106,11 +103,11 @@ public class SpotController {
 
     // 새로운 Spot 추가
     @PostMapping("/spot/add")
-    public ResponseEntity<SuccessResponseDTO> addSpot(@RequestBody Spot spot, HttpServletRequest request) {
+    public ResponseEntity<SuccessResponseDTO> addSpot(@RequestBody UserSpot userSpot, HttpServletRequest request) {
         HttpSession session = request.getSession();
         Integer uid = (Integer) session.getAttribute("uid");
 
-        SpotDTO savedSpotDTO = spotService.addSpot(uid, spot);
+        SpotDTO savedSpotDTO = spotService.addSpot(uid, userSpot);
 
         // response를 감싸는 구조로 반환
         Map<String, Object> responseData = new HashMap<>();
@@ -123,11 +120,11 @@ public class SpotController {
 
     // Spot 수정
     @PutMapping("/spot/update")
-    public ResponseEntity<SuccessResponseDTO> updateSpot(@RequestBody Spot spot, HttpServletRequest request) {
+    public ResponseEntity<SuccessResponseDTO> updateSpot(@RequestBody UserSpot userSpot, HttpServletRequest request) {
         HttpSession session = request.getSession();
         Integer uid = (Integer) session.getAttribute("uid");
 
-        SpotDTO savedSpotDTO = spotService.updateSpot(uid, spot);
+        SpotDTO savedSpotDTO = spotService.updateSpot(uid, userSpot);
 
         // response를 감싸는 구조로 반환
         Map<String, Object> responseData = new HashMap<>();
