@@ -7,8 +7,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class CategorySumDTO {
-    //long -값타입 Long-WrapperClass
+public class AvgCategorySumDTO {
     private String category;
-    private Long sum;
+    private long averageSum;
+    private long mySum;
 }

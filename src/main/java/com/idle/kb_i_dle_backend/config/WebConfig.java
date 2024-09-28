@@ -23,11 +23,7 @@ import java.nio.file.Paths;
 @EnableWebMvc
 @EnableTransactionManagement
 @ComponentScan(basePackages = {
-        "com.idle.kb_i_dle_backend.community",
-        "com.idle.kb_i_dle_backend.member",
-        "com.idle.kb_i_dle_backend.finance",
-        "com.idle.kb_i_dle_backend.goal",
-        "com.idle.kb_i_dle_backend.config"
+        "com.idle.kb_i_dle_backend"
 })
 @PropertySource("classpath:application.properties")
 public class WebConfig implements WebMvcConfigurer {
@@ -55,7 +51,8 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedMethods("*")
                 .allowedOriginPatterns("*")
-                .allowedOrigins("http://localhost:5173"); // 프론트엔드 도메인
+                .allowedOrigins("http://localhost:5173")
+                .allowCredentials(true); // 프론트엔드 도메인
     }
 
     @Bean

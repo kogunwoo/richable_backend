@@ -63,7 +63,6 @@ public class DBConfig {
         config.setJdbcUrl(dbUrl);
         config.setUsername(dbUser);
         config.setPassword(dbPass);
-        //setMaximumpllSize 2 로 조정
         config.setMaximumPoolSize(2);
         return new HikariDataSource(config);
     }

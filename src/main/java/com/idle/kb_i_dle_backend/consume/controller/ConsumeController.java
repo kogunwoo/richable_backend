@@ -1,8 +1,6 @@
 package com.idle.kb_i_dle_backend.consume.controller;
 
-import com.idle.kb_i_dle_backend.consume.dto.CategorySumDTO;
-import com.idle.kb_i_dle_backend.consume.dto.OutcomeAverageDTO;
-import com.idle.kb_i_dle_backend.consume.dto.OutcomeUserDTO;
+import com.idle.kb_i_dle_backend.consume.dto.*;
 import com.idle.kb_i_dle_backend.consume.service.ConsumeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,12 +31,12 @@ public class ConsumeController {
         return ResponseEntity.ok(outcomeUser);
     }
 
-    // 달, 카테고리별 소비 합계 조회
-    @GetMapping("/category/sum")
-    public ResponseEntity<List<CategorySumDTO>> getCategorySum(@RequestParam int uid, @RequestParam int year, @RequestParam int month) {
-        List<CategorySumDTO> categorySum = consumeService.getCategorySum(uid, year, month);
-        return ResponseEntity.ok(categorySum);
-    }
+//    // 달, 카테고리별 소비 합계 조회
+//    @GetMapping("/category/sum")
+//    public ResponseEntity<List<CategorySumDTO>> getCategorySum(@RequestParam int uid, @RequestParam int year, @RequestParam int month) {
+//        List<CategorySumDTO> categorySum = consumeService.getCategorySum(uid, year, month);
+//        return ResponseEntity.ok(categorySum);
+//    }
 
 //    // 소비 상세 조회: /detail
 //    @GetMapping("/detail")
@@ -60,4 +58,18 @@ public class ConsumeController {
 //        Map<String, Long> comparison = consumeService.compareWithAverage(uid, month);
 //        return ResponseEntity.ok(comparison);
 //    }
+    @GetMapping("/category/sum/{cntYear}/{cntMonth}")
+    public ResponseEntity<ResponseCategorySumListDTO> categorySumList(@PathVariable int cntYear, @PathVariable int cntMonth) {
+        ResponseCategorySumListDTO responseCategorySumListDTO = consumeService.findCategorySum(cntYear, cntMonth);
+        return ResponseEntity.ok(responseCategorySumListDTO);
+    }
+
+    @GetMapping("/category/dailysum/{cntYear}/{cntMonth}")
+    public ResponseEntity<MonthConsumeDTO> monthConsume(@PathVariable int cntYear, @PathVariable int cntMonth){
+        System.out.println("month!!!!!!!!!!!");
+        MonthConsumeDTO monthConsumeDTO = consumeService.findMonthConsume(cntYear, cntMonth);
+        return ResponseEntity.ok(monthConsumeDTO);
+    }
+
+
 }
