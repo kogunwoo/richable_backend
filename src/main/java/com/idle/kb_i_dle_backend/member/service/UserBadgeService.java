@@ -19,7 +19,7 @@ public class UserBadgeService {
     @Autowired
     private UserRepository userRepository;
 
-    // 닉네임을 통해 모든 뱃지를 가져오는 메서드
+    // 닉네임을 통해 모든 뱃지를 가져옴
     public List<UserBadgeDTO> getAllBadgesByNickname(String nickname) {
         // 유저 정보 가져오기
         User user = userRepository.findByNickname(nickname);

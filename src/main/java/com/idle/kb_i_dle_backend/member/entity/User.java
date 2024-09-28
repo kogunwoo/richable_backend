@@ -5,10 +5,10 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.util.List;
-
+//setter 추가
 @Entity
 @Getter
-@Setter //202409.27일 건우 오후 11시 23분 setter 추가!
+@Setter
 @Table(name = "user_info", catalog = "user_info")
 @Builder
 @AllArgsConstructor

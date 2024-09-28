@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.Objects;
-
+//badgeentitypk
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor

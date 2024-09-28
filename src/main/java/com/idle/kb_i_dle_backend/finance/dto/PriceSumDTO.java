@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 
+//dto
 public class PriceSumDTO {
     private String prodCategory;
     private Long amount;

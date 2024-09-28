@@ -8,11 +8,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+//uid 필드 추가
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserApiDTO {
-    private Integer uid;  // uid 필드 추가
+    private Integer uid;
     private String apiBank;
     private String apiStock;
     private String apiStockToken;

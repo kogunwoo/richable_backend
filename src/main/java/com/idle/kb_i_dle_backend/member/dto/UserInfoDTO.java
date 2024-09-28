@@ -19,6 +19,7 @@ public class UserInfoDTO {
     private String img;  // img 필드 추가
     private UserApiDTO api;
 
+    // img 필드를 초기화
     // 필요한 필드만 받는 생성자
     public UserInfoDTO(Integer uid, String id, String nickname, String auth) {
         this.uid = uid;
@@ -29,7 +30,7 @@ public class UserInfoDTO {
         this.birthYear = null;
         this.gender = null;
         this.certification = null;
-        this.img = null;  // img 필드를 초기화
+        this.img = null;
         this.api = null;
     }
 

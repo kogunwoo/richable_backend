@@ -9,14 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-
+//
 @Service
 public class UserInfoService {
 
     @Autowired
     private UserRepository userRepository;
 
-    // 기존 사용자의 정보를 가져오는 메서드
+    // 기존 사용자의 정보를 가져오는메서드
     public UserInfoDTO getUserInfoByNickname(String nickname) {
         User user = userRepository.findByNickname(nickname);
 

@@ -51,6 +51,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+
 @Slf4j
 @RestController
 @RequestMapping("/member")
@@ -63,7 +64,7 @@ public class MemberController {
     private final UserInfoService userInfoService;
     private final UserApiService userApiService;
 
-
+    //userapiservie 추가
     // 생성자에서 UserInfoService를 추가로 주입
     public MemberController(AuthenticationManager authenticationManager, JwtProcessor jwtProcessor, MemberService memberService, UserInfoService userInfoService, UserApiRepository userApiRepository, UserApiService userApiService) {
 

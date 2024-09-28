@@ -141,17 +141,17 @@ public class MemberServiceImpl implements MemberService {
 
     // 마이페이지 회원 구간 2024 9/27일 수정 파일
 
-        @Autowired
-        private UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-        @Override
-        public boolean deleteMemberById(String id) {
-            // ID로 회원 조회 후 삭제
-            User user = userRepository.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+    @Override
+    public boolean deleteMemberById(String id) {
+        // ID로 회원 조회 후 삭제
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-            // 회원 삭제
-            userRepository.delete(user);
-            return true;
-        }
+        // 회원 삭제
+        userRepository.delete(user);
+        return true;
     }
+}

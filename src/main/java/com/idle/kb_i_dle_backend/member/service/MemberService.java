@@ -27,6 +27,6 @@ public interface    MemberService {
     boolean verifyCode(String email, String code);
 
     boolean resetPassword(String id, String newPassword);
-    //회원 삭제 메서드 추가 2024.09.27 11시47분
+    //회원 삭제 메서드 추가
     boolean deleteMemberById(String id);
 }

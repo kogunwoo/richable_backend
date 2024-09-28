@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 
 import javax.persistence.*;
-
+//api entity
 @Entity
 @Getter
 @Table(name = "user_api", catalog = "user_info")
