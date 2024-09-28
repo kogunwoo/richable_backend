@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
-//goalentity
+//Goal-entity
 @Entity
 @Getter
 @Table(name = "user_goal", catalog = "user_info")

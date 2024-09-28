@@ -27,6 +27,6 @@ public interface    MemberService {
     boolean verifyCode(String email, String code);
 
     boolean resetPassword(String id, String newPassword);
-    //회원 삭제 메서드 추가
+    //회원 삭제 메서드
     boolean deleteMemberById(String id);
 }

@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-//responsedto
+//ResponseDTO 만듬
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

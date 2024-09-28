@@ -27,7 +27,7 @@ public class UserBadgeService {
             throw new IllegalArgumentException("유저를 찾을 수 없습니다.");
         }
 
-        // 유저 ID로 뱃지 정보 가져오기
+        // 유저 ID로 뱃지 정보 가져옴
         return convertToUserBadgeDTOs(user.getUid());
     }
 

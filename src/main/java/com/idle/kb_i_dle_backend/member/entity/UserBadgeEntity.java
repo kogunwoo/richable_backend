@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.io.Serializable;
-//badgeentity
+//badge-entity
 @Entity
 @Getter
 @Table(name = "user_badge", catalog = "user_info")

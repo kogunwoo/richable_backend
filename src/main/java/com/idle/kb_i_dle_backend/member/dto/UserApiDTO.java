@@ -8,7 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-//uid 필드 추가
+//uid를 필드 추가
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
