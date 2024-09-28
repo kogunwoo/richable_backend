@@ -1,16 +1,14 @@
 package com.idle.kb_i_dle_backend.member.entity;
 
 import com.idle.kb_i_dle_backend.finance.entity.Spot;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.List;
 
 @Entity
 @Getter
+@Setter //202409.27일 건우 오후 11시 23분 setter 추가!
 @Table(name = "user_info", catalog = "user_info")
 @Builder
 @AllArgsConstructor
@@ -24,14 +22,14 @@ public class User {
     private String password;
     private String email;
     private String social;
-    private String birth_year;
+    private Integer birth_year;
     private String gender;
     private String profile;
 
-    private boolean agreement_info;
-    private boolean agreement_finace;
-    private boolean is_mentor;
-    private boolean is_certification;
+    private Boolean agreement_info;
+    private Boolean agreement_finace;
+    private Boolean is_mentor;
+    private Boolean is_certification;
 
     private String nickname;
     private String auth;
@@ -39,4 +37,9 @@ public class User {
     // User와 Spot의 양방향 관계 설정
     @OneToMany(mappedBy = "uid", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Spot> spots;
+    // User와 UserApi의 관계 설정
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private UserApiEntity userApi;
 }
+
+

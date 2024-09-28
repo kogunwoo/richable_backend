@@ -1,44 +1,36 @@
 package com.idle.kb_i_dle_backend.member.entity;
 
-
-
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+
+@Entity
 @Getter
-@Setter
-//@Entity
-//@Table(name = "user_goal")
+@Table(name = "user_goal", catalog = "user_info")
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserGoalEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int index;
+    private Integer index;
 
-    @Column(name = "UID", nullable = false)
-    private int uid;
-
-    @Column(length = 50, nullable = false)
+    private Integer uid;
     private String category;
-
-    @Column(length = 1000, nullable = false)
     private String title;
+    private Long amount;
+    private Timestamp set_date;
+    private Integer priority;
+    private Boolean is_achive;
 
-    @Column(nullable = false)
-    private long amount;
-
-    @Column(name = "set_date", nullable = false)
-    private Timestamp setDate;
-
-    @Column(nullable = false)
-    private int priority;
-
-    @Column(name = "is_achive", columnDefinition = "TINYINT(1)")
-    private boolean isAchive;
-
-    // 기본 생성자
-    public UserGoalEntity() {}
-    }
+    // User와의 관계 설정 (ManyToOne)
+    @ManyToOne
+    @JoinColumn(name = "uid", insertable = false, updatable = false)
+    private User user;
+}
 

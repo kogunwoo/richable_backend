@@ -2,7 +2,6 @@ package com.idle.kb_i_dle_backend.finance.entity;
 
 import com.idle.kb_i_dle_backend.member.entity.User;
 import lombok.Getter;
-
 import javax.persistence.*;
 import java.util.Date;
 

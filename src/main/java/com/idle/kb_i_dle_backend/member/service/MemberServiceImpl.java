@@ -2,8 +2,11 @@ package com.idle.kb_i_dle_backend.member.service;
 
 import com.idle.kb_i_dle_backend.member.dto.MemberDTO;
 import com.idle.kb_i_dle_backend.member.dto.MemberJoinDTO;
+import com.idle.kb_i_dle_backend.member.entity.User;
 import com.idle.kb_i_dle_backend.member.mapper.MemberMapper;
 import java.util.*;
+
+import com.idle.kb_i_dle_backend.member.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -45,7 +48,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public void MemberJoin(MemberJoinDTO memberjoindto) {
-        if(memberMapper.checkDupl(memberjoindto.getId())){
+        if (memberMapper.checkDupl(memberjoindto.getId())) {
             throw new IllegalStateException("User already exists");
         }
         if (memberjoindto.getNickname() == null || memberjoindto.getNickname().length() > 50) {
@@ -116,6 +119,7 @@ public class MemberServiceImpl implements MemberService {
         String savedCode = verificationCodes.get(email);
         return savedCode != null && savedCode.equals(code);
     }
+
     private String generateRandomCode() {
         // 6자리 랜덤 숫자 생성 로직
         return String.format("%06d", new Random().nextInt(1000000));
@@ -135,4 +139,19 @@ public class MemberServiceImpl implements MemberService {
         return memberMapper.resetPassword(id, encodedPassword) > 0;
     }
 
-}
+    // 마이페이지 회원 구간 2024 9/27일 수정 파일
+
+        @Autowired
+        private UserRepository userRepository;
+
+        @Override
+        public boolean deleteMemberById(String id) {
+            // ID로 회원 조회 후 삭제
+            User user = userRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+            // 회원 삭제
+            userRepository.delete(user);
+            return true;
+        }
+    }

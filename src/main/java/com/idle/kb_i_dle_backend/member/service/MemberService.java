@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
-public interface MemberService {
+public interface    MemberService {
     boolean checkDupl(String id);
 
     MemberDTO getMember(String id);
@@ -27,4 +27,6 @@ public interface MemberService {
     boolean verifyCode(String email, String code);
 
     boolean resetPassword(String id, String newPassword);
+    //회원 삭제 메서드 추가 2024.09.27 11시47분
+    boolean deleteMemberById(String id);
 }

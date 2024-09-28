@@ -1,28 +1,34 @@
 package com.idle.kb_i_dle_backend.member.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
+@Entity
 @Getter
-@Setter
-//@Entity
-//@Table(name = "user_badge")
-public class UserBadgeEntity {
+@Table(name = "user_badge", catalog = "user_info")
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@IdClass(UserBadgeEntityPK.class)
+public class UserBadgeEntity implements Serializable {
 
-    @EmbeddedId
-    private UserBadgeId id;  // 복합 키 사용
+    @Id
+    private Integer uid;
 
-    @Column(name = "badge", length = 100, nullable = false)
-    private String badge;  // badge 컬럼 매핑
+    @Id
+    private Integer badge_no;
 
-    @Column(name = "badge_achive", columnDefinition = "TINYINT(1)", nullable = false)
-    private boolean badgeAchive;  // badge_achive 컬럼 매핑
+    private String badge;
+    private Boolean badge_achive;
+    private Boolean badge_main;
 
-    @Column(name = "badge_main", columnDefinition = "TINYINT(1)", nullable = false)
-    private boolean badgeMain;  // badge_main 컬럼 매핑
-
-    // 기본 생성자
-    public UserBadgeEntity() {}
+    // User와의 관계 설정 (ManyToOne)
+    @ManyToOne
+    @JoinColumn(name = "uid", insertable = false, updatable = false)
+    private User user;
 }
