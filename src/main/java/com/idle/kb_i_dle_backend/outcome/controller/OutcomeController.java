@@ -1,5 +1,6 @@
 package com.idle.kb_i_dle_backend.outcome.controller;
 
+import com.idle.kb_i_dle_backend.common.dto.ResponseDTO;
 import com.idle.kb_i_dle_backend.outcome.dto.*;
 import com.idle.kb_i_dle_backend.outcome.service.OutcomeService;
 import java.text.SimpleDateFormat;
@@ -21,6 +22,26 @@ import java.util.List;
 public class OutcomeController {
 
     private final OutcomeService outcomeService;
+
+
+    @GetMapping("/review/sum/{cntYear}/{cntMonth}")
+    public ResponseEntity<ResponseDTO> saveOutcomeInMonth(@PathVariable int cntYear, @PathVariable int cntMonth){
+        Calendar calendar = Calendar.getInstance();
+
+        // 시작일 설정 (해당 연도와 월의 첫 번째 날)
+        calendar.set(Calendar.YEAR, cntYear);
+        calendar.set(Calendar.MONTH, cntMonth - 1); // Calendar.MONTH는 0-based이므로 1을 빼줍니다.
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        Date startDate = calendar.getTime();
+
+        // 마지막 날 설정 (해당 연도와 월의 마지막 날)
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+        Date endDate = calendar.getTime();
+
+        PossibleSaveOutcomeInMonthDTO possibleSaveOutcomeInMonthDTO = outcomeService.findPossibleSaveOutcome(1, startDate, endDate);
+        ResponseDTO responseDTO = new ResponseDTO(true, possibleSaveOutcomeInMonthDTO);
+        return ResponseEntity.ok(responseDTO);
+    }
 
 
     /**

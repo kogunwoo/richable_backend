@@ -79,27 +79,68 @@ public class OutcomeServiceImpl implements OutcomeService {
             User user = optionalUser.get();
             //사용자의 나이대를 가져온다.
             String ageRange =  getUserAgeRange(getUserAge(user.getBirth_year()));
-            //사용자의 나이대와 카테고리의 소비 합을 조회
-            List<OutcomeUser> outcomeUsers = outcomeUserRepository.findByUidAndDateBetween(user, start, end);
-
-            //카테고리 조회
-            OutcomeCategory outcomeCategory = categoryRepository.findByCategoryNameStartingWith(category);
-
-            //date를 분기로 변경
-            //사용자 나이대의 카테고리의 소비를 조회
-
-            String quarter = getQuarter(start);
-
-            List<OutcomeAverage> outcomeAverages = averageOutcomeRepository.findByCategoryAndQuaterAndAgeGroup(outcomeCategory.getCategoryName(), getQuarter(start), ageRange);
-            String categoryName = outcomeCategory.getCategoryName();
-            compareAverageCategoryOutcomeDTO.setMySum( outcomeUsers.stream().mapToLong(OutcomeUser::getAmount).sum());
-            compareAverageCategoryOutcomeDTO.setAverageSum(outcomeAverages.stream().mapToLong(OutcomeAverage::getOutcome).sum());
-            compareAverageCategoryOutcomeDTO.setCategory(outcomeCategory.getCategoryName());
-            return compareAverageCategoryOutcomeDTO;
+            return getCompareAverageCategoryOutcomeDTO(user, start, end, category, ageRange, compareAverageCategoryOutcomeDTO);
         }
         return compareAverageCategoryOutcomeDTO;
 
     }
+
+
+    @Override
+    public PossibleSaveOutcomeInMonthDTO findPossibleSaveOutcome(Integer uid, Date start, Date end) {
+        //먼저 사용자 uid를 가져오고
+        Optional<User> optionalUser = memberService.findMemberByUid(uid);
+        //dto 생성
+        PossibleSaveOutcomeInMonthDTO possibleSaveOutcomeInMonthDTO = new PossibleSaveOutcomeInMonthDTO();
+
+        if(optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            //사용자의 나이대를 가져온다.
+            String ageRange =  getUserAgeRange(getUserAge(user.getBirth_year()));
+
+            //전체 소비 조회
+            List<OutcomeUser> outcomeUsers = outcomeUserRepository.findByUidAndDateBetween(user, start, end);
+
+            //평균 전체 소비
+            List<OutcomeAverage> outcomeAverages = averageOutcomeRepository.findByAgeGroupAndQuater(ageRange, getQuarter(start));
+
+            Long userSum = outcomeUsers.stream().mapToLong(OutcomeUser::getAmount).sum();
+            Long averageSum = outcomeAverages.stream().mapToLong(OutcomeAverage::getOutcome).sum();
+            log.info("userSum = " + userSum);
+            log.info("averageSum = " + averageSum);
+            possibleSaveOutcomeInMonthDTO.setPossibleSaveAmount(averageSum - userSum);
+            return possibleSaveOutcomeInMonthDTO;
+        }
+        return possibleSaveOutcomeInMonthDTO;
+    }
+
+    /**
+     * 해당 카테고리, 나이대, start~end까지의 user의 평균 소비량 비교DTO를 가져온다.
+     * @param user
+     * @param start
+     * @param end
+     * @param category
+     * @param ageRange
+     * @param compareAverageCategoryOutcomeDTO
+     * @return
+     */
+    public CompareAverageCategoryOutcomeDTO getCompareAverageCategoryOutcomeDTO(User user, Date start, Date end, String category, String ageRange, CompareAverageCategoryOutcomeDTO compareAverageCategoryOutcomeDTO){
+        //사용자의 한달 동안 소비 조회
+        List<OutcomeUser> outcomeUsers = outcomeUserRepository.findByUidAndDateBetween(user, start, end);
+
+        //카테고리 조회
+        OutcomeCategory outcomeCategory = categoryRepository.findByCategoryNameStartingWith(category);
+
+        //date를 분기로 변경
+        //사용자 나이대의 카테고리의 소비를 조회
+        List<OutcomeAverage> outcomeAverages = averageOutcomeRepository.findByCategoryAndQuaterAndAgeGroup(outcomeCategory.getCategoryName(), getQuarter(start), ageRange);
+        String categoryName = outcomeCategory.getCategoryName();
+        compareAverageCategoryOutcomeDTO.setMySum( outcomeUsers.stream().mapToLong(OutcomeUser::getAmount).sum());
+        compareAverageCategoryOutcomeDTO.setAverageSum(outcomeAverages.stream().mapToLong(OutcomeAverage::getOutcome).sum());
+        compareAverageCategoryOutcomeDTO.setCategory(outcomeCategory.getCategoryName());
+        return compareAverageCategoryOutcomeDTO;
+    }
+
     /**
      * 사용자 나이대를 가져옴
      * @param age
