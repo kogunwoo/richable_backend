@@ -8,6 +8,7 @@ import com.idle.kb_i_dle_backend.member.dto.MemberJoinDTO;
 import com.idle.kb_i_dle_backend.member.dto.MemberInfoDTO;
 import com.idle.kb_i_dle_backend.member.service.MemberService;
 import com.idle.kb_i_dle_backend.member.util.JwtProcessor;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
@@ -19,9 +20,11 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -35,13 +38,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.json.JSONObject;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Slf4j
 @RestController
@@ -125,64 +123,89 @@ public class MemberController {
     }
 
     @GetMapping("/naverCallback")
-    public ResponseEntity<?> naverCallback(@RequestParam String code,
-                                           @RequestParam String state,
-                                           HttpSession session) throws Exception {
-        // Validate state token
-        String sessionState = (String) session.getAttribute("naverState");
-        if (!state.equals(sessionState)) {
-            log.error("Invalid State. Session state: {}, Received state: {}", sessionState, state);
-            return ResponseEntity.badRequest().body("Invalid State");
-        }
+    public ResponseEntity<?> naverCallback(@RequestParam(required = false) String code,
+                                           @RequestParam(required = false) String state
+    ) throws Exception {
 
-        // Exchange code for access token
+        log.error("Received callback - code: {}, state: {}" + code, state);
+
+        // 최종 인증 값인 접근 토큰을 발급
         String tokenUrl = "https://nid.naver.com/oauth2.0/token?grant_type=authorization_code"
                 + "&client_id=" + clientId
                 + "&client_secret=" + clientSecret
                 + "&code=" + code
                 + "&state=" + state;
-        String tokenResponse = getHttpResponse(tokenUrl);
-        JSONObject tokenJson = new JSONObject(tokenResponse);
+        String authtoken = getHttpResponse(tokenUrl);
+        log.error("Token Response: {}", authtoken);
+        log.error("tokenUrl: {}", tokenUrl);
+
+        // JSON 파싱
+        JSONObject tokenJson = new JSONObject(authtoken);
         String accessToken = tokenJson.getString("access_token");
-        log.error("isthere code? "+code);
-        log.error("isthere state? "+state);
 
-        // Fetch user profile
+        // 사용자 프로필 정보 조회
         JSONObject userProfile = getUserProfile(accessToken);
-        JSONObject responseObj = userProfile.getJSONObject("response");
-        String email = responseObj.optString("email");
-        String naverId = responseObj.getString("id");
-        String nickname = responseObj.optString("nickname", "User");
+        log.info("User Profile: {}", userProfile.toString());
 
-        if (email == null || email.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email is required but not provided.");
-        }
+        // 여기서 userProfile을 사용하여 회원가입 또는 로그인 처리
 
-        // Check if user exists
+        // Parse the user profile to extract necessary information
+        JSONObject response = userProfile.getJSONObject("response");
+        String email = response.getString("email");
+        String birthyear = response.getString("birthyear");
+        String gender = response.getString("gender");
+        String nickname = response.getString("nickname");
+        String naverId = response.getString("id");
+
+        // Check if the email exists in your database
         boolean userExists = memberService.checkEmailExists(email);
+        log.error("log for userExists"+userExists);
 
+//        // 예: MemberDTO 생성 및 저장, JWT 토큰 생성 등
         if (userExists) {
-            // User exists, authenticate and generate token
+            // User exists, proceed to authenticate
             MemberDTO member = memberService.findByEmail(email);
-            CustomMember customMember = new CustomMember(member);
-            Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    customMember, null, customMember.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            log.error("log for member"+member);
 
+            // Generate JWT token
             String jwtToken = jwtProcessor.generateToken(member.getId(), member.getUid(), member.getNickname());
-            MemberInfoDTO userInfo = new MemberInfoDTO(member.getUid(), member.getId(), member.getNickname(), member.getAuth().toString());
-            return ResponseEntity.ok(new AuthResultDTO(jwtToken, userInfo));
+
+            // Redirect to home page with token
+            String redirectUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/")
+                    .queryParam("token", jwtToken)
+                    .toUriString();
+
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .header(HttpHeaders.LOCATION, redirectUrl)
+                    .build();
+
         } else {
-            // User does not exist, return information for registration
-            Map<String, Object> data = new HashMap<>();
-            data.put("email", email);
-            data.put("naverId", naverId);
-            data.put("nickname", nickname);
-            data.put("message", "User not registered. Proceed to registration.");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(data);
+            // New user registration
+            MemberJoinDTO memberJoinDTO = MemberJoinDTO.builder()
+                    .id(email.split("@")[0])
+                    .password(naverId)
+                    .email(email)
+                    .nickname(nickname)
+                    .gender(gender.equals("M") ? 'M' : 'F')
+                    .birth_year(Integer.valueOf(birthyear))
+                    .auth("ROLE_MEMBER")
+                    .agreementInfo(false)  // 기본값 설정
+                    .agreementFinance(false)  // 기본값 설정
+                    .build();
+
+            memberService.MemberJoin(memberJoinDTO);
+
+            MemberDTO member = memberService.findByEmail(email);
+            String parid = member.getId();
+
+            String redirectUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/user/terms")
+                    .queryParam("id", parid).toUriString();
+
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .header(HttpHeaders.LOCATION, redirectUrl)
+                    .build();
         }
     }
-
 
     private String getHttpResponse(String urlString) throws Exception {
         URL url = new URL(urlString);
@@ -227,6 +250,11 @@ public class MemberController {
     @PostMapping("/register")
     public ResponseEntity<?> signup(@RequestBody MemberJoinDTO signupDTO) {
         try {
+            if (signupDTO.isAgreementInfo() != true ) {
+                signupDTO.setAgreementInfo(false);
+            }
+            if (signupDTO.isAgreementFinance() != true) {
+                signupDTO.setAgreementFinance(false);}
             memberService.MemberJoin(signupDTO);
             return ResponseEntity.ok("User registered successfully");
         } catch (IllegalStateException e) {

@@ -51,6 +51,16 @@ public class MemberServiceImpl implements MemberService {
         try {
             log.debug("Starting MemberJoin process for ID: {}", memberjoindto.getId());
 
+            if (memberjoindto.isAgreementInfo()) {
+                memberjoindto.setAgreementInfo(true);
+            } else {
+                memberjoindto.setAgreementInfo(false);
+            }
+            if (memberjoindto.isAgreementFinance()) {
+                memberjoindto.setAgreementFinance(true);
+            } else {
+                memberjoindto.setAgreementFinance(false);
+            }
             if (memberjoindto.getAuth() == null || memberjoindto.getAuth().isEmpty()) {
                 memberjoindto.setAuth("ROLE_MEMBER");
             }
@@ -82,6 +92,9 @@ public class MemberServiceImpl implements MemberService {
                     .email(memberjoindto.getEmail())
                     .birth_year(memberjoindto.getBirth_year())
                     .auth(memberjoindto.getAuth())
+
+                    .agreementInfo(memberjoindto.isAgreementInfo())
+                    .agreementFinance(memberjoindto.isAgreementFinance())
                     .build();
 
             log.debug("Saving new user: {}", newMember);
@@ -206,11 +219,6 @@ public class MemberServiceImpl implements MemberService {
             );
         }
         return null; // 또는 예외를 던질 수 있습니다.
-    }
-
-    @Override
-    public boolean checkEmailExists(String email) {
-        return false;
     }
 
 }
