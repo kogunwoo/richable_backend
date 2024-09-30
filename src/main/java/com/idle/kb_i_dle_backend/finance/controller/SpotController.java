@@ -65,87 +65,51 @@ public class SpotController {
 
     // 현물 자산 리스트 반환
     @GetMapping("/spot/all")
-    public ResponseEntity<SuccessResponseDTO> getTotalSpotList(HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        Integer uid = (Integer) session.getAttribute("uid");
-
-        List<Spot> spots = spotService.getSpotList(uid);
-        List<SpotDTO> spotList = new ArrayList<>();
-
-        // 날짜 형식을 변환할 포맷 설정 (예: "yyyy-MM-dd")
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-        for (Spot s : spots) {
-            SpotDTO spotDTO = new SpotDTO();
-            spotDTO.setIndex(s.getIndex());
-            spotDTO.setCategory(s.getCategory());
-            spotDTO.setName(s.getName());
-            spotDTO.setPrice(s.getPrice());
-            String formattedAddDate = dateFormat.format(s.getAddDate());
-            spotDTO.setAddDate(formattedAddDate);
-            spotList.add(spotDTO);
+    public ResponseEntity<?> getTotalSpotList() {
+        try {
+            ResponseDTO response = new ResponseDTO(true, new DataDTO(spotService.getSpotList()));
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
-
-
-        // response를 감싸는 구조로 반환
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("data", spotList);
-
-        SuccessResponseDTO successResponse = new SuccessResponseDTO("true", responseData);
-        return ResponseEntity.ok(successResponse);  // 응답을 ResponseEntity로 감싸서 반환
     }
 
     // 새로운 Spot 추가
     @PostMapping("/spot/add")
-    public ResponseEntity<SuccessResponseDTO> addSpot(@RequestBody Spot spot, HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        Integer uid = (Integer) session.getAttribute("uid");
-
-        SpotDTO savedSpotDTO = spotService.addSpot(uid, spot);
-
-        // response를 감싸는 구조로 반환
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("data", savedSpotDTO);
-
-        SuccessResponseDTO successResponse = new SuccessResponseDTO("true", responseData);
-
-        return ResponseEntity.ok(successResponse);  // 저장된 Spot 객체를 반환
+    public ResponseEntity<?> addSpot(@RequestBody Spot spot) {
+        try {
+            ResponseDTO response = new ResponseDTO(true, new DataDTO(spotService.addSpot(spot)));
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
     }
 
     // Spot 수정
     @PutMapping("/spot/update")
-    public ResponseEntity<SuccessResponseDTO> updateSpot(@RequestBody Spot spot, HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        Integer uid = (Integer) session.getAttribute("uid");
-
-        SpotDTO savedSpotDTO = spotService.updateSpot(uid, spot);
-
-        // response를 감싸는 구조로 반환
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("data", savedSpotDTO);
-
-        SuccessResponseDTO successResponse = new SuccessResponseDTO("true", responseData);
-
-        return ResponseEntity.ok(successResponse);  // 저장된 Spot 객체를 반환
+    public ResponseEntity<?> updateSpot(@RequestBody Spot spot) {
+        try {
+            ResponseDTO response = new ResponseDTO(true, new DataDTO(spotService.updateSpot(spot)));
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
     }
 
     // Spot 삭제
     @DeleteMapping("/spot/delete/{index}")
-    public ResponseEntity<SuccessResponseDTO> deleteSpot(@PathVariable("index") Integer index, HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        Integer uid = (Integer) session.getAttribute("uid");
-
-        spotService.deleteSpotByUidAndIndex(uid, index);
-
-        Map<String, Object> dataObject = new HashMap<>();
-        dataObject.put("index", index);
-
-        // response를 감싸는 구조로 반환
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("data", dataObject);
-
-        SuccessResponseDTO successResponse = new SuccessResponseDTO("true", responseData);
-
-        return ResponseEntity.ok(successResponse);  // 저장된 Spot 객체를 반환
+    public ResponseEntity<?> deleteSpot(@PathVariable("index") Integer index, HttpServletRequest request) {
+        try {
+            Map<String, Object> indexData = new HashMap<>();
+            indexData.put("index", spotService.deleteSpotByUidAndIndex(index));
+            ResponseDTO response = new ResponseDTO(true, new DataDTO(indexData));
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
     }
 }

@@ -11,14 +11,14 @@ public interface SpotService {
 
     PriceSumDTO getTotalPrice() throws Exception;
 
-    List<Spot> getSpotList(Integer uid);
+    List<SpotDTO> getSpotList() throws Exception;
 
-    SpotDTO addSpot(Integer uid, Spot spot);
+    SpotDTO addSpot(Spot spot);
 
     Integer getLastSpotIndex();
 
-    SpotDTO updateSpot(Integer uid, Spot spot);
+    SpotDTO updateSpot(Spot spot);
 
-    void deleteSpotByUidAndIndex(Integer uid, Integer index);
+    Integer deleteSpotByUidAndIndex(Integer index);
 
 }
