@@ -1,16 +1,16 @@
 package com.idle.kb_i_dle_backend.member.entity;
 
 import com.idle.kb_i_dle_backend.finance.entity.Spot;
-import lombok.*;
-
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+
+import lombok.*;
+import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(name = "user_info", catalog = "user_info")
 @Getter
 @Setter
+@Table(name = "user_info", catalog = "user_info")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

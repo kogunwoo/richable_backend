@@ -1,4 +1,4 @@
-package com.idle.kb_i_dle_backend.consume.dto;
+package com.idle.kb_i_dle_backend.outcome.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,7 +1,7 @@
-package com.idle.kb_i_dle_backend.consume.controller;
+package com.idle.kb_i_dle_backend.outcome.controller;
 
-import com.idle.kb_i_dle_backend.consume.dto.*;
-import com.idle.kb_i_dle_backend.consume.service.ConsumeService;
+import com.idle.kb_i_dle_backend.outcome.dto.*;
+import com.idle.kb_i_dle_backend.outcome.service.OutcomeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -13,21 +13,21 @@ import java.util.List;
 @RequestMapping("/consume")
 @Slf4j
 @RequiredArgsConstructor
-public class ConsumeController {
+public class OutcomeController {
 
-    private final ConsumeService consumeService;
+    private final OutcomeService outcomeService;
 
     // 전체 소비 데이터 조회
     @GetMapping("/")
     public ResponseEntity<List<OutcomeAverageDTO>> getAll() {
-        List<OutcomeAverageDTO> outcomeAverage = consumeService.getAll();
+        List<OutcomeAverageDTO> outcomeAverage = outcomeService.getAll();
         return ResponseEntity.ok(outcomeAverage);
     }
 
     // 사용자 소비 상세 조회
     @GetMapping("/detail")
     public ResponseEntity<List<OutcomeUserDTO>> getAllUser() {
-        List<OutcomeUserDTO> outcomeUser = consumeService.getAllUser();
+        List<OutcomeUserDTO> outcomeUser = outcomeService.getAllUser();
         return ResponseEntity.ok(outcomeUser);
     }
 
@@ -60,15 +60,15 @@ public class ConsumeController {
 //    }
     @GetMapping("/category/sum/{cntYear}/{cntMonth}")
     public ResponseEntity<ResponseCategorySumListDTO> categorySumList(@PathVariable int cntYear, @PathVariable int cntMonth) {
-        ResponseCategorySumListDTO responseCategorySumListDTO = consumeService.findCategorySum(cntYear, cntMonth);
+        ResponseCategorySumListDTO responseCategorySumListDTO = outcomeService.findCategorySum(cntYear, cntMonth);
         return ResponseEntity.ok(responseCategorySumListDTO);
     }
 
     @GetMapping("/category/dailysum/{cntYear}/{cntMonth}")
-    public ResponseEntity<MonthConsumeDTO> monthConsume(@PathVariable int cntYear, @PathVariable int cntMonth){
+    public ResponseEntity<MonthOutcomeDTO> monthConsume(@PathVariable int cntYear, @PathVariable int cntMonth){
         System.out.println("month!!!!!!!!!!!");
-        MonthConsumeDTO monthConsumeDTO = consumeService.findMonthConsume(cntYear, cntMonth);
-        return ResponseEntity.ok(monthConsumeDTO);
+        MonthOutcomeDTO monthOutcomeDTO = outcomeService.findMonthOutcome(cntYear, cntMonth);
+        return ResponseEntity.ok(monthOutcomeDTO);
     }
 
 
