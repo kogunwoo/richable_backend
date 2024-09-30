@@ -1,31 +1,30 @@
-package com.idle.kb_i_dle_backend.consume.service;
+package com.idle.kb_i_dle_backend.outcome.service;
 
-import com.idle.kb_i_dle_backend.consume.dto.*;
-import com.idle.kb_i_dle_backend.consume.entity.OutcomeAverage;
-import com.idle.kb_i_dle_backend.consume.entity.OutcomeUser;
-import com.idle.kb_i_dle_backend.consume.repository.ConsumeRepository;
-import com.idle.kb_i_dle_backend.consume.repository.OutcomeUserRepository;
+import com.idle.kb_i_dle_backend.outcome.dto.*;
+import com.idle.kb_i_dle_backend.outcome.entity.OutcomeAverage;
+import com.idle.kb_i_dle_backend.outcome.entity.OutcomeUser;
+import com.idle.kb_i_dle_backend.outcome.repository.AverageOutcomeRepository;
+import com.idle.kb_i_dle_backend.outcome.repository.OutcomeUserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ConsumeServiceImpl implements ConsumeService {
+public class OutcomeServiceImpl implements OutcomeService {
 
-    private final ConsumeRepository consumeRepository;
+    private final AverageOutcomeRepository averageOutcomeRepository;
     private final OutcomeUserRepository outcomeUserRepository;
 
 
     @Override
     public List<OutcomeAverageDTO> getAll() {
         // 엔티티를 DTO로 변환하여 반환
-        return consumeRepository.findAll()
+        return averageOutcomeRepository.findAll()
                 .stream()
                 .map(this::convertToOutcomeAverageDTO)  // 엔티티를 DTO로 변환
                 .collect(Collectors.toList());
@@ -75,7 +74,7 @@ public class ConsumeServiceImpl implements ConsumeService {
     }
 
     @Override
-    public MonthConsumeDTO findMonthConsume(Integer year, Integer month) {
+    public MonthOutcomeDTO findMonthOutcome(Integer year, Integer month) {
         List<OutcomeUser> consumes = outcomeUserRepository.findAmountAllByUidAndYearAndMonth(1, year, month);
         List<Long> dailyAmount = new ArrayList<>(Collections.nCopies(31, 0L));
         for(OutcomeUser consume : consumes) {
@@ -93,8 +92,8 @@ public class ConsumeServiceImpl implements ConsumeService {
         }
 
         System.out.println(consumes.toString());
-        MonthConsumeDTO monthConsumeDTO = new MonthConsumeDTO(month,year,dailyAmount);
+        MonthOutcomeDTO monthOutcomeDTO = new MonthOutcomeDTO(month,year,dailyAmount);
 
-        return monthConsumeDTO;
+        return monthOutcomeDTO;
     }
 }

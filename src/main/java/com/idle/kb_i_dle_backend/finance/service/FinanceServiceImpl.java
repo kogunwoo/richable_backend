@@ -3,7 +3,7 @@ package com.idle.kb_i_dle_backend.finance.service;
 import com.idle.kb_i_dle_backend.finance.dto.*;
 import com.idle.kb_i_dle_backend.finance.entity.*;
 import com.idle.kb_i_dle_backend.income.entity.*;
-import com.idle.kb_i_dle_backend.consume.entity.*;
+import com.idle.kb_i_dle_backend.outcome.entity.*;
 import com.idle.kb_i_dle_backend.finance.repository.*;
 import com.idle.kb_i_dle_backend.member.entity.User;
 import java.text.DecimalFormat;
