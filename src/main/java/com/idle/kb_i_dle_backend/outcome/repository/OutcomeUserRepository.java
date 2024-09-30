@@ -1,7 +1,10 @@
 package com.idle.kb_i_dle_backend.outcome.repository;
 
+import com.idle.kb_i_dle_backend.member.entity.User;
 import com.idle.kb_i_dle_backend.outcome.dto.CategorySumDTO;
 import com.idle.kb_i_dle_backend.outcome.entity.OutcomeUser;
+import java.time.LocalDate;
+import java.util.Date;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -38,4 +41,6 @@ public interface OutcomeUserRepository extends JpaRepository<OutcomeUser, Intege
             "WHERE o.uid = :uid AND YEAR(o.date) = :year AND MONTH(o.date) = :month " +
             "order by o.date")
     List<OutcomeUser> findAmountAllByUidAndYearAndMonth(@Param("uid") int uid, @Param("year") int year , @Param("month") int month);
+
+    List<OutcomeUser> findByUidAndDateBetween(User uid, Date start, Date end);
 }
