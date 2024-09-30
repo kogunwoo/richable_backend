@@ -20,11 +20,13 @@ import java.util.List;
 @Service
 public class IncomeServiceImpl implements IncomeService {
 
-    @Autowired
-    private IncomeRepository incomeRepository;
+    private final UserRepository userRepository;
+    private final IncomeRepository incomeRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+    public IncomeServiceImpl(UserRepository userRepository, IncomeRepository incomeRepository) {
+        this.userRepository = userRepository;
+        this.incomeRepository = incomeRepository;
+    }
 
     @Override
     public List<IncomeDTO> getIncomeList() throws Exception {

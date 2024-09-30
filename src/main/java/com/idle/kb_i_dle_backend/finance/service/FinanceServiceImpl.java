@@ -30,10 +30,10 @@ public class FinanceServiceImpl implements FinanceService {
     private SpotRepository spotRepository;
     @Autowired
     private StockRepository stockRepository;
-    @Autowired
-    private IncomeRepository incomeRepository;
-    @Autowired
-    private OutComeUserRepository outComeUserRepository;
+//    @Autowired
+//    private IncomeRepository incomeRepository;
+//    @Autowired
+//    private OutComeUserRepository outComeUserRepository;
 
     // 소수점 이하 한 자리로 포맷팅할 수 있는 DecimalFormat
     private static final DecimalFormat df = new DecimalFormat("#.#");
@@ -93,37 +93,37 @@ public class FinanceServiceImpl implements FinanceService {
     public List<MonthlySavingRateDTO> getMonthlySavingRateTrend(int uid) {
         List<MonthlySavingRateDTO> monthlySavingRates = new ArrayList<>();
 
-        for (int i = 0; i < 6; i++) {
-            // 해당 월의 시작일과 마지막일 계산
-            LocalDate startOfMonth = LocalDate.now().minusMonths(i).withDayOfMonth(1);
-            LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
-
-            Date startDate = Date.from(startOfMonth.atStartOfDay(ZoneId.systemDefault()).toInstant());
-            Date endDate = Date.from(endOfMonth.atStartOfDay(ZoneId.systemDefault()).toInstant());
-
-            // 소득과 소비 데이터를 가져옴
-            List<Income> incomes = incomeRepository.findByUidAndDateBetween(uid, startDate, endDate);
-            List<OutcomeUser> outComeUsers = outComeUserRepository.findByUidAndDateBetween(uid, startDate, endDate);
-
-            // 총 소득 계산
-            long totalIncome = incomes.stream().mapToLong(Income::getAmount).sum();
-
-            // 총 소비량 계산
-            long totalConsumption = outComeUsers.stream().mapToLong(OutcomeUser::getAmount).sum();
-
-            // 저축 가능 금액 계산 (소득 - 소비)
-            long savings = totalIncome - totalConsumption;
-
-            // 저축률 계산: 저축 가능 금액 / 총 소득 (소득이 0인 경우 저축률을 0으로 설정)
-            double savingRate = totalIncome > 0 ? (double) savings / totalIncome : 0;
-
-            System.out.println(savings);
-            System.out.println(totalIncome);
-
-            // 월별 저축률 DTO에 추가
-            savingRate = Math.floor(savingRate * 10) / 10.0;
-            monthlySavingRates.add(new MonthlySavingRateDTO(i,savingRate));
-        }
+//        for (int i = 0; i < 6; i++) {
+//            // 해당 월의 시작일과 마지막일 계산
+//            LocalDate startOfMonth = LocalDate.now().minusMonths(i).withDayOfMonth(1);
+//            LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
+//
+//            Date startDate = Date.from(startOfMonth.atStartOfDay(ZoneId.systemDefault()).toInstant());
+//            Date endDate = Date.from(endOfMonth.atStartOfDay(ZoneId.systemDefault()).toInstant());
+//
+//            // 소득과 소비 데이터를 가져옴
+//            List<Income> incomes = incomeRepository.findByUidAndDateBetween(uid, startDate, endDate);
+//            List<OutcomeUser> outComeUsers = outComeUserRepository.findByUidAndDateBetween(uid, startDate, endDate);
+//
+//            // 총 소득 계산
+//            long totalIncome = incomes.stream().mapToLong(Income::getAmount).sum();
+//
+//            // 총 소비량 계산
+//            long totalConsumption = outComeUsers.stream().mapToLong(OutcomeUser::getAmount).sum();
+//
+//            // 저축 가능 금액 계산 (소득 - 소비)
+//            long savings = totalIncome - totalConsumption;
+//
+//            // 저축률 계산: 저축 가능 금액 / 총 소득 (소득이 0인 경우 저축률을 0으로 설정)
+//            double savingRate = totalIncome > 0 ? (double) savings / totalIncome : 0;
+//
+//            System.out.println(savings);
+//            System.out.println(totalIncome);
+//
+//            // 월별 저축률 DTO에 추가
+//            savingRate = Math.floor(savingRate * 10) / 10.0;
+//            monthlySavingRates.add(new MonthlySavingRateDTO(i,savingRate));
+//        }
 
         return monthlySavingRates;
     }
