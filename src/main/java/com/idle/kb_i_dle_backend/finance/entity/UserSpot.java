@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 @Entity
@@ -23,14 +24,21 @@ public class UserSpot {
     @JoinColumn(name = "uid") // foreign key 이름 설정
     private User uid;
 
+    @NotNull
+    @Column(length = 20)
     private String category;
 
+    @NotNull
+    @Column(length = 50)
     private String name;
 
+    @NotNull
     private Long price;
 
+    @Column(length = 100)
     private String prod_category;
 
+    @NotNull
     @Temporal(TemporalType.TIMESTAMP)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "add_date")

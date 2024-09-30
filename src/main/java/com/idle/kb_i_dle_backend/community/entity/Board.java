@@ -1,15 +1,16 @@
 package com.idle.kb_i_dle_backend.community.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+
+import com.idle.kb_i_dle_backend.member.entity.User;
 import lombok.Getter;
 
-//@Entity
-//@Getter
-//@Table(name = "board_gallery", catalog = "board") // table 설정, 스키마 설정 table이름이나 컬럼은 DB와 같다면 따로 지정 안 해도 되긴 함
+import java.util.Date;
+
+@Entity
+@Getter
+@Table(name = "board_gallery", catalog = "board") // table 설정, 스키마 설정 table이름이나 컬럼은 DB와 같다면 따로 지정 안 해도 되긴 함
 public class Board {
     /**
      * Entity는 id값이 필수로 있어야 한다.
@@ -19,12 +20,31 @@ public class Board {
      * https://gmlwjd9405.github.io/2019/08/12/primary-key-mapping.html 참고
      *
      */
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id; // 내 DB가 Integer라서 Integer로 했지만, DB에서는 id값이 BigInt로 설정되어 있기 때문에 Long이 일반적.
-    // 다만 key값이 작다면 Integer여도 됨.
-    // https://reasontaek.tistory.com/13 참고.
-//    private String title;
-//    private String writer;
-//    private String contents;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer index; // 내 DB가 Integer라서 Integer로 했지만, DB에서는 id값이 BigInt로 설정되어 있기 때문에 Long이 일반적.
+                        //     다만 key값이 작다면 Integer여도 됨.
+                        //     https://reasontaek.tistory.com/13 참고.
+
+    @ManyToOne
+    @JoinColumn(name = "uid")
+    private User uid;
+
+    @NotNull
+    @Column(length = 50)
+    private String title;
+
+    @Column(columnDefinition = "LONGBLOB")
+    private byte[] img;
+
+    @Column(name = "b_content",columnDefinition = "TEXT")
+    private String content;
+
+    @NotNull
+    @Column(length = 20)
+    private String category;
+
+    @NotNull
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date time;
 }

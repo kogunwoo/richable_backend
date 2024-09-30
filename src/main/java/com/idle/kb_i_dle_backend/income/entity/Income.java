@@ -2,11 +2,8 @@ package com.idle.kb_i_dle_backend.income.entity;
 
 import com.idle.kb_i_dle_backend.member.entity.User;
 import java.util.Date;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
+
 import lombok.Getter;
 
 @Entity
@@ -20,6 +17,7 @@ public class Income {
     @JoinColumn(name = "uid")
     private User uid;
 
+    @Column(length = 100)
     private String type;
     private Long amount;
     private Date date;
