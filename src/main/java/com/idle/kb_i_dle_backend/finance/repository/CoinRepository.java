@@ -1,6 +1,6 @@
 package com.idle.kb_i_dle_backend.finance.repository;
 
-import com.idle.kb_i_dle_backend.finance.entity.Coin;
+import com.idle.kb_i_dle_backend.finance.entity.UserCoin;
 import java.util.Date;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,9 +9,9 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface CoinRepository extends JpaRepository <Coin,Integer> {
+public interface CoinRepository extends JpaRepository <UserCoin,Integer> {
 
-    List<Coin> findAllByUidAndDeleteDateIsNull(int uid);
+    List<UserCoin> findAllByUidAndDeleteDateIsNull(int uid);
 
     @Query(value = "SELECT a.balance, b.closing_price " +
             "FROM asset.coin a " +

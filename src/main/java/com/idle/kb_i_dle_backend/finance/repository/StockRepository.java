@@ -1,6 +1,6 @@
 package com.idle.kb_i_dle_backend.finance.repository;
 
-import com.idle.kb_i_dle_backend.finance.entity.Stock;
+import com.idle.kb_i_dle_backend.finance.entity.UserStock;
 import java.util.Date;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface StockRepository extends JpaRepository<Stock,Integer> {
+public interface StockRepository extends JpaRepository<UserStock,Integer> {
 
     //선택한 주식의 종가
     @Query(value = "SELECT sl.price " +
@@ -26,7 +26,7 @@ public interface StockRepository extends JpaRepository<Stock,Integer> {
     List<Object[]> getStockBalanceAndPrice(@Param("uid") int uid);
 
 
-    List<Stock> findAllByUidAndDeleteDateIsNull(int uid);
+    List<UserStock> findAllByUidAndDeleteDateIsNull(int uid);
 
     // 선택한 주식의 해당 시점의 가격을 가져옴
     @Query(value = "SELECT " +
