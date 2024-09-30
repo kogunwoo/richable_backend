@@ -6,12 +6,15 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import org.springframework.stereotype.Component;
 
 @Component
 public final class JwtProcessor {
     static private final long TOKEN_VALID_MILISECOND = 1000L * 60 * 60; // 60 minutes
+    private static final String ENCRYPTION_SECRET = "TPk93NCNEQKs66+Ht89m+qVM8WkXoysjxanI7qh9hK0=";
 
     // For development use
     private String secretKey = "as13dfoipqieunxc_vm.hblih37y21.904-5jkd_glbovocipx98-58495ht9348hif0hg98dfugoih345n78t53yfihgkjcvhaa8sdr9wehurhlkcjxhz";
@@ -19,9 +22,11 @@ public final class JwtProcessor {
 
     // JWT generation
     public String generateToken(String subject, Integer uid,String nickname) {
+        String encryptedUid = AESUtil.encrypt(uid.toString(), ENCRYPTION_SECRET);
+
         return Jwts.builder()
                 .setSubject(subject)
-                .claim("uid", uid)
+                .claim("uid", encryptedUid)
                 .claim("nickname", nickname)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + TOKEN_VALID_MILISECOND))
@@ -41,12 +46,15 @@ public final class JwtProcessor {
 
     // Extract uid from JWT
     public Integer getUid(String token) {
-        return Jwts.parserBuilder()
+        String encryptedUid = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
-                .get("uid", Integer.class);
+                .get("uid", String.class);
+
+        String decryptedUid = AESUtil.decrypt(encryptedUid, ENCRYPTION_SECRET);
+        return Integer.parseInt(decryptedUid);
     }
 
     // Extract nickname from JWT

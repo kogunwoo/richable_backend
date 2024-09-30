@@ -61,6 +61,8 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true); // 쿠키나 인증 정보 허용
         config.addAllowedOrigin("http://localhost:5173"); // 허용할 출처
+        config.addAllowedOrigin("http://localhost:8080");
+        config.addAllowedOrigin("https://nid.naver.com");
         config.addAllowedHeader("*"); // 모든 헤더 허용
         config.addAllowedMethod("*"); // 모든 메서드 허용 (GET, POST, PUT, DELETE, etc.)
 

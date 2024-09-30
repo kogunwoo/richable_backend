@@ -15,5 +15,6 @@ public class MemberJoinDTO {
     String nickname;
     char gender;
     String email;
-    String birth_year;
+    Integer birth_year;
+    String auth;
 }
