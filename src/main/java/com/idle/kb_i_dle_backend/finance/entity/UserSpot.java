@@ -5,16 +5,14 @@ import com.idle.kb_i_dle_backend.member.entity.User;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.mail.Session;
 import javax.persistence.*;
-import javax.servlet.http.HttpSession;
 import java.util.Date;
 
 @Entity
 @Getter
 @Setter
 @Table(name = "spot",catalog = "asset") //name =table명 , catalog =  schema
-public class Spot {
+public class UserSpot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "`index`")
