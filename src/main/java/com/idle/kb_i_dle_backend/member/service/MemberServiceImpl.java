@@ -5,6 +5,7 @@ import com.idle.kb_i_dle_backend.member.dto.MemberJoinDTO;
 import com.idle.kb_i_dle_backend.member.entity.User;
 import com.idle.kb_i_dle_backend.member.repository.UserRepository;
 import java.util.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
 public class MemberServiceImpl implements MemberService {
 
 //    private final MemberMapper memberMapper;
@@ -33,7 +35,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public boolean checkDupl(String id) {
-        return userRepository.existsById(Long.valueOf(id));
+        return userRepository.existsById(id);
     }
 
 
@@ -46,34 +48,54 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public void MemberJoin(MemberJoinDTO memberjoindto) {
-        if (userRepository.existsById(Long.valueOf(memberjoindto.getId()))) {
-            throw new IllegalStateException("User already exists");
-        }
-        if (memberjoindto.getNickname() == null || memberjoindto.getNickname().length() > 50) {
-            throw new IllegalArgumentException("Nickname must not be null and should not exceed 50 characters");
-        }
-        // Perform necessary checks and add try-catch blocks for any exceptions.
-        if (memberjoindto.getId() == null || memberjoindto.getId().isEmpty()) {
-            throw new IllegalStateException("User ID is required");
-        }
-        String encodePassword = passwordEncoder.encode(memberjoindto.getPassword());
+        try {
+            log.debug("Starting MemberJoin process for ID: {}", memberjoindto.getId());
 
-        User newUser = User.builder() // Use Builder pattern if defined
-                .id(memberjoindto.getId())
-                .password(encodePassword)
-                .nickname(memberjoindto.getNickname())
-                .gender(String.valueOf(memberjoindto.getGender()))
-                .email(memberjoindto.getEmail())
-                .birth_year(memberjoindto.getBirth_year())
-                .build();
+            if (memberjoindto.getAuth() == null || memberjoindto.getAuth().isEmpty()) {
+                memberjoindto.setAuth("ROLE_MEMBER");
+            }
 
-        System.out.println("Inserting new user: " + newUser); // 디버깅을 위해 추가
-        userRepository.save(newUser);
+            log.debug("Checking if user exists");
+            if (userRepository.existsById(memberjoindto.getId())) {
+                throw new IllegalStateException("User already exists");
+            }
+
+            log.debug("Validating nickname");
+            if (memberjoindto.getNickname() == null || memberjoindto.getNickname().length() > 50) {
+                throw new IllegalArgumentException("Nickname must not be null and should not exceed 50 characters");
+            }
+
+            log.debug("Validating ID");
+            if (memberjoindto.getId() == null || memberjoindto.getId().isEmpty()) {
+                throw new IllegalStateException("User ID is required");
+            }
+
+            log.debug("Encoding password");
+            String encodePassword = passwordEncoder.encode(memberjoindto.getPassword());
+
+            log.debug("Building User entity");
+            User newUser = User.builder()
+                    .id(memberjoindto.getId())
+                    .password(encodePassword)
+                    .nickname(memberjoindto.getNickname())
+                    .gender(String.valueOf(memberjoindto.getGender()))
+                    .email(memberjoindto.getEmail())
+                    .birth_year(memberjoindto.getBirth_year())
+                    .auth(memberjoindto.getAuth())
+                    .build();
+
+            log.debug("Saving new user: {}", newUser);
+            userRepository.save(newUser);
+            log.debug("User saved successfully");
+        } catch (Exception e) {
+            log.error("Error in MemberJoin: ", e);
+            throw e;
+        }
     }
 
     @Override
     public MemberDTO findById(String id) {
-        User user = userRepository.findById(Long.valueOf(id)).orElse(null);
+        User user = userRepository.findById(id);
         if (user != null) {
             return new MemberDTO(
                     user.getUid(),
@@ -84,10 +106,10 @@ public class MemberServiceImpl implements MemberService {
                     user.getBirth_year(),
                     user.getGender().charAt(0), // Assuming gender is stored as a String
                     user.getProfile(),
-                    user.isAgreement_info(),
-                    user.isAgreement_finace(),
-                    user.isMentor(),
-                    user.isCertification(),
+                    user.getAgreementInfo(),
+                    user.getAgreementFinance(),
+                    user.getIsMentor(),
+                    user.getIsCertification(),
                     user.getNickname(),
                     user.getAuth()
             );
@@ -102,10 +124,10 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public boolean checkAgree(boolean info, boolean finance, String id) {
-        User user = userRepository.findById(Long.valueOf(id)).orElse(null);
+        User user = userRepository.findById(id);
         if (user != null) {
-            user.setAgreement_info(info);
-            user.setAgreement_finace(finance);
+            user.setAgreementInfo(info);
+            user.setAgreementFinance(finance);
             userRepository.save(user); // Save updated user
             return true;
         }
@@ -147,7 +169,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public boolean resetPassword(String id, String newPassword) {
-        User user = userRepository.findById(Long.valueOf(id)).orElse(null);
+        User user = userRepository.findById(id);
         if (user != null) {
             String encodedPassword = passwordEncoder.encode(newPassword);
             user.setPassword(encodedPassword); // Update password

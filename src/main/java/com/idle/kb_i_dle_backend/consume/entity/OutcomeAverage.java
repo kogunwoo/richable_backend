@@ -3,6 +3,7 @@ package com.idle.kb_i_dle_backend.consume.entity;
 import lombok.Getter;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 @Entity
@@ -15,19 +16,23 @@ public class OutcomeAverage {
     @Column
     private int index;
 
-    @Column(name = "household_head_age_group")  // 실제 테이블의 컬럼과 매핑
+    @NotNull
+    @Column(name = "household_head_age_group", length = 50)  // 실제 테이블의 컬럼과 매핑
     private String ageGroup;
 
-    @Column(name = "outcome_expenditure_category")  // 실제 테이블의 컬럼과 매핑
+    @NotNull
+    @Column(name = "outcome_expenditure_category", length = 100)  // 실제 테이블의 컬럼과 매핑
     private String category;
 
+    @NotNull
     @Column(name = "outcome")
     private Integer outcome;
 
+    @NotNull
     @Column(name = "household_size", precision = 3, scale = 2)
     private BigDecimal householdSize;
 
-    @Column(name = "quater")
+    @Column(name = "quater", length = 10)
     private String quater;
 
     // getter, setter, constructor 생략

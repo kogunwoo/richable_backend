@@ -66,16 +66,21 @@ public class MemberController {
         // Perform authentication
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(loginDTO.getId(), loginDTO.getPassword());
-        Authentication authentication = authenticationManager.authenticate(authenticationToken);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // Assuming you have a method to fetch UserInfoDTO (e.g., from the authenticated user details)
-        UserInfoDTO userInfo = getUserInfoFromAuthentication(authentication);
-        // Generate JWT token with uid
-        String jwtToken = jwtProcessor.generateToken(userInfo.getId(), userInfo.getUid(), userInfo.getNickname());
+        try {
+            Authentication authentication = authenticationManager.authenticate(authenticationToken);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            // Assuming you have a method to fetch UserInfoDTO (e.g., from the authenticated user details)
+            UserInfoDTO userInfo = getUserInfoFromAuthentication(authentication);
+            // Generate JWT token with uid
+            String jwtToken = jwtProcessor.generateToken(userInfo.getId(), userInfo.getUid(), userInfo.getNickname());
+            // Return the AuthResultDTO with token and user info
+            return ResponseEntity.ok(new AuthResultDTO(jwtToken, userInfo));
 
-        // Return the AuthResultDTO with token and user info
-        return ResponseEntity.ok(new AuthResultDTO(jwtToken, userInfo));
+        } catch (Exception e) {
+            log.error("Authentication failed: ", e);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication failed");
+        }
     }
 
     // Helper method to retrieve user information from the authentication object
@@ -254,17 +259,6 @@ public class MemberController {
             return ResponseEntity.badRequest().body(Map.of("message", "잘못된 인증 코드입니다."));
         }
     }
-
-//    @GetMapping("/findid2/{id}")
-//    public ResponseEntity<?> confirmFoundId(@PathVariable String id) {
-//        // ID의 유효성을 확인하고 필요한 정보를 반환합니다.
-//        // 보안상의 이유로 전체 ID를 반환하지 않고 일부만 마스킹하여 반환할 수 있습니다.
-//        if (maskedId != null) {
-//            return ResponseEntity.ok(Map.of("maskedId", maskedId));
-//        } else {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "해당 아이디를 찾을 수 없습니다."));
-//        }
-//    }
 
     @PostMapping("/find/pw/auth")
     public ResponseEntity<?> findPw(@RequestBody Map<String, String> payload) {
