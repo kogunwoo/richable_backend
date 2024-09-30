@@ -350,8 +350,8 @@ public class FinanceServiceImpl implements FinanceService {
 
     // Spot 자산 합산 메서드
     private long calculateSpotAssetsSum(int uid) {
-        List<UserSpot> spotData = spotRepository.findAllByUidAndDeleteDateIsNull(User.builder().uid(uid).build());
-        return spotData.stream().mapToLong(UserSpot::getPrice).sum();
+        List<Spot> spotData = spotRepository.findByUidAndDeleteDateIsNull(User.builder().uid(uid).build());
+        return spotData.stream().mapToLong(Spot::getPrice).sum();
     }
 
     // 월별 금융 자산 합산 메서드
@@ -391,8 +391,8 @@ public class FinanceServiceImpl implements FinanceService {
         User user = User.builder().uid(uid).build();
         LocalDateTime endOfMonthLDT = LocalDate.now().minusMonths(monthsAgo).withDayOfMonth(1).atStartOfDay();
         Date endOfMonth = Date.from(endOfMonthLDT.atZone(ZoneId.systemDefault()).toInstant());
-        List<UserSpot> spotAssets = spotRepository.findAllByUidAndAddDateBefore(user, endOfMonth);
-        return spotAssets.stream().mapToLong(UserSpot::getPrice).sum();
+        List<Spot> spotAssets = spotRepository.findByUidAndAddDateBefore(user, endOfMonth);
+        return spotAssets.stream().mapToLong(Spot::getPrice).sum();
     }
 
 }
