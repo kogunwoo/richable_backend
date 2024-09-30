@@ -1,9 +1,8 @@
-package com.idle.kb_i_dle_backend.consume.entity;
+package com.idle.kb_i_dle_backend.outcome.entity;
 
 import com.idle.kb_i_dle_backend.member.entity.User;
 import lombok.Getter;
 import lombok.ToString;
-import org.apache.ibatis.annotations.Many;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;

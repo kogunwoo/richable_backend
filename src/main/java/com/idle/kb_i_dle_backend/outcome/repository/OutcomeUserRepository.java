@@ -1,8 +1,7 @@
-package com.idle.kb_i_dle_backend.consume.repository;
+package com.idle.kb_i_dle_backend.outcome.repository;
 
-import com.idle.kb_i_dle_backend.consume.dto.CategorySumDTO;
-import com.idle.kb_i_dle_backend.consume.entity.OutcomeAverage;
-import com.idle.kb_i_dle_backend.consume.entity.OutcomeUser;
+import com.idle.kb_i_dle_backend.outcome.dto.CategorySumDTO;
+import com.idle.kb_i_dle_backend.outcome.entity.OutcomeUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,7 +19,7 @@ public interface OutcomeUserRepository extends JpaRepository<OutcomeUser, Intege
      * @param month 달
      * @return 카테고리별 소비합
      */
-    @Query("SELECT new com.idle.kb_i_dle_backend.consume.dto.CategorySumDTO(o.category, SUM(o.amount)) " +
+    @Query("SELECT new com.idle.kb_i_dle_backend.outcome.dto.CategorySumDTO(o.category, SUM(o.amount)) " +
             "FROM OutcomeUser o WHERE o.uid = :uid " +
             "AND YEAR(o.date) = :year AND MONTH(o.date) = :month " +
             "GROUP BY o.category " +

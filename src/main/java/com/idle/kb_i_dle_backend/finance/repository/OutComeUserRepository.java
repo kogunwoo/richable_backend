@@ -1,6 +1,6 @@
 package com.idle.kb_i_dle_backend.finance.repository;
 
-import com.idle.kb_i_dle_backend.consume.entity.OutcomeUser;
+import com.idle.kb_i_dle_backend.outcome.entity.OutcomeUser;
 import java.util.Date;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
