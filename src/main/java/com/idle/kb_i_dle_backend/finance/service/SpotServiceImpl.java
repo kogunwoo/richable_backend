@@ -1,11 +1,13 @@
 package com.idle.kb_i_dle_backend.finance.service;
 
+import com.idle.kb_i_dle_backend.finance.dto.PriceSumDTO;
 import com.idle.kb_i_dle_backend.finance.dto.SpotDTO;
 import com.idle.kb_i_dle_backend.finance.entity.Spot;
 import com.idle.kb_i_dle_backend.finance.repository.SpotRepository;
 import com.idle.kb_i_dle_backend.member.entity.User;
 import com.idle.kb_i_dle_backend.member.repository.UserRepository;
 import com.idle.kb_i_dle_backend.member.util.JwtProcessor;
+import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -30,37 +32,44 @@ public class SpotServiceImpl implements SpotService {
 
     // 카테고리별 현물 자산 총합
     @Override
-    public Long getTotalPriceByCategory(Integer uid, String category) {
+    public PriceSumDTO getTotalPriceByCategory(String category) throws Exception{
+        User tempUser = userRepository.findByUid(1).orElseThrow();
+        List<Spot> spots = spotRepository.findByUidAndCategoryAndDeleteDateIsNull(tempUser, category);
 
-        User user = User.builder().uid(uid).build();
+        if (spots.isEmpty()) throw new NotFoundException("");
 
-        List<Spot> spots = spotRepository.findByUidAndCategoryAndDeleteDateIsNull(user, category);
+        PriceSumDTO priceSum = new PriceSumDTO(
+                category,
+                spots.stream()
+                        .mapToLong(Spot::getPrice)
+                        .sum());
 
-        // Java 코드로 합계를 계산
-        return spots.stream()
-                .mapToLong(Spot::getPrice)  // 각 Spot의 price 추출
-                .sum();                     // price의 합계를 구함
+        return priceSum;
     }
 
     // 전체 현물 자산 총합
     @Override
-    public Long getTotalPrice(Integer uid) {
-        User user = User.builder().uid(uid).build();
+    public PriceSumDTO getTotalPrice() throws Exception {
+        User tempUser = userRepository.findByUid(1).orElseThrow();
+        List<Spot> spots = spotRepository.findByUidAndDeleteDateIsNull(tempUser);
 
-        List<Spot> spots = spotRepository.findByUidAndDeleteDateIsNull(user);
+        if (spots.isEmpty()) throw new NotFoundException("");
 
-        // Java 코드로 합계를 계산
-        return spots.stream()
-                .mapToLong(Spot::getPrice)  // 각 Spot의 price 추출
-                .sum();
+        PriceSumDTO priceSum = new PriceSumDTO(
+                "현물자산",
+                spots.stream()
+                        .mapToLong(Spot::getPrice)
+                        .sum());
+
+        return priceSum;
     }
 
     // 현물 자산 목록 전체 조회
     @Override
     public List<Spot> getSpotList(Integer uid) {
-        User user = User.builder().uid(uid).build();
-
-        List<Spot> spots = spotRepository.findByUidAndDeleteDateIsNull(user);
+//        User user = User.builder().uid(uid).build();
+        User tempUser = userRepository.findByUid(1).orElseThrow();
+        List<Spot> spots = spotRepository.findByUidAndDeleteDateIsNull(tempUser);
 
         return spots;
     }

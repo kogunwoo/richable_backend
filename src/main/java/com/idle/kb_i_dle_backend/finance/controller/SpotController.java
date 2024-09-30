@@ -1,5 +1,8 @@
 package com.idle.kb_i_dle_backend.finance.controller;
 
+import com.idle.kb_i_dle_backend.common.dto.DataDTO;
+import com.idle.kb_i_dle_backend.common.dto.ErrorResponseDTO;
+import com.idle.kb_i_dle_backend.common.dto.ResponseDTO;
 import com.idle.kb_i_dle_backend.common.dto.SuccessResponseDTO;
 import com.idle.kb_i_dle_backend.finance.dto.PriceSumDTO;
 import com.idle.kb_i_dle_backend.finance.dto.SpotDTO;
@@ -10,6 +13,7 @@ import com.idle.kb_i_dle_backend.member.util.JwtProcessor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -34,45 +38,32 @@ public class SpotController {
 
     // 카테고리에 따른 총 가격 반환
     @GetMapping("/spot/category/sum")
-    public ResponseEntity<SuccessResponseDTO> getTotalPriceByCategory(@RequestBody HashMap<String, String> map, HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        Integer uid = (Integer) session.getAttribute("uid");
+    public ResponseEntity<?> getTotalPriceByCategory(@RequestBody HashMap<String, String> map) {
         String category = map.get("category");
-        Long totalPrice = spotService.getTotalPriceByCategory(uid, category);
-
-        PriceSumDTO priceSum = new PriceSumDTO();
-        priceSum.setProdCategory(category);
-        priceSum.setAmount(totalPrice);
-
-        // response를 감싸는 구조로 반환
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("data", priceSum);
-
-        SuccessResponseDTO successResponse = new SuccessResponseDTO("true", responseData);
-        return ResponseEntity.ok(successResponse);  // 응답을 ResponseEntity로 감싸서 반환
+        try {
+            ResponseDTO response = new ResponseDTO(true, new DataDTO(spotService.getTotalPriceByCategory(category)));
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
     }
+
+
 
     // 현물 자산 총 가격 반환
     @GetMapping("/spot/sum")
-    public ResponseEntity<SuccessResponseDTO> getTotalPriceByCategory(HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        Integer uid = (Integer) session.getAttribute("uid");
-
-        Long totalPrice = spotService.getTotalPrice(uid);
-
-        PriceSumDTO priceSum = new PriceSumDTO();
-        priceSum.setProdCategory("현물자산");
-        priceSum.setAmount(totalPrice);
-
-        // response를 감싸는 구조로 반환
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("data", priceSum);
-
-        SuccessResponseDTO successResponse = new SuccessResponseDTO("true", responseData);
-        return ResponseEntity.ok(successResponse);  // 응답을 ResponseEntity로 감싸서 반환
+    public ResponseEntity<?> getTotalPriceByCategory(){
+        try {
+            ResponseDTO response = new ResponseDTO(true, new DataDTO(spotService.getTotalPrice()));
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
     }
 
-    // 현물 자산 총 가격 반환
+    // 현물 자산 리스트 반환
     @GetMapping("/spot/all")
     public ResponseEntity<SuccessResponseDTO> getTotalSpotList(HttpServletRequest request) {
         HttpSession session = request.getSession();
