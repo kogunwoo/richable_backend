@@ -20,9 +20,24 @@ public class CustomUser extends User {
     }
 
     // Static factory method to create CustomUser from MemberDTO
-    public static CustomUser from(MemberDTO member) {
-        Collection<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(member.getAuth().toString()));
-        return new CustomUser(member, authorities);
+    public static CustomUser from(com.idle.kb_i_dle_backend.member.entity.User user) {
+        Collection<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(user.getAuth().toString()));
+        return new CustomUser(new MemberDTO(
+                user.getUid(),
+                user.getId(),
+                user.getPassword(),
+                user.getEmail(),
+                user.getSocial(),
+                user.getBirth_year(),
+                user.getGender().charAt(0), // Assuming gender is stored as a String
+                user.getProfile(),
+                user.isAgreement_info(),
+                user.isAgreement_finace(),
+                user.isMentor(),
+                user.isCertification(),
+                user.getNickname(),
+                user.getAuth()
+        ), authorities);
     }
 
     // Getter for uid

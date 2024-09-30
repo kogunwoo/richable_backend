@@ -28,8 +28,12 @@ public class User {
 
     private boolean agreement_info;
     private boolean agreement_finace;
-    private boolean is_mentor;
-    private boolean is_certification;
+
+    @Column(name = "is_mentor", columnDefinition = "TINYINT(1)")
+    private boolean mentor;
+
+    @Column(name = "is_certification", columnDefinition = "TINYINT(1)")
+    private boolean certification;
 
     private String nickname;
     private String auth;

@@ -28,13 +28,14 @@ public class MemberDTO {
     boolean is_certification;
     String auth;
 
-    public MemberDTO(String id, String password, String nickname, char gender, String email, String birth_year) {
+    public MemberDTO(Integer uid, String id, String password, String nickname, String social, Integer birthYear, char gender, String email, boolean birth_year,
+                     boolean agreementInfo, boolean agreementFinace, boolean mentor, String certification, String auth) {
         this.id = id;
         this.password = password;
         this.nickname = nickname;
         this.gender = gender;
         this.email = email;
-        this.birth_year = birth_year;
+        this.birth_year = String.valueOf(birth_year);
     }
 
     public List<SimpleGrantedAuthority> getAuth() {

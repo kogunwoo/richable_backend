@@ -2,7 +2,8 @@ package com.idle.kb_i_dle_backend.member.service;
 
 import com.idle.kb_i_dle_backend.member.dto.MemberDTO;
 import com.idle.kb_i_dle_backend.member.dto.MemberJoinDTO;
-import com.idle.kb_i_dle_backend.member.mapper.MemberMapper;
+import com.idle.kb_i_dle_backend.member.entity.User;
+import com.idle.kb_i_dle_backend.member.repository.UserRepository;
 import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -13,7 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class MemberServiceImpl implements MemberService {
 
-    private final MemberMapper memberMapper;
+//    private final MemberMapper memberMapper;
+
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -23,29 +26,27 @@ public class MemberServiceImpl implements MemberService {
     private Map<String, String> verificationCodes = new HashMap<>();
 
     @Autowired
-    public MemberServiceImpl(MemberMapper memberMapper, @Lazy PasswordEncoder passwordEncoder) {
-        this.memberMapper = memberMapper;
+    public MemberServiceImpl(UserRepository userRepository, @Lazy PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public boolean checkDupl(String id) {
-        // Implement this method using memberMapper
-        return memberMapper.checkDupl(id);
+        return userRepository.existsById(Long.valueOf(id));
     }
 
 
     @Override
     @Transactional
-    public MemberDTO getMember(String id) {
-        // Implement this method using memberMapper
-        return memberMapper.getMember(id);
+    public User getMember(String id) {
+        return userRepository.findById(id);
     }
 
     @Override
     @Transactional
     public void MemberJoin(MemberJoinDTO memberjoindto) {
-        if(memberMapper.checkDupl(memberjoindto.getId())){
+        if (userRepository.existsById(Long.valueOf(memberjoindto.getId()))) {
             throw new IllegalStateException("User already exists");
         }
         if (memberjoindto.getNickname() == null || memberjoindto.getNickname().length() > 50) {
@@ -57,24 +58,41 @@ public class MemberServiceImpl implements MemberService {
         }
         String encodePassword = passwordEncoder.encode(memberjoindto.getPassword());
 
-        MemberJoinDTO newUser = new MemberJoinDTO(
-                memberjoindto.getId(),
-                encodePassword,
-                memberjoindto.getNickname(),
-                memberjoindto.getGender(),
-                memberjoindto.getEmail(),
-                memberjoindto.getBirth_year()
-        );
+        User newUser = User.builder() // Use Builder pattern if defined
+                .id(memberjoindto.getId())
+                .password(encodePassword)
+                .nickname(memberjoindto.getNickname())
+                .gender(String.valueOf(memberjoindto.getGender()))
+                .email(memberjoindto.getEmail())
+                .birth_year(memberjoindto.getBirth_year())
+                .build();
 
         System.out.println("Inserting new user: " + newUser); // 디버깅을 위해 추가
-
-        memberMapper.insertNewMember(newUser);
+        userRepository.save(newUser);
     }
 
     @Override
     public MemberDTO findById(String id) {
-        // This method is used for JWT authentication
-        return memberMapper.findById(id);
+        User user = userRepository.findById(Long.valueOf(id)).orElse(null);
+        if (user != null) {
+            return new MemberDTO(
+                    user.getUid(),
+                    user.getId(),
+                    user.getPassword(),
+                    user.getEmail(),
+                    user.getSocial(),
+                    user.getBirth_year(),
+                    user.getGender().charAt(0), // Assuming gender is stored as a String
+                    user.getProfile(),
+                    user.isAgreement_info(),
+                    user.isAgreement_finace(),
+                    user.isMentor(),
+                    user.isCertification(),
+                    user.getNickname(),
+                    user.getAuth()
+            );
+        }
+        return null; // Or handle user not found as needed
     }
 
     @Override
@@ -84,18 +102,20 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public boolean checkAgree(boolean info, boolean finance, String id) {
-        try {
-            this.memberMapper.updateAgree(info, finance, id);
+        User user = userRepository.findById(Long.valueOf(id)).orElse(null);
+        if (user != null) {
+            user.setAgreement_info(info);
+            user.setAgreement_finace(finance);
+            userRepository.save(user); // Save updated user
             return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
         }
+        return false; // User not found
     }
 
     @Override
     public String findIdByEmail(String email) {
-        return memberMapper.findIdByEmail(email);
+        User user = userRepository.findByEmail(email);
+        return user != null ? user.getId() : null;
     }
 
     @Override
@@ -127,12 +147,14 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public boolean resetPassword(String id, String newPassword) {
-
-        // 비밀번호 암호화
-        String encodedPassword = passwordEncoder.encode(newPassword);
-
-        // 데이터베이스에 새 비밀번호 저장
-        return memberMapper.resetPassword(id, encodedPassword) > 0;
+        User user = userRepository.findById(Long.valueOf(id)).orElse(null);
+        if (user != null) {
+            String encodedPassword = passwordEncoder.encode(newPassword);
+            user.setPassword(encodedPassword); // Update password
+            userRepository.save(user); // Save updated user
+            return true;
+        }
+        return false; // User not found
     }
 
 }
