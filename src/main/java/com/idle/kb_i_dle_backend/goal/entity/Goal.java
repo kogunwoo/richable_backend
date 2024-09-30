@@ -2,14 +2,9 @@ package com.idle.kb_i_dle_backend.goal.entity;
 
 import com.idle.kb_i_dle_backend.member.entity.User;
 import java.util.Date;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,11 +30,14 @@ public class Goal {
 
     private Long amount;
 
+    @NotNull
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "set_date")
     private Date date;
 
     private Integer priority;
 
+    @NotNull
     @ColumnDefault("false")
     @Column(name = "is_achive")
     private Boolean isAchive;

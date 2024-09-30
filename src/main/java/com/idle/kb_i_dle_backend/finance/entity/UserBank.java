@@ -2,14 +2,7 @@ package com.idle.kb_i_dle_backend.finance.entity;
 
 import com.idle.kb_i_dle_backend.member.entity.User;
 import java.util.Date;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import lombok.Getter;
 
@@ -25,23 +18,23 @@ public class UserBank {
     @JoinColumn(name = "uid")
     private User uid;
 
-    @Column(name = "org_code")
+    @Column(name = "org_code", length = 100)
     private String orgCode;
 
     @Column(name = "account_num")
     private Long accountNum;
 
-    @Column(name = "prod_name")
+    @Column(name = "prod_name",length = 100)
     private String name;
 
     @NotNull
-    @Column(name = "prod_category")
+    @Column(name = "prod_category", length = 100)
     private String category;
 
-    @Column(name = "account_type")
+    @Column(name = "account_type", length = 100)
     private String accountType;
 
-    @Column(name = "currency_code")
+    @Column(name = "currency_code", length = 10)
     private String currencyCode;
 
     @NotNull
@@ -49,6 +42,7 @@ public class UserBank {
     private Long balanceAmt;
 
     @NotNull
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "add_date")
     private Date addDate;
 
