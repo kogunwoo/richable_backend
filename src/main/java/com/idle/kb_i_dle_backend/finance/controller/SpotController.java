@@ -6,16 +6,13 @@ import com.idle.kb_i_dle_backend.common.dto.ResponseDTO;
 import com.idle.kb_i_dle_backend.common.dto.SuccessResponseDTO;
 import com.idle.kb_i_dle_backend.finance.dto.PriceSumDTO;
 import com.idle.kb_i_dle_backend.finance.dto.SpotDTO;
-import com.idle.kb_i_dle_backend.finance.entity.Spot;
+import com.idle.kb_i_dle_backend.finance.entity.UserSpot;
 import com.idle.kb_i_dle_backend.finance.service.SpotService;
-import com.idle.kb_i_dle_backend.finance.service.SpotServiceImpl;
-import com.idle.kb_i_dle_backend.member.util.JwtProcessor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -77,7 +74,7 @@ public class SpotController {
 
     // 새로운 Spot 추가
     @PostMapping("/spot/add")
-    public ResponseEntity<?> addSpot(@RequestBody Spot spot) {
+    public ResponseEntity<?> addSpot(@RequestBody UserSpot spot) {
         try {
             ResponseDTO response = new ResponseDTO(true, new DataDTO(spotService.addSpot(spot)));
             return new ResponseEntity<>(response, HttpStatus.OK);
@@ -89,7 +86,7 @@ public class SpotController {
 
     // Spot 수정
     @PutMapping("/spot/update")
-    public ResponseEntity<?> updateSpot(@RequestBody Spot spot) {
+    public ResponseEntity<?> updateSpot(@RequestBody UserSpot spot) {
         try {
             ResponseDTO response = new ResponseDTO(true, new DataDTO(spotService.updateSpot(spot)));
             return new ResponseEntity<>(response, HttpStatus.OK);

@@ -5,16 +5,15 @@ import com.idle.kb_i_dle_backend.member.entity.User;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.mail.Session;
 import javax.persistence.*;
-import javax.servlet.http.HttpSession;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 @Entity
 @Getter
 @Setter
 @Table(name = "spot",catalog = "asset") //name =table명 , catalog =  schema
-public class Spot {
+public class UserSpot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "`index`")
@@ -25,14 +24,21 @@ public class Spot {
     @JoinColumn(name = "uid") // foreign key 이름 설정
     private User uid;
 
+    @NotNull
+    @Column(length = 20)
     private String category;
 
+    @NotNull
+    @Column(length = 50)
     private String name;
 
+    @NotNull
     private Long price;
 
+    @Column(length = 100)
     private String prod_category;
 
+    @NotNull
     @Temporal(TemporalType.TIMESTAMP)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "add_date")

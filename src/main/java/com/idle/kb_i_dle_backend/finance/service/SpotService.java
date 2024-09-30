@@ -2,7 +2,7 @@ package com.idle.kb_i_dle_backend.finance.service;
 
 import com.idle.kb_i_dle_backend.finance.dto.PriceSumDTO;
 import com.idle.kb_i_dle_backend.finance.dto.SpotDTO;
-import com.idle.kb_i_dle_backend.finance.entity.Spot;
+import com.idle.kb_i_dle_backend.finance.entity.UserSpot;
 
 import java.util.List;
 
@@ -13,11 +13,11 @@ public interface SpotService {
 
     List<SpotDTO> getSpotList() throws Exception;
 
-    SpotDTO addSpot(Spot spot);
+    SpotDTO addSpot(UserSpot spot);
 
     Integer getLastSpotIndex();
 
-    SpotDTO updateSpot(Spot spot);
+    SpotDTO updateSpot(UserSpot spot);
 
     Integer deleteSpotByUidAndIndex(Integer index);
 

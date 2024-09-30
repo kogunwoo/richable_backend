@@ -2,20 +2,16 @@ package com.idle.kb_i_dle_backend.finance.service;
 
 import com.idle.kb_i_dle_backend.finance.dto.PriceSumDTO;
 import com.idle.kb_i_dle_backend.finance.dto.SpotDTO;
-import com.idle.kb_i_dle_backend.finance.entity.Spot;
-import com.idle.kb_i_dle_backend.finance.repository.SpotRepository;
+import com.idle.kb_i_dle_backend.finance.entity.UserSpot;
+import com.idle.kb_i_dle_backend.finance.repository.UserSpotRepository;
 import com.idle.kb_i_dle_backend.member.entity.User;
 import com.idle.kb_i_dle_backend.member.repository.UserRepository;
-import com.idle.kb_i_dle_backend.member.util.JwtProcessor;
 import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,7 +22,7 @@ import java.util.Optional;
 public class SpotServiceImpl implements SpotService {
 
     @Autowired
-    private SpotRepository spotRepository;
+    private UserSpotRepository userSpotRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -35,14 +31,14 @@ public class SpotServiceImpl implements SpotService {
     @Override
     public PriceSumDTO getTotalPriceByCategory(String category) throws Exception{
         User tempUser = userRepository.findByUid(1).orElseThrow();
-        List<Spot> spots = spotRepository.findByUidAndCategoryAndDeleteDateIsNull(tempUser, category);
+        List<UserSpot> spots = userSpotRepository.findByUidAndCategoryAndDeleteDateIsNull(tempUser, category);
 
         if (spots.isEmpty()) throw new NotFoundException("");
 
         PriceSumDTO priceSum = new PriceSumDTO(
                 category,
                 spots.stream()
-                        .mapToLong(Spot::getPrice)
+                        .mapToLong(UserSpot::getPrice)
                         .sum());
 
         return priceSum;
@@ -52,14 +48,14 @@ public class SpotServiceImpl implements SpotService {
     @Override
     public PriceSumDTO getTotalPrice() throws Exception {
         User tempUser = userRepository.findByUid(1).orElseThrow();
-        List<Spot> spots = spotRepository.findByUidAndDeleteDateIsNull(tempUser);
+        List<UserSpot> spots = userSpotRepository.findByUidAndDeleteDateIsNull(tempUser);
 
         if (spots.isEmpty()) throw new NotFoundException("");
 
         PriceSumDTO priceSum = new PriceSumDTO(
                 "현물자산",
                 spots.stream()
-                        .mapToLong(Spot::getPrice)
+                        .mapToLong(UserSpot::getPrice)
                         .sum());
 
         return priceSum;
@@ -69,13 +65,13 @@ public class SpotServiceImpl implements SpotService {
     @Override
     public List<SpotDTO> getSpotList() throws Exception {
         User tempUser = userRepository.findByUid(1).orElseThrow();
-        List<Spot> spots = spotRepository.findByUidAndDeleteDateIsNull(tempUser);
+        List<UserSpot> spots = userSpotRepository.findByUidAndDeleteDateIsNull(tempUser);
 
         if (spots.isEmpty()) throw new NotFoundException("");
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         List<SpotDTO> spotList = new ArrayList<>();
-        for (Spot s : spots) {
+        for (UserSpot s : spots) {
             SpotDTO spotDTO = new SpotDTO();
             spotDTO.setIndex(s.getIndex());
             spotDTO.setCategory(s.getCategory());
@@ -91,25 +87,25 @@ public class SpotServiceImpl implements SpotService {
 
     // 현물 자산 추가
     @Override
-    public SpotDTO addSpot(Spot spot) {
+    public SpotDTO addSpot(UserSpot spot) {
         User tempUser = userRepository.findByUid(1).orElseThrow();
         // User 객체를 Spot 엔티티에 설정
         spot.setUid(tempUser);
         spot.setAddDate(new Date());
         // Spot 엔티티를 저장하고 반환
-        Spot savedSpot = spotRepository.save(spot);
+        UserSpot savedSpot = userSpotRepository.save(spot);
         return convertToDTO(savedSpot);
     }
 
     // 현물 자산 마지막 index 값 조회
     @Override
     public Integer getLastSpotIndex() {
-        Optional<Spot> lastSpot = spotRepository.findTopByOrderByIndexDesc();
-        return lastSpot.map(Spot::getIndex).orElse(null);
+        Optional<UserSpot> lastSpot = userSpotRepository.findTopByOrderByIndexDesc();
+        return lastSpot.map(UserSpot::getIndex).orElse(null);
     }
 
     // Spot -> SpotDTO 변환 메서드
-    private SpotDTO convertToDTO(Spot spot) {
+    private SpotDTO convertToDTO(UserSpot spot) {
         SpotDTO spotDTO = new SpotDTO();
         spotDTO.setIndex(getLastSpotIndex());
         spotDTO.setCategory(spot.getCategory());
@@ -126,7 +122,7 @@ public class SpotServiceImpl implements SpotService {
     }
 
 
-    private SpotDTO convertToUpdateDTO(Spot spot) {
+    private SpotDTO convertToUpdateDTO(UserSpot spot) {
         SpotDTO spotDTO = new SpotDTO();
         spotDTO.setIndex(spot.getIndex());
         spotDTO.setCategory(spot.getCategory());
@@ -143,10 +139,10 @@ public class SpotServiceImpl implements SpotService {
     // 현물 자산 수정
     @Transactional
     @Override
-    public SpotDTO updateSpot(Spot spot) {
+    public SpotDTO updateSpot(UserSpot spot) {
         User tempUser = userRepository.findByUid(1).orElseThrow();
         // Spot 조회
-        Spot isSpot = spotRepository.findByIndex(spot.getIndex())
+        UserSpot isSpot = userSpotRepository.findByIndex(spot.getIndex())
                 .orElseThrow(() -> new IllegalArgumentException("Spot not found with id: " + spot.getIndex()));
 
         // User 조회 (User 객체가 없을 경우 예외 처리)
@@ -161,7 +157,7 @@ public class SpotServiceImpl implements SpotService {
         isSpot.setName(spot.getName());
         isSpot.setPrice(spot.getPrice());
 
-        Spot savedSpot = spotRepository.save(isSpot);
+        UserSpot savedSpot = userSpotRepository.save(isSpot);
         return convertToUpdateDTO(savedSpot);
     }
 
@@ -170,7 +166,7 @@ public class SpotServiceImpl implements SpotService {
     @Override
     public Integer deleteSpotByUidAndIndex(Integer index) {
         User tempUser = userRepository.findByUid(1).orElseThrow();
-        Spot isSpot = spotRepository.findByIndex(index)
+        UserSpot isSpot = userSpotRepository.findByIndex(index)
                 .orElseThrow(() -> new IllegalArgumentException("Spot not found with index: " + index));
 
         // 유저가 소유한 Spot인지 확인
@@ -178,7 +174,7 @@ public class SpotServiceImpl implements SpotService {
             throw new AccessDeniedException("You do not have permission to delete this spot.");
         }
 
-        spotRepository.deleteByIndex(index);  // Spot 삭제
+        userSpotRepository.deleteByIndex(index);  // Spot 삭제
 
         return index;
     }

@@ -59,7 +59,7 @@ public class ConsumeServiceImpl implements ConsumeService {
     private OutcomeUserDTO convertToOutcomeUserDTO(OutcomeUser outcomeUser) {
         return new OutcomeUserDTO(
                 outcomeUser.getIndex(),
-                outcomeUser.getUid(),
+                outcomeUser.getUid().getUid(),
                 outcomeUser.getCategory(),
                 outcomeUser.getDate(),
                 outcomeUser.getAmount(),
