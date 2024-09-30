@@ -2,14 +2,12 @@ package com.idle.kb_i_dle_backend.member.service;
 
 import com.idle.kb_i_dle_backend.member.dto.MemberDTO;
 import com.idle.kb_i_dle_backend.member.dto.MemberJoinDTO;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import com.idle.kb_i_dle_backend.member.entity.Member;
 
 public interface MemberService {
     boolean checkDupl(String id);
 
-    MemberDTO getMember(String id);
+    Member getMember(String id);
 
     void MemberJoin(MemberJoinDTO memberjoindto);
 

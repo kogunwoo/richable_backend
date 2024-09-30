@@ -1,6 +1,6 @@
 package com.idle.kb_i_dle_backend.member.filter;
 
-import com.idle.kb_i_dle_backend.member.service.CustomUserDetailsService;
+import com.idle.kb_i_dle_backend.member.service.CustomMemberDetailsService;
 import com.idle.kb_i_dle_backend.member.util.JwtProcessor;
 import java.io.IOException;
 import javax.servlet.FilterChain;
@@ -25,17 +25,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     public static final String BEARER_PREFIX = "Bearer "; // 끝에 공백 있음
 
     private final JwtProcessor jwtProcessor;
-    private final CustomUserDetailsService customUserDetailsService;
+    private final CustomMemberDetailsService customMemberDetailsService;
 
 
-    public JwtAuthenticationFilter(JwtProcessor jwtProcessor, CustomUserDetailsService customUserDetailsService) {
+    public JwtAuthenticationFilter(JwtProcessor jwtProcessor, CustomMemberDetailsService customMemberDetailsService) {
         this.jwtProcessor = jwtProcessor;
-        this.customUserDetailsService = customUserDetailsService;
+        this.customMemberDetailsService = customMemberDetailsService;
     }
 
     private Authentication getAuthentication(String token) {
         String username = jwtProcessor.getId(token);
-        UserDetails principal = customUserDetailsService.loadUserByUsername(username);
+        UserDetails principal = customMemberDetailsService.loadUserByUsername(username);
         return new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
     }
 
@@ -54,7 +54,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpSession session = request.getSession();
             session.setAttribute("uid", uid);
             // Load user details
-            UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+            UserDetails userDetails = customMemberDetailsService.loadUserByUsername(username);
             Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
             // Set authentication to the context

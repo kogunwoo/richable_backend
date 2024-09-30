@@ -2,8 +2,10 @@ package com.idle.kb_i_dle_backend.member.service;
 
 import com.idle.kb_i_dle_backend.member.dto.MemberDTO;
 import com.idle.kb_i_dle_backend.member.dto.MemberJoinDTO;
-import com.idle.kb_i_dle_backend.member.mapper.MemberMapper;
+import com.idle.kb_i_dle_backend.member.entity.Member;
+import com.idle.kb_i_dle_backend.member.repository.MemberRepository;
 import java.util.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -11,9 +13,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
 public class MemberServiceImpl implements MemberService {
 
-    private final MemberMapper memberMapper;
+//    private final MemberMapper memberMapper;
+
+    private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -23,58 +28,93 @@ public class MemberServiceImpl implements MemberService {
     private Map<String, String> verificationCodes = new HashMap<>();
 
     @Autowired
-    public MemberServiceImpl(MemberMapper memberMapper, @Lazy PasswordEncoder passwordEncoder) {
-        this.memberMapper = memberMapper;
+    public MemberServiceImpl(MemberRepository memberRepository, @Lazy PasswordEncoder passwordEncoder) {
+        this.memberRepository = memberRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public boolean checkDupl(String id) {
-        // Implement this method using memberMapper
-        return memberMapper.checkDupl(id);
+        return memberRepository.existsById(id);
     }
 
 
     @Override
     @Transactional
-    public MemberDTO getMember(String id) {
-        // Implement this method using memberMapper
-        return memberMapper.getMember(id);
+    public Member getMember(String id) {
+        return memberRepository.findById(id);
     }
 
     @Override
     @Transactional
     public void MemberJoin(MemberJoinDTO memberjoindto) {
-        if(memberMapper.checkDupl(memberjoindto.getId())){
-            throw new IllegalStateException("User already exists");
-        }
-        if (memberjoindto.getNickname() == null || memberjoindto.getNickname().length() > 50) {
-            throw new IllegalArgumentException("Nickname must not be null and should not exceed 50 characters");
-        }
-        // Perform necessary checks and add try-catch blocks for any exceptions.
-        if (memberjoindto.getId() == null || memberjoindto.getId().isEmpty()) {
-            throw new IllegalStateException("User ID is required");
-        }
-        String encodePassword = passwordEncoder.encode(memberjoindto.getPassword());
+        try {
+            log.debug("Starting MemberJoin process for ID: {}", memberjoindto.getId());
 
-        MemberJoinDTO newUser = new MemberJoinDTO(
-                memberjoindto.getId(),
-                encodePassword,
-                memberjoindto.getNickname(),
-                memberjoindto.getGender(),
-                memberjoindto.getEmail(),
-                memberjoindto.getBirth_year()
-        );
+            if (memberjoindto.getAuth() == null || memberjoindto.getAuth().isEmpty()) {
+                memberjoindto.setAuth("ROLE_MEMBER");
+            }
 
-        System.out.println("Inserting new user: " + newUser); // 디버깅을 위해 추가
+            log.debug("Checking if user exists");
+            if (memberRepository.existsById(memberjoindto.getId())) {
+                throw new IllegalStateException("User already exists");
+            }
 
-        memberMapper.insertNewMember(newUser);
+            log.debug("Validating nickname");
+            if (memberjoindto.getNickname() == null || memberjoindto.getNickname().length() > 50) {
+                throw new IllegalArgumentException("Nickname must not be null and should not exceed 50 characters");
+            }
+
+            log.debug("Validating ID");
+            if (memberjoindto.getId() == null || memberjoindto.getId().isEmpty()) {
+                throw new IllegalStateException("User ID is required");
+            }
+
+            log.debug("Encoding password");
+            String encodePassword = passwordEncoder.encode(memberjoindto.getPassword());
+
+            log.debug("Building User entity");
+            Member newMember = Member.builder()
+                    .id(memberjoindto.getId())
+                    .password(encodePassword)
+                    .nickname(memberjoindto.getNickname())
+                    .gender(String.valueOf(memberjoindto.getGender()))
+                    .email(memberjoindto.getEmail())
+                    .birth_year(memberjoindto.getBirth_year())
+                    .auth(memberjoindto.getAuth())
+                    .build();
+
+            log.debug("Saving new user: {}", newMember);
+            memberRepository.save(newMember);
+            log.debug("User saved successfully");
+        } catch (Exception e) {
+            log.error("Error in MemberJoin: ", e);
+            throw e;
+        }
     }
 
     @Override
     public MemberDTO findById(String id) {
-        // This method is used for JWT authentication
-        return memberMapper.findById(id);
+        Member member = memberRepository.findById(id);
+        if (member != null) {
+            return new MemberDTO(
+                    member.getUid(),
+                    member.getId(),
+                    member.getPassword(),
+                    member.getEmail(),
+                    member.getSocial(),
+                    member.getBirth_year(),
+                    member.getGender().charAt(0), // Assuming gender is stored as a String
+                    member.getProfile(),
+                    member.getAgreementInfo(),
+                    member.getAgreementFinance(),
+                    member.getIsMentor(),
+                    member.getIsCertification(),
+                    member.getNickname(),
+                    member.getAuth()
+            );
+        }
+        return null; // Or handle user not found as needed
     }
 
     @Override
@@ -84,18 +124,20 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public boolean checkAgree(boolean info, boolean finance, String id) {
-        try {
-            this.memberMapper.updateAgree(info, finance, id);
+        Member member = memberRepository.findById(id);
+        if (member != null) {
+            member.setAgreementInfo(info);
+            member.setAgreementFinance(finance);
+            memberRepository.save(member); // Save updated user
             return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
         }
+        return false; // User not found
     }
 
     @Override
     public String findIdByEmail(String email) {
-        return memberMapper.findIdByEmail(email);
+        Member member = memberRepository.findByEmail(email);
+        return member != null ? member.getId() : null;
     }
 
     @Override
@@ -127,12 +169,43 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public boolean resetPassword(String id, String newPassword) {
+        Member member = memberRepository.findById(id);
+        if (member != null) {
+            String encodedPassword = passwordEncoder.encode(newPassword);
+            member.setPassword(encodedPassword); // Update password
+            memberRepository.save(member); // Save updated user
+            return true;
+        }
+        return false; // User not found
+    }
 
-        // 비밀번호 암호화
-        String encodedPassword = passwordEncoder.encode(newPassword);
+    @Override
+    public boolean checkEmailExists(String email) {
+        return memberRepository.existsByEmail(email);
+    }
 
-        // 데이터베이스에 새 비밀번호 저장
-        return memberMapper.resetPassword(id, encodedPassword) > 0;
+    @Override
+    public MemberDTO findByEmail(String email) {
+        Member member = memberRepository.findByEmail(email);
+        if (member != null) {
+            return new MemberDTO(
+                    member.getUid(),
+                    member.getId(),
+                    member.getPassword(),
+                    member.getEmail(),
+                    member.getSocial(),
+                    member.getBirth_year(),
+                    member.getGender().charAt(0),
+                    member.getProfile(),
+                    member.getAgreementInfo(),
+                    member.getAgreementFinance(),
+                    member.getIsMentor(),
+                    member.getIsCertification(),
+                    member.getNickname(),
+                    member.getAuth()
+            );
+        }
+        return null; // 또는 예외를 던질 수 있습니다.
     }
 
     @Override

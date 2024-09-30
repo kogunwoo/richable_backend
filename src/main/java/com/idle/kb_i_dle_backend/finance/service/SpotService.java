@@ -1,23 +1,24 @@
 package com.idle.kb_i_dle_backend.finance.service;
 
+import com.idle.kb_i_dle_backend.finance.dto.PriceSumDTO;
 import com.idle.kb_i_dle_backend.finance.dto.SpotDTO;
-import com.idle.kb_i_dle_backend.finance.entity.Spot;
+import com.idle.kb_i_dle_backend.finance.entity.UserSpot;
 
 import java.util.List;
 
 public interface SpotService {
-    Long getTotalPriceByCategory(Integer uid, String category);
+    PriceSumDTO getTotalPriceByCategory(String category) throws Exception;
 
-    Long getTotalPrice(Integer uid);
+    PriceSumDTO getTotalPrice() throws Exception;
 
-    List<Spot> getSpotList(Integer uid);
+    List<SpotDTO> getSpotList() throws Exception;
 
-    SpotDTO addSpot(Integer uid, Spot spot);
+    SpotDTO addSpot(UserSpot spot);
 
     Integer getLastSpotIndex();
 
-    SpotDTO updateSpot(Integer uid, Spot spot);
+    SpotDTO updateSpot(UserSpot spot);
 
-    void deleteSpotByUidAndIndex(Integer uid, Integer index);
+    Integer deleteSpotByUidAndIndex(Integer index);
 
 }
