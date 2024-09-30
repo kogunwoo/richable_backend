@@ -3,10 +3,8 @@ package com.idle.kb_i_dle_backend.finance.controller;
 import com.idle.kb_i_dle_backend.common.dto.DataDTO;
 import com.idle.kb_i_dle_backend.common.dto.ErrorResponseDTO;
 import com.idle.kb_i_dle_backend.common.dto.ResponseDTO;
-import com.idle.kb_i_dle_backend.common.dto.SuccessResponseDTO;
-import com.idle.kb_i_dle_backend.finance.dto.PriceSumDTO;
 import com.idle.kb_i_dle_backend.finance.dto.SpotDTO;
-import com.idle.kb_i_dle_backend.finance.entity.UserSpot;
+import com.idle.kb_i_dle_backend.finance.entity.Spot;
 import com.idle.kb_i_dle_backend.finance.service.SpotService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,11 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -74,9 +68,9 @@ public class SpotController {
 
     // 새로운 Spot 추가
     @PostMapping("/spot/add")
-    public ResponseEntity<?> addSpot(@RequestBody UserSpot spot) {
+    public ResponseEntity<?> addSpot(@RequestBody SpotDTO spotDTO) {
         try {
-            ResponseDTO response = new ResponseDTO(true, new DataDTO(spotService.addSpot(spot)));
+            ResponseDTO response = new ResponseDTO(true, new DataDTO(spotService.addSpot(spotDTO)));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
@@ -86,9 +80,9 @@ public class SpotController {
 
     // Spot 수정
     @PutMapping("/spot/update")
-    public ResponseEntity<?> updateSpot(@RequestBody UserSpot spot) {
+    public ResponseEntity<?> updateSpot(@RequestBody SpotDTO spotDTO) {
         try {
-            ResponseDTO response = new ResponseDTO(true, new DataDTO(spotService.updateSpot(spot)));
+            ResponseDTO response = new ResponseDTO(true, new DataDTO(spotService.updateSpot(spotDTO)));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
@@ -98,7 +92,7 @@ public class SpotController {
 
     // Spot 삭제
     @DeleteMapping("/spot/delete/{index}")
-    public ResponseEntity<?> deleteSpot(@PathVariable("index") Integer index, HttpServletRequest request) {
+    public ResponseEntity<?> deleteSpot(@PathVariable("index") Integer index) {
         try {
             Map<String, Object> indexData = new HashMap<>();
             indexData.put("index", spotService.deleteSpotByUidAndIndex(index));
