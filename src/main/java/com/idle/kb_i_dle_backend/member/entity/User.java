@@ -1,7 +1,6 @@
 package com.idle.kb_i_dle_backend.member.entity;
 
-import com.idle.kb_i_dle_backend.finance.entity.UserBank;
-import com.idle.kb_i_dle_backend.finance.entity.UserSpot;
+import com.idle.kb_i_dle_backend.finance.entity.Spot;
 import lombok.*;
 
 import javax.persistence.*;
@@ -64,6 +63,6 @@ public class User {
 
     // User와 Spot의 양방향 관계 설정
     @OneToMany(mappedBy = "uid", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserSpot> userSpots;
+    private List<Spot> spots;
 
 }
