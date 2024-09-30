@@ -1,7 +1,5 @@
 package com.idle.kb_i_dle_backend.income.dto;
 
-import com.idle.kb_i_dle_backend.finance.dto.SpotDTO;
-import com.idle.kb_i_dle_backend.finance.entity.Spot;
 import com.idle.kb_i_dle_backend.income.entity.Income;
 import com.idle.kb_i_dle_backend.member.entity.User;
 import lombok.AllArgsConstructor;

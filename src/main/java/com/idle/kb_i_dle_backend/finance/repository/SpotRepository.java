@@ -5,6 +5,7 @@ import com.idle.kb_i_dle_backend.member.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,5 +21,7 @@ public interface SpotRepository extends JpaRepository<Spot, Long> {
 
     // 특정 index값의 spot 삭제
     void deleteByIndex(@Param("index")Integer index);
+
+    List<Spot> findByUidAndAddDateBefore(User uid, Date date);
     
 }
