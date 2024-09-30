@@ -46,7 +46,7 @@ public class User {
     @Column(name = "agreement_info")
     private Boolean agreementInfo;
 
-    @Column(name = "agreement_finace")
+    @Column(name = "agreement_finance")
     private Boolean agreementFinance;
 
     @Column(name = "is_mentor")
