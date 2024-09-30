@@ -270,7 +270,7 @@ public class FinanceServiceImpl implements FinanceService {
 
                 if (i == 0) {
                         double currentPrice = 40;
-                        double purchasePrice = bond.getPerPrice();
+                        double purchasePrice = bond.getPrice();
                         System.out.println("Current Bond Price: " + currentPrice + ", Purchase Price: " + purchasePrice);
 
                         if (purchasePrice > 0) {
@@ -282,8 +282,8 @@ public class FinanceServiceImpl implements FinanceService {
 
                 } else {
                     if (!purchaseDate.isAfter(currentMonthDate)) {
-                        double purchasePrice = bond.getPerPrice();
-                        Double currentMonthPrice = bondRepository.getBondPriceForMonth(bond.getItmsNm(), endDate,i);
+                        double purchasePrice = bond.getPrice();
+                        Double currentMonthPrice = bondRepository.getBondPriceForMonth(bond.getName(), endDate,i);
                         System.out.println("Month: " + i + ", Current Month Price: " + currentMonthPrice + ", Purchase Price: " + purchasePrice);
 
                         if (currentMonthPrice != null && purchasePrice > 0) {
@@ -345,7 +345,7 @@ public class FinanceServiceImpl implements FinanceService {
     // 채권 자산 합계
     private long sumBondAssets(int uid) {
         return bondRepository.findAllByUidAndDeleteDateIsNull(uid).stream()
-                .mapToLong(bond -> (long) bond.getPerPrice() * bond.getCnt()).sum();
+                .mapToLong(bond -> (long) bond.getPrice() * bond.getCnt()).sum();
     }
 
     // Spot 자산 합산 메서드
@@ -369,7 +369,7 @@ public class FinanceServiceImpl implements FinanceService {
 
         // 채권 자산 합산
         List<UserBond> bondAssets = bondRepository.findAllByUidAndAddDateBefore(uid, endOfMonth,monthsAgo);
-        monthlySum += bondAssets.stream().mapToLong(UserBond -> (long) UserBond.getPerPrice() * UserBond.getCnt()).sum();
+        monthlySum += bondAssets.stream().mapToLong(UserBond -> (long) UserBond.getPrice() * UserBond.getCnt()).sum();
 
         // 가상화폐 자산 합산
         List<Object[]> coinData = coinRepository.findCoinBalanceAndPriceByUserIdAndBefore(uid, endOfMonth, monthsAgo);

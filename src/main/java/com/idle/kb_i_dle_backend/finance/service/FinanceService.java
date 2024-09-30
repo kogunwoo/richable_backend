@@ -7,7 +7,6 @@ import com.idle.kb_i_dle_backend.finance.dto.FinancialAssetDTO;
 import com.idle.kb_i_dle_backend.finance.dto.FinancialChangeDTO;
 import com.idle.kb_i_dle_backend.finance.dto.FinancialSumDTO;
 import com.idle.kb_i_dle_backend.finance.dto.MonthlySavingRateDTO;
-import com.idle.kb_i_dle_backend.finance.dto.SpotAssetDTO;
 import com.idle.kb_i_dle_backend.finance.dto.StockReturnDTO;
 import com.idle.kb_i_dle_backend.finance.dto.TotalChangeDTO;
 import com.idle.kb_i_dle_backend.finance.dto.BondReturnDTO;
