@@ -27,4 +27,8 @@ public interface MemberService {
     boolean verifyCode(String email, String code);
 
     boolean resetPassword(String id, String newPassword);
+
+    boolean checkEmailExists(String email);
+
+    MemberDTO findByEmail(String email);
 }

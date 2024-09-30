@@ -123,46 +123,9 @@ public class MemberController {
     @GetMapping("/naverCallback")
     public ResponseEntity<?> naverCallback(@RequestParam(required = false) String code,
                                            @RequestParam(required = false) String state
-//            ,
-//                                           @RequestParam(required = false) String savedState,
-//                                           @RequestParam(required = false) String error,
-//                                           @RequestParam(required = false) String error_description
     ) throws Exception {
 
-        log.error("Received callback - code: {}, state: {}" +
-//                        ", savedState: {}, error: {}, error_description: {}",
-                code, state
-//                , savedState, error, error_description
-                );
-
-//        if (error != null) {
-//            log.error("Error during Naver login: {} - {}", error, error_description);
-//            return ResponseEntity.badRequest().body("Error during Naver login: " + error);
-//        }
-//
-//        if (code == null || state == null || savedState == null) {
-//            log.error("Missing required parameters: code, state or savedState");
-//            return ResponseEntity.badRequest().body("Missing required parameters");
-//        }
-//
-//        if (!state.equals(savedState)) {
-//            log.error("Invalid State. Saved state: {}, Received state: {}", savedState, state);
-//            return ResponseEntity.badRequest().body("Invalid State");
-//        }
-
-//        Enumeration<String> attributeNames = session.getAttributeNames();
-//        while (attributeNames.hasMoreElements()) {
-//            String name = attributeNames.nextElement();
-//            Object value = session.getAttribute(name);
-//            log.error("Session attribute - Name: " + name + ", Value: " + value);
-//        }
-//        String sessionState = (String) session.getAttribute("naverState");
-//        log.error("세션 상태: " + sessionState + " | 받은 상태: " + state);
-//        if (!state.equals(sessionState)) {
-//            redirectAttributes.addFlashAttribute("error", "Invalid State");
-//            log.error("Invalid State. Session state: {}, Received state: {}", sessionState, state);
-//            return ResponseEntity.badRequest().body("Invalid State");
-//        }
+        log.error("Received callback - code: {}, state: {}" + code, state );
 
         // 최종 인증 값인 접근 토큰을 발급
         String tokenUrl = "https://nid.naver.com/oauth2.0/token?grant_type=authorization_code"
@@ -183,9 +146,40 @@ public class MemberController {
         log.info("User Profile: {}", userProfile.toString());
 
         // 여기서 userProfile을 사용하여 회원가입 또는 로그인 처리
-        // 예: MemberDTO 생성 및 저장, JWT 토큰 생성 등
 
-        return ResponseEntity.ok(userProfile.toString());
+        // Parse the user profile to extract necessary information
+        JSONObject response = userProfile.getJSONObject("response");
+        String email = response.getString("email");
+        String naverId = response.getString("id");
+        String nickname = response.optString("nickname", "User");
+
+        // Check if the email exists in your database
+        boolean userExists = memberService.checkEmailExists(email);
+
+        // 예: MemberDTO 생성 및 저장, JWT 토큰 생성 등
+        if (userExists) {
+            // User exists, proceed to authenticate
+            MemberDTO member = memberService.findByEmail(email);
+
+            // Generate JWT token
+            String jwtToken = jwtProcessor.generateToken(member.getId(), member.getUid(), member.getNickname());
+
+            // Return the AuthResultDTO with token and user info
+            UserInfoDTO userInfo = new UserInfoDTO(member.getUid(), member.getId(), member.getNickname(), member.getAuth().toString());
+            return ResponseEntity.ok(new AuthResultDTO(jwtToken, userInfo));
+
+        } else {
+            // User does not exist, proceed to registration
+            // You can redirect to a registration endpoint or return the profile data
+            // For example, return the profile data to the client to pre-fill the registration form
+            Map<String, Object> data = new HashMap<>();
+            data.put("email", email);
+            data.put("naverId", naverId);
+            data.put("nickname", nickname);
+            data.put("message", "User not registered. Proceed to registration.");
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(data);
+        }
     }
 
     private String getHttpResponse(String urlString) throws Exception {

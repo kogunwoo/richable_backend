@@ -135,4 +135,9 @@ public class MemberServiceImpl implements MemberService {
         return memberMapper.resetPassword(id, encodedPassword) > 0;
     }
 
+    @Override
+    public boolean checkEmailExists(String email) {
+        return false;
+    }
+
 }
