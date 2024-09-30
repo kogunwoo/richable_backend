@@ -2,13 +2,15 @@ package com.idle.kb_i_dle_backend.income.repository;
 
 import com.idle.kb_i_dle_backend.income.entity.Income;
 import com.idle.kb_i_dle_backend.member.entity.User;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface IncomeRepository extends CrudRepository<Income, Integer> {
+@Repository
+public interface IncomeRepository extends JpaRepository<Income, Long> {
     // 소득 전체 조회
     List<Income> findByUid(User uid);
     
