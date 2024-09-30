@@ -1,8 +1,7 @@
-package com.idle.kb_i_dle_backend.consume.dto;
+package com.idle.kb_i_dle_backend.outcome.dto;
 
 import lombok.Getter;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 
 @Getter

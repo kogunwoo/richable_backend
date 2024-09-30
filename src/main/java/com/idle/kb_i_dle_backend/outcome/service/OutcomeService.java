@@ -1,10 +1,10 @@
-package com.idle.kb_i_dle_backend.consume.service;
+package com.idle.kb_i_dle_backend.outcome.service;
 
-import com.idle.kb_i_dle_backend.consume.dto.*;
+import com.idle.kb_i_dle_backend.outcome.dto.*;
 
 import java.util.List;
 
-public interface ConsumeService {
+public interface OutcomeService {
 
 
     List<OutcomeAverageDTO> getAll();
@@ -13,5 +13,5 @@ public interface ConsumeService {
 
     ResponseCategorySumListDTO findCategorySum(Integer year, Integer month);
 
-    MonthConsumeDTO findMonthConsume(Integer year, Integer month);
+    MonthOutcomeDTO findMonthOutcome(Integer year, Integer month);
 }

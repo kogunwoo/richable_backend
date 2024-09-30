@@ -1,4 +1,4 @@
-package com.idle.kb_i_dle_backend.consume.entity;
+package com.idle.kb_i_dle_backend.outcome.entity;
 
 import lombok.Getter;
 

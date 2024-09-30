@@ -2,10 +2,11 @@ package com.idle.kb_i_dle_backend.finance.service;
 
 import com.idle.kb_i_dle_backend.finance.dto.*;
 import com.idle.kb_i_dle_backend.finance.entity.*;
+import com.idle.kb_i_dle_backend.income.entity.*;
+import com.idle.kb_i_dle_backend.outcome.entity.*;
 import com.idle.kb_i_dle_backend.finance.repository.*;
 import com.idle.kb_i_dle_backend.member.entity.User;
 import java.text.DecimalFormat;
-import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -102,13 +103,13 @@ public class FinanceServiceImpl implements FinanceService {
 
             // 소득과 소비 데이터를 가져옴
             List<Income> incomes = incomeRepository.findByUidAndDateBetween(uid, startDate, endDate);
-            List<OutComeUser> outComeUsers = outComeUserRepository.findByUidAndDateBetween(uid, startDate, endDate);
+            List<OutcomeUser> outComeUsers = outComeUserRepository.findByUidAndDateBetween(uid, startDate, endDate);
 
             // 총 소득 계산
             long totalIncome = incomes.stream().mapToLong(Income::getAmount).sum();
 
             // 총 소비량 계산
-            long totalConsumption = outComeUsers.stream().mapToLong(OutComeUser::getAmount).sum();
+            long totalConsumption = outComeUsers.stream().mapToLong(OutcomeUser::getAmount).sum();
 
             // 저축 가능 금액 계산 (소득 - 소비)
             long savings = totalIncome - totalConsumption;
@@ -130,13 +131,13 @@ public class FinanceServiceImpl implements FinanceService {
     @Override
     public List<StockReturnDTO> getStockReturnTrend(int uid) {
         List<StockReturnDTO> stockReturns = new ArrayList<>();
-        List<Stock> userStocks = stockRepository.findAllByUidAndDeleteDateIsNull(uid);
+        List<UserStock> userStocks = stockRepository.findAllByUidAndDeleteDateIsNull(uid);
 
         for (int i = 0; i < 6; i++) {
             double totalStockReturn = 0;
             int stockCount = 0;
 
-            for (Stock stock : userStocks) {
+            for (UserStock stock : userStocks) {
                 Date purchaseDateAsDate = stock.getAddDate();
                 LocalDate purchaseDate = purchaseDateAsDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
                 LocalDate currentMonthDate = LocalDate.now().minusMonths(i);
@@ -185,14 +186,14 @@ public class FinanceServiceImpl implements FinanceService {
     public List<CoinReturnDTO> getCoinReturnTrend(int uid) {
 
         List<CoinReturnDTO> coinReturns = new ArrayList<>();
-        List<Coin> userCoins = coinRepository.findAllByUidAndDeleteDateIsNull(uid);
+        List<UserCoin> userCoins = coinRepository.findAllByUidAndDeleteDateIsNull(uid);
 
         for (int i = 0; i < 6; i++) {
             double totalCoinReturn = 0;
             int coinCount = 0;
 
 
-            for (Coin coin : userCoins) {
+            for (UserCoin coin : userCoins) {
                 Date purchaseDateAsDate = coin.getAddDate();
                 LocalDate purchaseDate = purchaseDateAsDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
                 LocalDate currentMonthDate = LocalDate.now().minusMonths(i);
@@ -254,13 +255,13 @@ public class FinanceServiceImpl implements FinanceService {
     @Override
     public List<BondReturnDTO> getBondReturnTrend(int uid) {
         List<BondReturnDTO> bondReturns = new ArrayList<>();
-        List<Bond> userBonds = bondRepository.findAllByUidAndDeleteDateIsNull(uid);
+        List<UserBond> userBonds = bondRepository.findAllByUidAndDeleteDateIsNull(uid);
 
         for (int i = 0; i < 6; i++) {
             double totalBondReturn = 0;
             int bondCount = 0;
 
-            for (Bond bond : userBonds) {
+            for (UserBond bond : userBonds) {
                 Date purchaseDateAsDate = bond.getAddDate();
                 LocalDate purchaseDate = purchaseDateAsDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
                 LocalDate currentMonthDate = LocalDate.now().minusMonths(i);
@@ -269,7 +270,7 @@ public class FinanceServiceImpl implements FinanceService {
 
                 if (i == 0) {
                         double currentPrice = 40;
-                        double purchasePrice = bond.getPerPrice();
+                        double purchasePrice = bond.getPrice();
                         System.out.println("Current Bond Price: " + currentPrice + ", Purchase Price: " + purchasePrice);
 
                         if (purchasePrice > 0) {
@@ -281,8 +282,8 @@ public class FinanceServiceImpl implements FinanceService {
 
                 } else {
                     if (!purchaseDate.isAfter(currentMonthDate)) {
-                        double purchasePrice = bond.getPerPrice();
-                        Double currentMonthPrice = bondRepository.getBondPriceForMonth(bond.getItmsNm(), endDate,i);
+                        double purchasePrice = bond.getPrice();
+                        Double currentMonthPrice = bondRepository.getBondPriceForMonth(bond.getName(), endDate,i);
                         System.out.println("Month: " + i + ", Current Month Price: " + currentMonthPrice + ", Purchase Price: " + purchasePrice);
 
                         if (currentMonthPrice != null && purchasePrice > 0) {
@@ -326,7 +327,7 @@ public class FinanceServiceImpl implements FinanceService {
 
     // 은행 자산 합계
     private long sumBankAssets(int uid) {
-        return bankRepository.findAllByUidAndDeleteDateIsNull(uid).stream().mapToLong(Bank::getBalanceAmt).sum();
+        return bankRepository.findAllByUidAndDeleteDateIsNull(uid).stream().mapToLong(UserBank::getBalanceAmt).sum();
     }
 
     // 주식 자산 합계
@@ -344,13 +345,13 @@ public class FinanceServiceImpl implements FinanceService {
     // 채권 자산 합계
     private long sumBondAssets(int uid) {
         return bondRepository.findAllByUidAndDeleteDateIsNull(uid).stream()
-                .mapToLong(bond -> (long) bond.getPerPrice() * bond.getCnt()).sum();
+                .mapToLong(bond -> (long) bond.getPrice() * bond.getCnt()).sum();
     }
 
     // Spot 자산 합산 메서드
     private long calculateSpotAssetsSum(int uid) {
-        List<Spot> spotData = spotRepository.findAllByUidAndDeleteDateIsNull(User.builder().uid(uid).build());
-        return spotData.stream().mapToLong(Spot::getPrice).sum();
+        List<UserSpot> spotData = spotRepository.findAllByUidAndDeleteDateIsNull(User.builder().uid(uid).build());
+        return spotData.stream().mapToLong(UserSpot::getPrice).sum();
     }
 
     // 월별 금융 자산 합산 메서드
@@ -363,12 +364,12 @@ public class FinanceServiceImpl implements FinanceService {
         long monthlySum = 0;
 
         // 은행 자산 합산
-        List<Bank> bankAssets = bankRepository.findAllByUidAndAddDateBefore(uid, endOfMonth);
-        monthlySum += bankAssets.stream().mapToLong(Bank::getBalanceAmt).sum();
+        List<UserBank> bankAssets = bankRepository.findAllByUidAndAddDateBefore(uid, endOfMonth);
+        monthlySum += bankAssets.stream().mapToLong(UserBank::getBalanceAmt).sum();
 
         // 채권 자산 합산
-        List<Bond> bondAssets = bondRepository.findAllByUidAndAddDateBefore(uid, endOfMonth,monthsAgo);
-        monthlySum += bondAssets.stream().mapToLong(bond -> (long) bond.getPerPrice() * bond.getCnt()).sum();
+        List<UserBond> bondAssets = bondRepository.findAllByUidAndAddDateBefore(uid, endOfMonth,monthsAgo);
+        monthlySum += bondAssets.stream().mapToLong(UserBond -> (long) UserBond.getPrice() * UserBond.getCnt()).sum();
 
         // 가상화폐 자산 합산
         List<Object[]> coinData = coinRepository.findCoinBalanceAndPriceByUserIdAndBefore(uid, endOfMonth, monthsAgo);
@@ -390,8 +391,8 @@ public class FinanceServiceImpl implements FinanceService {
         User user = User.builder().uid(uid).build();
         LocalDateTime endOfMonthLDT = LocalDate.now().minusMonths(monthsAgo).withDayOfMonth(1).atStartOfDay();
         Date endOfMonth = Date.from(endOfMonthLDT.atZone(ZoneId.systemDefault()).toInstant());
-        List<Spot> spotAssets = spotRepository.findAllByUidAndAddDateBefore(user, endOfMonth);
-        return spotAssets.stream().mapToLong(Spot::getPrice).sum();
+        List<UserSpot> spotAssets = spotRepository.findAllByUidAndAddDateBefore(user, endOfMonth);
+        return spotAssets.stream().mapToLong(UserSpot::getPrice).sum();
     }
 
 }
