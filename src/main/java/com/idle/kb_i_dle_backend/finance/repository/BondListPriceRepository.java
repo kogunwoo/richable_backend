@@ -1,6 +1,6 @@
 package com.idle.kb_i_dle_backend.finance.repository;
 
-import com.idle.kb_i_dle_backend.finance.entity.;
+import com.idle.kb_i_dle_backend.finance.entity.BondListPrice;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
