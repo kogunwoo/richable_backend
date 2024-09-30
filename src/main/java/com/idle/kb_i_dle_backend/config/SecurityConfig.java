@@ -3,7 +3,7 @@ package com.idle.kb_i_dle_backend.config;
 import com.idle.kb_i_dle_backend.member.filter.JwtAuthenticationFilter;
 import com.idle.kb_i_dle_backend.member.handler.CustomAccessDeniedHandler;
 import com.idle.kb_i_dle_backend.member.handler.CustomAuthenticationEntryPoint;
-import com.idle.kb_i_dle_backend.member.service.CustomUserDetailsService;
+import com.idle.kb_i_dle_backend.member.service.CustomMemberDetailsService;
 import com.idle.kb_i_dle_backend.member.util.JwtProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -80,7 +80,7 @@ public class SecurityConfig {
      * @throws Exception
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter, CustomUserDetailsService userDetailsService) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter, CustomMemberDetailsService userDetailsService) throws Exception {
         http
                 .csrf().disable()
                 .addFilterBefore(corsFilter(), UsernamePasswordAuthenticationFilter.class)

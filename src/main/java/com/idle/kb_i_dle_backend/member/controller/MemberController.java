@@ -1,11 +1,11 @@
 package com.idle.kb_i_dle_backend.member.controller;
 
 import com.idle.kb_i_dle_backend.member.dto.AuthResultDTO;
-import com.idle.kb_i_dle_backend.member.dto.CustomUser;
+import com.idle.kb_i_dle_backend.member.dto.CustomMember;
 import com.idle.kb_i_dle_backend.member.dto.LoginDTO;
 import com.idle.kb_i_dle_backend.member.dto.MemberDTO;
 import com.idle.kb_i_dle_backend.member.dto.MemberJoinDTO;
-import com.idle.kb_i_dle_backend.member.dto.UserInfoDTO;
+import com.idle.kb_i_dle_backend.member.dto.MemberInfoDTO;
 import com.idle.kb_i_dle_backend.member.service.MemberService;
 import com.idle.kb_i_dle_backend.member.util.JwtProcessor;
 import java.io.BufferedReader;
@@ -15,7 +15,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.security.SecureRandom;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -36,13 +35,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.json.JSONObject;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 @RestController
@@ -71,7 +64,7 @@ public class MemberController {
             Authentication authentication = authenticationManager.authenticate(authenticationToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
             // Assuming you have a method to fetch UserInfoDTO (e.g., from the authenticated user details)
-            UserInfoDTO userInfo = getUserInfoFromAuthentication(authentication);
+            MemberInfoDTO userInfo = getUserInfoFromAuthentication(authentication);
             // Generate JWT token with uid
             String jwtToken = jwtProcessor.generateToken(userInfo.getId(), userInfo.getUid(), userInfo.getNickname());
             // Return the AuthResultDTO with token and user info
@@ -84,10 +77,10 @@ public class MemberController {
     }
 
     // Helper method to retrieve user information from the authentication object
-    private UserInfoDTO getUserInfoFromAuthentication(Authentication authentication) {
-        CustomUser customUser = (CustomUser) authentication.getPrincipal();
-        MemberDTO member = customUser.getMember();  // Retrieve the MemberDTO object
-        return new UserInfoDTO(member.getUid(), member.getId(), member.getNickname(), member.getAuth().toString());
+    private MemberInfoDTO getUserInfoFromAuthentication(Authentication authentication) {
+        CustomMember customMember = (CustomMember) authentication.getPrincipal();
+        MemberDTO member = customMember.getMember();  // Retrieve the MemberDTO object
+        return new MemberInfoDTO(member.getUid(), member.getId(), member.getNickname(), member.getAuth().toString());
     }
 
     @Value("${naver.client.id}")
@@ -126,35 +119,64 @@ public class MemberController {
     }
 
     @GetMapping("/naverCallback")
-    public ResponseEntity<?> naverCallback(@RequestParam(required = false) String code,
-                                           @RequestParam(required = false) String state    ) throws Exception {
+    public ResponseEntity<?> naverCallback(@RequestParam String code,
+                                           @RequestParam String state,
+                                           HttpSession session) throws Exception {
+        // Validate state token
+        String sessionState = (String) session.getAttribute("naverState");
+        if (!state.equals(sessionState)) {
+            log.error("Invalid State. Session state: {}, Received state: {}", sessionState, state);
+            return ResponseEntity.badRequest().body("Invalid State");
+        }
 
-        log.error("Received callback - code: {}, state: {}" +    code, state    );
-
-
-        // 최종 인증 값인 접근 토큰을 발급
+        // Exchange code for access token
         String tokenUrl = "https://nid.naver.com/oauth2.0/token?grant_type=authorization_code"
                 + "&client_id=" + clientId
                 + "&client_secret=" + clientSecret
                 + "&code=" + code
                 + "&state=" + state;
-        String authtoken = getHttpResponse(tokenUrl);
-        log.error("Token Response: {}", authtoken);
-        log.error("tokenUrl: {}", tokenUrl);
-
-        // JSON 파싱
-        JSONObject tokenJson = new JSONObject(authtoken);
+        String tokenResponse = getHttpResponse(tokenUrl);
+        JSONObject tokenJson = new JSONObject(tokenResponse);
         String accessToken = tokenJson.getString("access_token");
+        log.error("isthere code? "+code);
+        log.error("isthere state? "+state);
 
-        // 사용자 프로필 정보 조회
+        // Fetch user profile
         JSONObject userProfile = getUserProfile(accessToken);
-        log.info("User Profile: {}", userProfile.toString());
+        JSONObject responseObj = userProfile.getJSONObject("response");
+        String email = responseObj.optString("email");
+        String naverId = responseObj.getString("id");
+        String nickname = responseObj.optString("nickname", "User");
 
-        // 여기서 userProfile을 사용하여 회원가입 또는 로그인 처리
-        // 예: MemberDTO 생성 및 저장, JWT 토큰 생성 등
+        if (email == null || email.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email is required but not provided.");
+        }
 
-        return ResponseEntity.ok(userProfile.toString());
+        // Check if user exists
+        boolean userExists = memberService.checkEmailExists(email);
+
+        if (userExists) {
+            // User exists, authenticate and generate token
+            MemberDTO member = memberService.findByEmail(email);
+            CustomMember customMember = new CustomMember(member);
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                    customMember, null, customMember.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            String jwtToken = jwtProcessor.generateToken(member.getId(), member.getUid(), member.getNickname());
+            MemberInfoDTO userInfo = new MemberInfoDTO(member.getUid(), member.getId(), member.getNickname(), member.getAuth().toString());
+            return ResponseEntity.ok(new AuthResultDTO(jwtToken, userInfo));
+        } else {
+            // User does not exist, return information for registration
+            Map<String, Object> data = new HashMap<>();
+            data.put("email", email);
+            data.put("naverId", naverId);
+            data.put("nickname", nickname);
+            data.put("message", "User not registered. Proceed to registration.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(data);
+        }
     }
+
 
     private String getHttpResponse(String urlString) throws Exception {
         URL url = new URL(urlString);
@@ -171,7 +193,8 @@ public class MemberController {
 
         return response.toString();
     }
-    private JSONObject getUserProfile(String accessToken) throws Exception{
+
+    private JSONObject getUserProfile(String accessToken) throws Exception {
         String profileUrl = "https://openapi.naver.com/v1/nid/me";
         URL url = new URL(profileUrl);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();

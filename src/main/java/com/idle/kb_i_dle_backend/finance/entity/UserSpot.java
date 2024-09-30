@@ -1,7 +1,7 @@
 package com.idle.kb_i_dle_backend.finance.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.idle.kb_i_dle_backend.member.entity.User;
+import com.idle.kb_i_dle_backend.member.entity.Member;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,7 +22,7 @@ public class UserSpot {
 
     @ManyToOne
     @JoinColumn(name = "uid") // foreign key 이름 설정
-    private User uid;
+    private Member uid;
 
     @NotNull
     @Column(length = 20)

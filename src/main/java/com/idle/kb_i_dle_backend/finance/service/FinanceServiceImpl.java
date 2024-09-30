@@ -5,7 +5,7 @@ import com.idle.kb_i_dle_backend.finance.entity.*;
 import com.idle.kb_i_dle_backend.income.entity.*;
 import com.idle.kb_i_dle_backend.consume.entity.*;
 import com.idle.kb_i_dle_backend.finance.repository.*;
-import com.idle.kb_i_dle_backend.member.entity.User;
+import com.idle.kb_i_dle_backend.member.entity.Member;
 import java.text.DecimalFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -350,7 +350,7 @@ public class FinanceServiceImpl implements FinanceService {
 
     // Spot 자산 합산 메서드
     private long calculateSpotAssetsSum(int uid) {
-        List<UserSpot> spotData = spotRepository.findAllByUidAndDeleteDateIsNull(User.builder().uid(uid).build());
+        List<UserSpot> spotData = spotRepository.findAllByUidAndDeleteDateIsNull(Member.builder().uid(uid).build());
         return spotData.stream().mapToLong(UserSpot::getPrice).sum();
     }
 
@@ -388,10 +388,10 @@ public class FinanceServiceImpl implements FinanceService {
 
     // Spot 자산 월별 합산 메서드
     private long calculateSpotAssetsSumBefore(int uid, int monthsAgo) {
-        User user = User.builder().uid(uid).build();
+        Member member = Member.builder().uid(uid).build();
         LocalDateTime endOfMonthLDT = LocalDate.now().minusMonths(monthsAgo).withDayOfMonth(1).atStartOfDay();
         Date endOfMonth = Date.from(endOfMonthLDT.atZone(ZoneId.systemDefault()).toInstant());
-        List<UserSpot> spotAssets = spotRepository.findAllByUidAndAddDateBefore(user, endOfMonth);
+        List<UserSpot> spotAssets = spotRepository.findAllByUidAndAddDateBefore(member, endOfMonth);
         return spotAssets.stream().mapToLong(UserSpot::getPrice).sum();
     }
 

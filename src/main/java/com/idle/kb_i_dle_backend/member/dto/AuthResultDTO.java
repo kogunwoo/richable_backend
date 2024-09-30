@@ -7,5 +7,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class AuthResultDTO {
     private String token;
-    private UserInfoDTO userInfo;
+    private MemberInfoDTO userInfo;
 }

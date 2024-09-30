@@ -1,7 +1,7 @@
 package com.idle.kb_i_dle_backend.member.dto;
 
 
-public class UserGradeDTO {
+public class MemberGradeDTO {
     private String id;
     private String grade;
 

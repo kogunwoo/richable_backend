@@ -1,7 +1,7 @@
 package com.idle.kb_i_dle_backend.finance.repository;
 
 import com.idle.kb_i_dle_backend.finance.entity.UserSpot;
-import com.idle.kb_i_dle_backend.member.entity.User;
+import com.idle.kb_i_dle_backend.member.entity.Member;
 import java.util.Date;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
@@ -11,10 +11,10 @@ import java.util.Optional;
 
 public interface SpotRepository extends JpaRepository<UserSpot, Long> {
     // deleteDate가 현재 날짜보다 이후이고, 카테고리가 특정 카테고리인 Spot의 가격 합계를 구함
-    List<UserSpot> findByUidAndCategoryAndDeleteDateIsNull(User uid, String category);
+    List<UserSpot> findByUidAndCategoryAndDeleteDateIsNull(Member uid, String category);
 
     // 삭제되지 않은 현물 자산 전체 조회
-    List<UserSpot> findByUidAndDeleteDateIsNull(User uid);
+    List<UserSpot> findByUidAndDeleteDateIsNull(Member uid);
 
     // index 값 기준으로 가장 마지막 Spot 조회
     Optional<UserSpot> findTopByOrderByIndexDesc();
@@ -22,9 +22,9 @@ public interface SpotRepository extends JpaRepository<UserSpot, Long> {
     // 특정 indev값의 정보 조회
     Optional<UserSpot> findByIndex(@Param("index")Integer index);
 
-    List<UserSpot> findAllByUidAndDeleteDateIsNull(User uid);
+    List<UserSpot> findAllByUidAndDeleteDateIsNull(Member uid);
 
-    List<UserSpot> findAllByUidAndAddDateBefore(User uid, Date date);
+    List<UserSpot> findAllByUidAndAddDateBefore(Member uid, Date date);
 
     void deleteByIndex(@Param("index")Integer index);
 

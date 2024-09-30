@@ -9,7 +9,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class UserInfoDTO {
+public class MemberInfoDTO {
     private Integer uid;
     private String id;
     private String nickname;
@@ -19,11 +19,11 @@ public class UserInfoDTO {
     private String birthYear;  // 추가 필드
     private String gender;     // 추가 필드
     private boolean certification;
-    private UserApiDTO api;
+    private MemberApiDTO api;
 
     // 필요한 필드만 사용하는 생성자 (이 경우 uid, id, nickname, auth)
 
-    public UserInfoDTO(Integer uid, String id, String nickname, String auth) {
+    public MemberInfoDTO(Integer uid, String id, String nickname, String auth) {
         this.uid = uid;
         this.id = id;
         this.nickname = nickname;

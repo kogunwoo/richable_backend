@@ -14,7 +14,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
+public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer uid;

@@ -3,7 +3,7 @@ package com.idle.kb_i_dle_backend.community.entity;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
-import com.idle.kb_i_dle_backend.member.entity.User;
+import com.idle.kb_i_dle_backend.member.entity.Member;
 import lombok.Getter;
 
 import java.util.Date;
@@ -28,7 +28,7 @@ public class Board {
 
     @ManyToOne
     @JoinColumn(name = "uid")
-    private User uid;
+    private Member uid;
 
     @NotNull
     @Column(length = 50)

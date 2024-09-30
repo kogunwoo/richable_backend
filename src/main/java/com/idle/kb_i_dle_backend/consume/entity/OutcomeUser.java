@@ -1,9 +1,8 @@
 package com.idle.kb_i_dle_backend.consume.entity;
 
-import com.idle.kb_i_dle_backend.member.entity.User;
+import com.idle.kb_i_dle_backend.member.entity.Member;
 import lombok.Getter;
 import lombok.ToString;
-import org.apache.ibatis.annotations.Many;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -22,7 +21,7 @@ public class OutcomeUser {
 
     @ManyToOne
     @JoinColumn(name = "uid")
-    private User uid;
+    private Member uid;
 
     @NotNull
     @Column(name = "outcome_expenditure_category")  // 실제 테이블의 컬럼과 매핑

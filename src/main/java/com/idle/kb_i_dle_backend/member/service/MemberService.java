@@ -2,12 +2,12 @@ package com.idle.kb_i_dle_backend.member.service;
 
 import com.idle.kb_i_dle_backend.member.dto.MemberDTO;
 import com.idle.kb_i_dle_backend.member.dto.MemberJoinDTO;
-import com.idle.kb_i_dle_backend.member.entity.User;
+import com.idle.kb_i_dle_backend.member.entity.Member;
 
 public interface MemberService {
     boolean checkDupl(String id);
 
-    User getMember(String id);
+    Member getMember(String id);
 
     void MemberJoin(MemberJoinDTO memberjoindto);
 
@@ -25,4 +25,8 @@ public interface MemberService {
     boolean verifyCode(String email, String code);
 
     boolean resetPassword(String id, String newPassword);
+
+    boolean checkEmailExists(String email);
+
+    MemberDTO findByEmail(String email);
 }

@@ -1,6 +1,6 @@
 package com.idle.kb_i_dle_backend.income.entity;
 
-import com.idle.kb_i_dle_backend.member.entity.User;
+import com.idle.kb_i_dle_backend.member.entity.Member;
 import java.util.Date;
 import javax.persistence.*;
 
@@ -15,7 +15,7 @@ public class Income {
 
     @ManyToOne
     @JoinColumn(name = "uid")
-    private User uid;
+    private Member uid;
 
     @Column(length = 100)
     private String type;

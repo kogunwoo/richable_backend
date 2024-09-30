@@ -1,6 +1,6 @@
 package com.idle.kb_i_dle_backend.member.dto;
 
-public class UserApiDTO {
+public class MemberApiDTO {
 
     private String bank;
     private ApiDetailDTO stock;

@@ -1,6 +1,6 @@
 package com.idle.kb_i_dle_backend.member.dto;
 
-public class UserBadgeDTO {
+public class MemberBadgeDTO {
     private int badgeNo;
     private String name;
     private String img;
@@ -8,7 +8,7 @@ public class UserBadgeDTO {
     private boolean having;
 
     // 기본 생성자
-    public UserBadgeDTO() {}
+    public MemberBadgeDTO() {}
 
     // getter & setter methods
 
