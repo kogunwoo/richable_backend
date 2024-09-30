@@ -1,6 +1,5 @@
 package com.idle.kb_i_dle_backend.finance.repository;
 
-import com.idle.kb_i_dle_backend.finance.entity.Stock;
 import com.idle.kb_i_dle_backend.finance.entity.UserStock;
 import java.util.Date;
 import java.util.List;
@@ -10,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface StockRepository extends JpaRepository<Stock,Integer> {
+public interface StockRepository extends JpaRepository<UserStock,Integer> {
 
     //선택한 주식의 종가
     @Query(value = "SELECT sl.price " +

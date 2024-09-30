@@ -1,13 +1,12 @@
 package com.idle.kb_i_dle_backend.finance.service;
 
-import com.idle.kb_i_dle_backend.consume.entity.OutcomeUser;
 import com.idle.kb_i_dle_backend.finance.dto.*;
 import com.idle.kb_i_dle_backend.finance.entity.*;
+import com.idle.kb_i_dle_backend.income.entity.*;
+import com.idle.kb_i_dle_backend.consume.entity.*;
 import com.idle.kb_i_dle_backend.finance.repository.*;
-import com.idle.kb_i_dle_backend.income.entity.Income;
 import com.idle.kb_i_dle_backend.member.entity.User;
 import java.text.DecimalFormat;
-import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -271,7 +270,7 @@ public class FinanceServiceImpl implements FinanceService {
 
                 if (i == 0) {
                         double currentPrice = 40;
-                        double purchasePrice = bond.getPrice();
+                        double purchasePrice = bond.getPerPrice();
                         System.out.println("Current Bond Price: " + currentPrice + ", Purchase Price: " + purchasePrice);
 
                         if (purchasePrice > 0) {
@@ -283,8 +282,8 @@ public class FinanceServiceImpl implements FinanceService {
 
                 } else {
                     if (!purchaseDate.isAfter(currentMonthDate)) {
-                        double purchasePrice = bond.getPrice();
-                        Double currentMonthPrice = bondRepository.getBondPriceForMonth(bond.getName(), endDate,i);
+                        double purchasePrice = bond.getPerPrice();
+                        Double currentMonthPrice = bondRepository.getBondPriceForMonth(bond.getItmsNm(), endDate,i);
                         System.out.println("Month: " + i + ", Current Month Price: " + currentMonthPrice + ", Purchase Price: " + purchasePrice);
 
                         if (currentMonthPrice != null && purchasePrice > 0) {
@@ -346,7 +345,7 @@ public class FinanceServiceImpl implements FinanceService {
     // 채권 자산 합계
     private long sumBondAssets(int uid) {
         return bondRepository.findAllByUidAndDeleteDateIsNull(uid).stream()
-                .mapToLong(bond -> (long) bond.getPrice() * bond.getCnt()).sum();
+                .mapToLong(bond -> (long) bond.getPerPrice() * bond.getCnt()).sum();
     }
 
     // Spot 자산 합산 메서드
@@ -370,7 +369,7 @@ public class FinanceServiceImpl implements FinanceService {
 
         // 채권 자산 합산
         List<UserBond> bondAssets = bondRepository.findAllByUidAndAddDateBefore(uid, endOfMonth,monthsAgo);
-        monthlySum += bondAssets.stream().mapToLong(bond -> (long) bond.getPrice() * bond.getCnt()).sum();
+        monthlySum += bondAssets.stream().mapToLong(UserBond -> (long) UserBond.getPerPrice() * UserBond.getCnt()).sum();
 
         // 가상화폐 자산 합산
         List<Object[]> coinData = coinRepository.findCoinBalanceAndPriceByUserIdAndBefore(uid, endOfMonth, monthsAgo);

@@ -1,6 +1,5 @@
 package com.idle.kb_i_dle_backend.finance.repository;
 
-import com.idle.kb_i_dle_backend.finance.entity.Bond;
 import com.idle.kb_i_dle_backend.finance.entity.UserBond;
 import java.util.Date;
 import java.util.List;
@@ -27,7 +26,7 @@ public interface BondRepository extends JpaRepository<UserBond, Integer> {
             "JOIN product.bond_list_price blp  ON b.itms_nm = blp.isinCdNm " +
             "WHERE b.uid = :uid AND b.add_date <= :endDate " +
             "AND b.delete_date IS NULL", nativeQuery = true)
-    List<UserBond> findAllByUidAndAddDateBefore(@Param("uid")int uid, @Param("endDate")Date endDate,@Param("monthsAgo") int monthsAgo);
+    List<UserBond> findAllByUidAndAddDateBefore(@Param("uid")int uid, @Param("endDate")Date endDate, @Param("monthsAgo") int monthsAgo);
 
 
     @Query(value = "SELECT " +
