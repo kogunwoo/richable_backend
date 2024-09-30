@@ -2,6 +2,7 @@ package com.idle.kb_i_dle_backend.finance.repository;
 
 import com.idle.kb_i_dle_backend.finance.entity.Bank;
 import com.idle.kb_i_dle_backend.finance.entity.Spot;
+import com.idle.kb_i_dle_backend.finance.entity.UserSpot;
 import com.idle.kb_i_dle_backend.member.entity.User;
 import java.util.Date;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,9 +24,9 @@ public interface SpotRepository extends JpaRepository<Spot, Long> {
     // 특정 indev값의 정보 조회
     Optional<Spot> findByIndex(@Param("index")Integer index);
 
-    List<Spot> findAllByUidAndDeleteDateIsNull(User uid);
+    List<UserSpot> findAllByUidAndDeleteDateIsNull(User uid);
 
-    List<Spot> findAllByUidAndAddDateBefore(User uid, Date date);
+    List<UserSpot> findAllByUidAndAddDateBefore(User uid, Date date);
 
     void deleteByIndex(@Param("index")Integer index);
 
