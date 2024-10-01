@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -38,6 +39,16 @@ public class IncomeServiceImpl implements IncomeService {
 
         return incomeList;
     }
+
+    @Override
+    public long getIncomeSumInMonth(int uid ,int year, int month ) throws Exception {
+        Member tempUser = userRepository.findByUid(1).orElseThrow();
+        List<Income> incomes = incomeRepository.findByUidAndYearAndMonth(tempUser, year, month);
+        Long sumOfIncomes = incomes.stream().mapToLong(Income::getAmount).sum();
+
+        return sumOfIncomes;
+    }
+
 
     @Override
     public IncomeDTO getIncomeByIndex(Integer index) throws Exception {
