@@ -6,6 +6,8 @@ import com.idle.kb_i_dle_backend.income.repository.IncomeRepository;
 import com.idle.kb_i_dle_backend.income.service.IncomeService;
 import com.idle.kb_i_dle_backend.member.entity.User;
 import com.idle.kb_i_dle_backend.member.repository.UserRepository;
+import com.idle.kb_i_dle_backend.outcome.dto.OutcomeUserDTO;
+import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
@@ -18,15 +20,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class IncomeServiceImpl implements IncomeService {
 
     private final UserRepository userRepository;
     private final IncomeRepository incomeRepository;
-
-    public IncomeServiceImpl(UserRepository userRepository, IncomeRepository incomeRepository) {
-        this.userRepository = userRepository;
-        this.incomeRepository = incomeRepository;
-    }
 
     @Override
     public List<IncomeDTO> getIncomeList() throws Exception {
@@ -35,18 +33,9 @@ public class IncomeServiceImpl implements IncomeService {
 
         if (incomes.isEmpty()) throw new NotFoundException("");
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         List<IncomeDTO> incomeList = new ArrayList<>();
         for (Income i : incomes) {
-            IncomeDTO incomeDTO = new IncomeDTO();
-            incomeDTO.setIncomeId(i.getIndex());
-            incomeDTO.setType(i.getType());
-            String formattedDate = dateFormat.format(i.getDate());
-            incomeDTO.setIncomeDate(formattedDate);
-            incomeDTO.setPrice(i.getAmount());
-            incomeDTO.setContents(i.getDescript());
-            incomeDTO.setMemo(i.getMemo());
-
+            IncomeDTO incomeDTO = IncomeDTO.convertToDTO(i);
             incomeList.add(incomeDTO);
         }
 
@@ -63,11 +52,8 @@ public class IncomeServiceImpl implements IncomeService {
         if (!isIncome.getUid().getUid().equals(tempUser.getUid())) {
             throw new AccessDeniedException("You do not have permission to delete this income.");
         }
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String formattedDate = dateFormat.format(isIncome.getDate());
-        IncomeDTO incomeDTO = new IncomeDTO(isIncome.getIndex(), isIncome.getType(), formattedDate, isIncome.getAmount(), isIncome.getDescript(), isIncome.getMemo());
 
-        return incomeDTO;
+        return IncomeDTO.convertToDTO(isIncome);
     }
 
     @Override

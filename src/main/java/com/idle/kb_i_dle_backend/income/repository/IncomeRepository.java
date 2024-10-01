@@ -12,9 +12,9 @@ import java.util.Optional;
 
 @Repository
 public interface IncomeRepository extends CrudRepository<Income, Integer> {
-    Income findByIndex(int id);
 
-    List<Income> findByUidAndDateBetween(int uid, Date startDate, Date endDate);
+    List<Income> findByUidAndDateBetween(User uid, Date startDate, Date endDate);
+
     // 소득 전체 조회
     List<Income> findByUid(User uid);
 

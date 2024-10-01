@@ -2,15 +2,14 @@ package com.idle.kb_i_dle_backend.income.dto;
 
 import com.idle.kb_i_dle_backend.income.entity.Income;
 import com.idle.kb_i_dle_backend.member.entity.User;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class IncomeDTO {

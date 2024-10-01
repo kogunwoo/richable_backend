@@ -28,7 +28,7 @@ public class IncomeController {
     @GetMapping("/all")
     public ResponseEntity<?> getTotalIncomeList() {
         try {
-            ResponseDTO response = new ResponseDTO(true, new DataDTO(incomeService.getIncomeList()));
+            ResponseDTO response = new ResponseDTO(true, incomeService.getIncomeList());
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
@@ -40,7 +40,7 @@ public class IncomeController {
     @GetMapping("/detail/{index}")
     public ResponseEntity<?> getIncomeDetail(@PathVariable("index") Integer index) {
         try {
-            ResponseDTO response = new ResponseDTO(true, new DataDTO(incomeService.getIncomeByIndex(index)));
+            ResponseDTO response = new ResponseDTO(true, incomeService.getIncomeByIndex(index));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
@@ -52,7 +52,7 @@ public class IncomeController {
     @PostMapping("/add")
     public ResponseEntity<?> addIncome(@RequestBody IncomeDTO incomeDTO) {
         try {
-            ResponseDTO response = new ResponseDTO(true, new DataDTO(incomeService.addIncome(incomeDTO)));
+            ResponseDTO response = new ResponseDTO(true, incomeService.addIncome(incomeDTO));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
@@ -64,7 +64,7 @@ public class IncomeController {
     @PutMapping("/update")
     public ResponseEntity<?> updateIncome(@RequestBody IncomeDTO incomeDTO) {
         try {
-            ResponseDTO response = new ResponseDTO(true, new DataDTO(incomeService.updateIncome(incomeDTO)));
+            ResponseDTO response = new ResponseDTO(true, incomeService.updateIncome(incomeDTO));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
@@ -78,7 +78,7 @@ public class IncomeController {
         try {
             Map<String, Object> indexData = new HashMap<>();
             indexData.put("index", incomeService.deleteIncomeByUidAndIndex(index));
-            ResponseDTO response = new ResponseDTO(true, new DataDTO(indexData));
+            ResponseDTO response = new ResponseDTO(true, indexData);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
