@@ -200,6 +200,7 @@ public class MemberController {
 
             String redirectUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/user/terms")
                     .queryParam("id", parid).toUriString();
+            log.error("redirectUrl"+redirectUrl);
 
             return ResponseEntity.status(HttpStatus.FOUND)
                     .header(HttpHeaders.LOCATION, redirectUrl)

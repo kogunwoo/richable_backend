@@ -17,10 +17,11 @@
 //import java.util.Date;
 //import java.util.List;
 //
+//@Reuq
 //@Service
 //public class FinanceServiceImpl implements FinanceService {
 //
-//    @Autowired
+//
 //    private BankRepository bankRepository;
 //    @Autowired
 //    private BondRepository bondRepository;
