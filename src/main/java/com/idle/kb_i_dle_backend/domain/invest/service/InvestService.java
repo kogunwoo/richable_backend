@@ -1,9 +1,7 @@
 package com.idle.kb_i_dle_backend.domain.invest.service;
 
-import com.idle.kb_i_dle_backend.domain.invest.dto.AvailableCashDTO;
-import com.idle.kb_i_dle_backend.domain.invest.dto.CategorySumDTO;
-import com.idle.kb_i_dle_backend.domain.invest.dto.InvestDTO;
-import com.idle.kb_i_dle_backend.domain.invest.dto.MaxPercentageCategoryDTO;
+import com.idle.kb_i_dle_backend.domain.invest.dto.*;
+
 import java.util.List;
 
 public interface InvestService {
@@ -16,4 +14,6 @@ public interface InvestService {
     long totalAsset() throws Exception;
 
     MaxPercentageCategoryDTO getMaxPercentageCategory() throws Exception;
+
+    List<RecommendedProductDTO> getRecommendedProducts() throws Exception;
 }

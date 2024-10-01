@@ -2,10 +2,7 @@ package com.idle.kb_i_dle_backend.domain.invest.controller;
 
 import com.idle.kb_i_dle_backend.common.dto.ErrorResponseDTO;
 import com.idle.kb_i_dle_backend.common.dto.ResponseDTO;
-import com.idle.kb_i_dle_backend.domain.invest.dto.AvailableCashDTO;
-import com.idle.kb_i_dle_backend.domain.invest.dto.CategorySumDTO;
-import com.idle.kb_i_dle_backend.domain.invest.dto.InvestDTO;
-import com.idle.kb_i_dle_backend.domain.invest.dto.MaxPercentageCategoryDTO;
+import com.idle.kb_i_dle_backend.domain.invest.dto.*;
 import com.idle.kb_i_dle_backend.domain.invest.service.InvestService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +36,7 @@ public class InvestController {
         }
     }
 
+    // 성향 조회
     @GetMapping("/tendency")
     public ResponseEntity<?> getMaxPercentageCategory() {
         try {
@@ -52,17 +50,19 @@ public class InvestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-//    public ResponseEntity<?> getInvestmentTendency() {
-//        try {
-//            List<CategorySumDTO> categorySums = investService.getInvestmentTendency();
-//            ResponseDTO response = new ResponseDTO(true, categorySums);
-//            return ResponseEntity.ok(response);
-//        } catch (Exception e) {
-//            log.error("Error in getInvestmentTendency: ", e);
-//            ErrorResponseDTO response = new ErrorResponseDTO(false,
-//                    "Failed to retrieve investment tendency: " + e.getMessage());
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-//        }
-//    }
+
+    @GetMapping("/recommended")
+    public ResponseEntity<?> getRecommendedProducts() {
+        try {
+            List<RecommendedProductDTO> recommendedProducts = investService.getRecommendedProducts();
+            ResponseDTO response = new ResponseDTO(true, recommendedProducts);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error in getRecommendedProducts: ", e);
+            ErrorResponseDTO response = new ErrorResponseDTO(false,
+                    "Failed to retrieve recommended products: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
 
 }

@@ -1,17 +1,11 @@
 package com.idle.kb_i_dle_backend.domain.invest.service.impl;
 
-import com.idle.kb_i_dle_backend.domain.finance.entity.UserBank;
-import com.idle.kb_i_dle_backend.domain.finance.entity.UserBond;
-import com.idle.kb_i_dle_backend.domain.finance.entity.UserCoin;
-import com.idle.kb_i_dle_backend.domain.finance.entity.UserStock;
+import com.idle.kb_i_dle_backend.domain.finance.entity.*;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BankRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BondRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.CoinRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.StockRepository;
-import com.idle.kb_i_dle_backend.domain.invest.dto.AvailableCashDTO;
-import com.idle.kb_i_dle_backend.domain.invest.dto.CategorySumDTO;
-import com.idle.kb_i_dle_backend.domain.invest.dto.InvestDTO;
-import com.idle.kb_i_dle_backend.domain.invest.dto.MaxPercentageCategoryDTO;
+import com.idle.kb_i_dle_backend.domain.invest.dto.*;
 import com.idle.kb_i_dle_backend.domain.invest.service.InvestService;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import com.idle.kb_i_dle_backend.domain.member.repository.UserRepository;
@@ -111,6 +105,27 @@ public class InvestServiceImpl implements InvestService {
                     return new CategorySumDTO(category, totalPrice, percentage);
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<RecommendedProductDTO> getRecommendedProducts() throws Exception {
+        MaxPercentageCategoryDTO maxCategory = getMaxPercentageCategory();
+        List<RecommendedProductDTO> recommendedProducts = new ArrayList<>();
+
+        if ("공격형".equals(maxCategory.getTendency())) {
+            List<CoinList> coins = coinRepository.findTop5ByOrderByPriceDesc();
+            List<StockList> stocks = stockRepository.findTop5ByOrderByAvgBuyPriceDesc();
+
+            recommendedProducts.addAll(coins.stream()
+                    .map(coin -> new RecommendedProductDTO("coin", coin.getCoinName(), Integer.parseInt(String.valueOf(coin.getClosingPrice())) ))
+                    .collect(Collectors.toList()));
+
+            recommendedProducts.addAll(stocks.stream()
+                    .map(stock -> new RecommendedProductDTO("stock", stock.getKrStockNm(), stock.getPrice()))
+                    .collect(Collectors.toList()));
+        }
+
+        return recommendedProducts;
     }
 
 

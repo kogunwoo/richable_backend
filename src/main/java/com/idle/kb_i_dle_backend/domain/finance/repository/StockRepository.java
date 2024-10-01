@@ -1,5 +1,6 @@
 package com.idle.kb_i_dle_backend.domain.finance.repository;
 
+import com.idle.kb_i_dle_backend.domain.finance.entity.StockList;
 import com.idle.kb_i_dle_backend.domain.finance.entity.UserBond;
 import com.idle.kb_i_dle_backend.domain.finance.entity.UserStock;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
@@ -70,6 +71,5 @@ public interface StockRepository extends JpaRepository<UserStock,Integer> {
     List<UserStock> findByUid(Member uid);
 
 
-
-
+    List<StockList> findTop5ByOrderByAvgBuyPriceDesc();
 }

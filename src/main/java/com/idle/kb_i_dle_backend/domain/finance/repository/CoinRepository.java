@@ -1,5 +1,6 @@
 package com.idle.kb_i_dle_backend.domain.finance.repository;
 
+import com.idle.kb_i_dle_backend.domain.finance.entity.CoinList;
 import com.idle.kb_i_dle_backend.domain.finance.entity.UserBond;
 import com.idle.kb_i_dle_backend.domain.finance.entity.UserCoin;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
@@ -66,6 +67,6 @@ public interface CoinRepository extends JpaRepository <UserCoin,Integer> {
 
     List<UserCoin> findByUid(Member uid);
 
-
+    List<CoinList> findTop5ByOrderByPriceDesc();
 }
 
