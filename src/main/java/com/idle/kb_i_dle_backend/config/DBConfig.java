@@ -27,8 +27,7 @@ import java.io.IOException;
 
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories(basePackages = "com.idle.kb_i_dle_backend.**.repository")
-@MapperScan(basePackages = {"com.idle.kb_i_dle_backend.member.mapper"})
+@EnableJpaRepositories(basePackages = "com.idle.kb_i_dle_backend.domain.**.repository")
 @PropertySource({"classpath:/application.properties"})
 public class DBConfig {
 
@@ -103,32 +102,5 @@ public class DBConfig {
         bean.setJpaProperties(properties);
 
         return bean;
-    }
-
-    /**
-     * MyBatis 설정 파일 위치와 Mapper 파일 위치 등록.
-     *
-     * @param dataSource
-     * @return
-     * @throws IOException
-     */
-    @Bean
-    public SqlSessionFactoryBean sqlSessionFactory(DataSource dataSource) throws IOException {
-        SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
-        factoryBean.setDataSource(dataSource);
-        factoryBean.setConfigLocation(applicationContext.getResource("classpath:/mybatis/mybatis-config.xml"));
-        factoryBean.setMapperLocations(applicationContext.getResources("classpath:/mybatis/mappers/*.xml"));
-        return factoryBean;
-    }
-
-    /**
-     * SqlSessionTemplate는 MyBatis 쿼리문을 수행하는 역할을 합니다.
-     *
-     * @param sqlSessionFactory
-     * @return
-     */
-    @Bean
-    public SqlSessionTemplate sqlSession(SqlSessionFactory sqlSessionFactory) {
-        return new SqlSessionTemplate(sqlSessionFactory);
     }
 }

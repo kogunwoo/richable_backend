@@ -1,10 +1,10 @@
 package com.idle.kb_i_dle_backend.config;
 
-import com.idle.kb_i_dle_backend.member.filter.JwtAuthenticationFilter;
-import com.idle.kb_i_dle_backend.member.handler.CustomAccessDeniedHandler;
-import com.idle.kb_i_dle_backend.member.handler.CustomAuthenticationEntryPoint;
-import com.idle.kb_i_dle_backend.member.service.CustomUserDetailsService;
-import com.idle.kb_i_dle_backend.member.util.JwtProcessor;
+import com.idle.kb_i_dle_backend.domain.member.filter.JwtAuthenticationFilter;
+import com.idle.kb_i_dle_backend.domain.member.handler.CustomAccessDeniedHandler;
+import com.idle.kb_i_dle_backend.domain.member.handler.CustomAuthenticationEntryPoint;
+import com.idle.kb_i_dle_backend.domain.member.service.CustomUserDetailsService;
+import com.idle.kb_i_dle_backend.domain.member.util.JwtProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -24,11 +24,11 @@ import org.springframework.web.filter.CorsFilter;
 @Configuration
 @EnableWebSecurity
 @ComponentScan(basePackages = {
-        "com.idle.kb_i_dle_backend.member.service",
-        "com.idle.kb_i_dle_backend.member.controller",
-        "com.idle.kb_i_dle_backend.member.filter",
-        "com.idle.kb_i_dle_backend.member.handler",
-        "com.idle.kb_i_dle_backend.member.util",
+        "com.idle.kb_i_dle_backend.domain.member.service",
+        "com.idle.kb_i_dle_backend.domain.member.controller",
+        "com.idle.kb_i_dle_backend.domain.member.filter",
+        "com.idle.kb_i_dle_backend.domain.member.handler",
+        "com.idle.kb_i_dle_backend.domain.member.util",
         "com.idle.kb_i_dle_backend.config"
 })
 public class SecurityConfig {
