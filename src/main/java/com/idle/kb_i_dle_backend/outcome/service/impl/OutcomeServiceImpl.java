@@ -1,24 +1,24 @@
-package com.idle.kb_i_dle_backend.outcome.service.impl;
+package com.idle.kb_i_dle_backend.domain.outcome.service;
 
-import com.idle.kb_i_dle_backend.member.entity.User;
-import com.idle.kb_i_dle_backend.member.repository.UserRepository;
-import com.idle.kb_i_dle_backend.member.service.MemberService;
-import com.idle.kb_i_dle_backend.outcome.dto.*;
-import com.idle.kb_i_dle_backend.outcome.entity.OutcomeAverage;
-import com.idle.kb_i_dle_backend.outcome.entity.OutcomeCategory;
-import com.idle.kb_i_dle_backend.outcome.entity.OutcomeUser;
-import com.idle.kb_i_dle_backend.outcome.repository.AverageOutcomeRepository;
-import com.idle.kb_i_dle_backend.outcome.repository.CategoryRepository;
-import com.idle.kb_i_dle_backend.outcome.repository.OutcomeUserRepository;
+import com.idle.kb_i_dle_backend.domain.member.entity.Member;
+import com.idle.kb_i_dle_backend.domain.member.repository.UserRepository;
+import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
+import com.idle.kb_i_dle_backend.domain.outcome.dto.*;
+import com.idle.kb_i_dle_backend.domain.outcome.entity.OutcomeAverage;
+import com.idle.kb_i_dle_backend.domain.outcome.entity.OutcomeCategory;
+import com.idle.kb_i_dle_backend.domain.outcome.entity.OutcomeUser;
+import com.idle.kb_i_dle_backend.domain.outcome.repository.AverageOutcomeRepository;
+import com.idle.kb_i_dle_backend.domain.outcome.repository.CategoryRepository;
+import com.idle.kb_i_dle_backend.domain.outcome.repository.OutcomeUserRepository;
 
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.Period;
 
-import com.idle.kb_i_dle_backend.outcome.service.OutcomeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.javassist.NotFoundException;
+
+import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.expression.ParseException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -94,12 +94,12 @@ public class OutcomeServiceImpl implements OutcomeService {
     @Transactional
     public CompareAverageCategoryOutcomeDTO compareWithAverage(int uid, Date start, Date end, String category) {
         //먼저 사용자 uid를 가져오고
-        Optional<User> optionalUser = memberService.findMemberByUid(uid);
+        Optional<Member> optionalUser = memberService.findMemberByUid(uid);
         //dto 생성
         CompareAverageCategoryOutcomeDTO compareAverageCategoryOutcomeDTO = new CompareAverageCategoryOutcomeDTO();
 
         if(optionalUser.isPresent()) {
-            User user = optionalUser.get();
+            Member user = optionalUser.get();
             //사용자의 나이대를 가져온다.
             String ageRange =  getUserAgeRange(getUserAge(user.getBirth_year()));
             return getCompareAverageCategoryOutcomeDTO(user, start, end, category, ageRange, compareAverageCategoryOutcomeDTO);
@@ -119,12 +119,12 @@ public class OutcomeServiceImpl implements OutcomeService {
     @Override
     public PossibleSaveOutcomeInMonthDTO findPossibleSaveOutcome(Integer uid, Date start, Date end) {
         //먼저 사용자 uid를 가져오고
-        Optional<User> optionalUser = memberService.findMemberByUid(uid);
+        Optional<Member> optionalUser = memberService.findMemberByUid(uid);
         //dto 생성
         PossibleSaveOutcomeInMonthDTO possibleSaveOutcomeInMonthDTO = new PossibleSaveOutcomeInMonthDTO();
 
         if(optionalUser.isPresent()) {
-            User user = optionalUser.get();
+            Member user = optionalUser.get();
             //사용자의 나이대를 가져온다.
             String ageRange =  getUserAgeRange(getUserAge(user.getBirth_year()));
 
@@ -154,7 +154,7 @@ public class OutcomeServiceImpl implements OutcomeService {
      * @param compareAverageCategoryOutcomeDTO
      * @return
      */
-    public CompareAverageCategoryOutcomeDTO getCompareAverageCategoryOutcomeDTO(User user, Date start, Date end, String category, String ageRange, CompareAverageCategoryOutcomeDTO compareAverageCategoryOutcomeDTO){
+    public CompareAverageCategoryOutcomeDTO getCompareAverageCategoryOutcomeDTO(Member user, Date start, Date end, String category, String ageRange, CompareAverageCategoryOutcomeDTO compareAverageCategoryOutcomeDTO){
         //사용자의 한달 동안 소비 조회
         List<OutcomeUser> outcomeUsers = outcomeUserRepository.findByUidAndDateBetween(user, start, end);
 
@@ -223,10 +223,10 @@ public class OutcomeServiceImpl implements OutcomeService {
 
     @Override
     public List<OutcomeUserDTO> getOutcomeList() throws Exception {
-        User tempUser = userRepository.findByUid(1).orElseThrow();
-        List<OutcomeUser> outcomes = outcomeUserRepository.findByUid(tempUser);
+        Member tempMember = userRepository.findByUid(1).orElseThrow();
+        List<OutcomeUser> outcomes = outcomeUserRepository.findByUid(tempMember);
 
-        if (outcomes.isEmpty()) throw new NotFoundException("");
+        if (outcomes.isEmpty()) throw new ChangeSetPersister.NotFoundException();
 
         List<OutcomeUserDTO> outcomeList = new ArrayList<>();
         for (OutcomeUser o : outcomes) {
@@ -239,12 +239,12 @@ public class OutcomeServiceImpl implements OutcomeService {
 
     @Override
     public OutcomeUserDTO getOutcomeByIndex(Integer index) throws Exception {
-        User tempUser = userRepository.findByUid(1).orElseThrow();
+        Member tempMember = userRepository.findByUid(1).orElseThrow();
         OutcomeUser isOutcomeUser = outcomeUserRepository.findByIndex(index)
                 .orElseThrow(() -> new IllegalArgumentException("Outcome not found with index: " + index));
 
         // 유저가 소유한 outcome인지 확인
-        if (!isOutcomeUser.getUid().getUid().equals(tempUser.getUid())) {
+        if (!isOutcomeUser.getUid().getUid().equals(tempMember.getUid())) {
             throw new AccessDeniedException("You do not have permission to delete this outcome.");
         }
 
@@ -253,8 +253,8 @@ public class OutcomeServiceImpl implements OutcomeService {
 
     @Override
     public OutcomeUserDTO addOutcome(OutcomeUserDTO outcomeUserDTO) throws ParseException {
-        User tempUser = userRepository.findByUid(1).orElseThrow();
-        OutcomeUser savedOutcome = outcomeUserRepository.save(OutcomeUserDTO.convertToEntity(tempUser, outcomeUserDTO));
+        Member tempMember = userRepository.findByUid(1).orElseThrow();
+        OutcomeUser savedOutcome = outcomeUserRepository.save(OutcomeUserDTO.convertToEntity(tempMember, outcomeUserDTO));
 
         return OutcomeUserDTO.convertToDTO(savedOutcome);
     }
@@ -262,18 +262,18 @@ public class OutcomeServiceImpl implements OutcomeService {
     @Transactional
     @Override
     public OutcomeUserDTO updateOutcome(OutcomeUserDTO outcomeUserDTO) throws ParseException {
-        User tempUser = userRepository.findByUid(1).orElseThrow();
+        Member tempMember = userRepository.findByUid(1).orElseThrow();
 
         // Outcome 조회
         OutcomeUser isOutcomeUser = outcomeUserRepository.findByIndex(outcomeUserDTO.getIndex())
                 .orElseThrow(() -> new IllegalArgumentException("Outcome not found with id: " + outcomeUserDTO.getIndex()));
 
-        // User 조회 (User 객체가 없을 경우 예외 처리)
-        User isUser = userRepository.findByUid(tempUser.getUid())
+        // Member 조회 (User 객체가 없을 경우 예외 처리)
+        Member isMember = userRepository.findByUid(tempMember.getUid())
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + tempUser.getUid()));
 
-        // Outcome의 소유자가 해당 User인지 확인
-        if (!isOutcomeUser.getUid().equals(isUser)) {
+        // Outcome의 소유자가 해당 Member인지 확인
+        if (!isOutcomeUser.getUid().equals(isMember)) {
             throw new AccessDeniedException("You do not have permission to modify this outcome.");
         }
 
@@ -289,12 +289,12 @@ public class OutcomeServiceImpl implements OutcomeService {
     @Transactional
     @Override
     public Integer deleteOutcomeByUidAndIndex(Integer index) {
-        User tempUser = userRepository.findByUid(1).orElseThrow();
+        Member tempMember = userRepository.findByUid(1).orElseThrow();
         OutcomeUser isOutcomeUser = outcomeUserRepository.findByIndex(index)
                 .orElseThrow(() -> new IllegalArgumentException("Outcome not found with index: " + index));
 
-        // 유저가 소유한 소비인지 확인
-        if (!isOutcomeUser.getUid().getUid().equals(tempUser.getUid())) {
+        // 멤버가 소유한 소비인지 확인
+        if (!isOutcomeUser.getUid().getUid().equals(tempMember.getUid())) {
             throw new AccessDeniedException("You do not have permission to delete this outcome.");
         }
 

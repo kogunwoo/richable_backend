@@ -4,7 +4,7 @@
 2030 목표 자산 형성을 위한 맞춤 관리 서비스 <strong>리처블(Richable)</strong> 입니다.
 <br/>
 
-![image 96](https://github.com/user-attachments/assets/f3b78481-85fd-4392-b69e-2dc26f4268d3)
+![image 96](https://github.com/member-attachments/assets/f3b78481-85fd-4392-b69e-2dc26f4268d3)
 
 <br/>
 <br/>
@@ -103,7 +103,7 @@
 <br/>
 
 # ⚒ 프로젝트 구조(Project Architecture)
-<img width="1024" alt="아키텍쳐" src="https://github.com/user-attachments/assets/dc2db2a4-f950-4a82-b91c-7f75a255b465">
+<img width="1024" alt="아키텍쳐" src="https://github.com/member-attachments/assets/dc2db2a4-f950-4a82-b91c-7f75a255b465">
 
 
 # ⚒ 개발 가이드
