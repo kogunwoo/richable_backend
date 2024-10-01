@@ -4,6 +4,9 @@ import com.idle.kb_i_dle_backend.domain.income.entity.Income;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
@@ -14,8 +17,12 @@ import java.util.Optional;
 @Repository
 public interface IncomeRepository extends JpaRepository<Income, Long> {
 
-    List<Income> findByUidAndDateBetween(Member uid, Date startDate, Date endDate);
-
+    @Query("SELECT I " +
+            "FROM Income I " +
+            "WHERE I.uid = :uid " +
+            "and YEAR (I.date) = :year " +
+            "and month (I.date) = :month")
+    List<Income> findByUidAndYearAndMonth(@Param("uid") Member uid, @Param("year") int year, @Param("month") int month);
     // 소득 전체 조회
     List<Income> findByUid(Member uid);
 

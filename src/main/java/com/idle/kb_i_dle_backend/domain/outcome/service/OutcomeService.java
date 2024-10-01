@@ -12,9 +12,11 @@ public interface OutcomeService {
 
     MonthOutcomeDTO findMonthOutcome(Integer year, Integer month);
 
-    CompareAverageCategoryOutcomeDTO compareWithAverage(int uid, Date start, Date end, String category);
+    CompareAverageCategoryOutcomeDTO compareWithAverage(int uid, int year, int month, String category);
 
-    PossibleSaveOutcomeInMonthDTO findPossibleSaveOutcome(Integer uid, Date start, Date end);
+    PossibleSaveOutcomeInMonthDTO findPossibleSaveOutcome(Integer uid, int year, int month);
+
+    Simulation6MonthDTO calculate6MonthSaveOutcome(Integer uid, int year, int month) throws  Exception;
 
     // 소비 CRUD 추가
     List<OutcomeUserDTO> getOutcomeList() throws Exception;
