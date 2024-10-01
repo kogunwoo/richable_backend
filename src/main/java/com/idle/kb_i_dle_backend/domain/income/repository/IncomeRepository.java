@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import org.springframework.data.repository.query.Param;
@@ -13,8 +15,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 @Repository
-public interface IncomeRepository extends CrudRepository<Income, Integer> {
-    Income findByIndex(int id);
+public interface IncomeRepository extends JpaRepository<Income, Long> {
 
     @Query("SELECT I " +
             "FROM Income I " +
