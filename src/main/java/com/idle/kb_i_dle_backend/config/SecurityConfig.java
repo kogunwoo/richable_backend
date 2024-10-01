@@ -89,6 +89,8 @@ public class SecurityConfig {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/**").permitAll()
+//                .antMatchers("/invest/**").authenticated()  // /invest/** 경로에 대해 인증 요구
+//                .antMatchers("/member/login", "/member/register", "/member/naverlogin", "/member/naverCallback").permitAll()  // 로그인 및 회원가입 관련 경로는 모두 허용
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling()
