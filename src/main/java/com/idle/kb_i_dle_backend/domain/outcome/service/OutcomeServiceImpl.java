@@ -1,6 +1,6 @@
 package com.idle.kb_i_dle_backend.domain.outcome.service;
 
-import com.idle.kb_i_dle_backend.domain.member.entity.User;
+import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import com.idle.kb_i_dle_backend.domain.member.repository.UserRepository;
 import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
 import com.idle.kb_i_dle_backend.domain.outcome.dto.*;
@@ -90,12 +90,12 @@ public class OutcomeServiceImpl implements OutcomeService {
     @Transactional
     public CompareAverageCategoryOutcomeDTO compareWithAverage(int uid, Date start, Date end, String category) {
         //먼저 사용자 uid를 가져오고
-        Optional<User> optionalUser = memberService.findMemberByUid(uid);
+        Optional<Member> optionalUser = memberService.findMemberByUid(uid);
         //dto 생성
         CompareAverageCategoryOutcomeDTO compareAverageCategoryOutcomeDTO = new CompareAverageCategoryOutcomeDTO();
 
         if(optionalUser.isPresent()) {
-            User user = optionalUser.get();
+            Member user = optionalUser.get();
             //사용자의 나이대를 가져온다.
             String ageRange =  getUserAgeRange(getUserAge(user.getBirth_year()));
             return getCompareAverageCategoryOutcomeDTO(user, start, end, category, ageRange, compareAverageCategoryOutcomeDTO);
@@ -115,12 +115,12 @@ public class OutcomeServiceImpl implements OutcomeService {
     @Override
     public PossibleSaveOutcomeInMonthDTO findPossibleSaveOutcome(Integer uid, Date start, Date end) {
         //먼저 사용자 uid를 가져오고
-        Optional<User> optionalUser = memberService.findMemberByUid(uid);
+        Optional<Member> optionalUser = memberService.findMemberByUid(uid);
         //dto 생성
         PossibleSaveOutcomeInMonthDTO possibleSaveOutcomeInMonthDTO = new PossibleSaveOutcomeInMonthDTO();
 
         if(optionalUser.isPresent()) {
-            User user = optionalUser.get();
+            Member user = optionalUser.get();
             //사용자의 나이대를 가져온다.
             String ageRange =  getUserAgeRange(getUserAge(user.getBirth_year()));
 
@@ -150,7 +150,7 @@ public class OutcomeServiceImpl implements OutcomeService {
      * @param compareAverageCategoryOutcomeDTO
      * @return
      */
-    public CompareAverageCategoryOutcomeDTO getCompareAverageCategoryOutcomeDTO(User user, Date start, Date end, String category, String ageRange, CompareAverageCategoryOutcomeDTO compareAverageCategoryOutcomeDTO){
+    public CompareAverageCategoryOutcomeDTO getCompareAverageCategoryOutcomeDTO(Member user, Date start, Date end, String category, String ageRange, CompareAverageCategoryOutcomeDTO compareAverageCategoryOutcomeDTO){
         //사용자의 한달 동안 소비 조회
         List<OutcomeUser> outcomeUsers = outcomeUserRepository.findByUidAndDateBetween(user, start, end);
 

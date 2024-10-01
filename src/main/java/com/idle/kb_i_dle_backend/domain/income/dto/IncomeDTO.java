@@ -1,7 +1,7 @@
 package com.idle.kb_i_dle_backend.domain.income.dto;
 
 import com.idle.kb_i_dle_backend.domain.income.entity.Income;
-import com.idle.kb_i_dle_backend.domain.member.entity.User;
+import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,7 +26,7 @@ public class IncomeDTO {
         return new IncomeDTO(income.getIndex(), income.getType(), dateFormat.format(income.getDate()), income.getAmount(), income.getDescript(), income.getMemo());
     }
 
-    public static Income convertToEntity(User user, IncomeDTO incomeDTO) throws ParseException {
+    public static Income convertToEntity(Member user, IncomeDTO incomeDTO) throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date iDate = (incomeDTO.getIncomeDate() != null)
                 ? dateFormat.parse(incomeDTO.getIncomeDate())

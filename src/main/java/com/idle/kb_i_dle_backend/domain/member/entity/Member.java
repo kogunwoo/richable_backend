@@ -14,7 +14,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
+public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer uid;
@@ -50,10 +50,12 @@ public class User {
     private Boolean agreementFinance;
 
     @Column(name = "is_mentor")
-    private Boolean isMentor;
+    @Builder.Default
+    private Boolean isMentor=false;
 
     @Column(name = "is_certification")
-    private Boolean isCertification;
+    @Builder.Default
+    private Boolean isCertification=false;
 
     @Column(length = 100)
     private String nickname;

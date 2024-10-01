@@ -21,7 +21,7 @@ public class CustomUser extends User {
         this.member = member;
     }
 
-    public static CustomUser from(com.idle.kb_i_dle_backend.domain.member.entity.User user) {
+    public static CustomUser from(com.idle.kb_i_dle_backend.domain.member.entity.Member user) {
         Collection<GrantedAuthority> authorities = Collections.emptyList();
         if (user.getAuth() != null && !user.getAuth().isEmpty()) {
             authorities = Arrays.stream(user.getAuth().split(","))

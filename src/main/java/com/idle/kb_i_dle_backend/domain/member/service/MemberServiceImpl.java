@@ -2,7 +2,7 @@ package com.idle.kb_i_dle_backend.domain.member.service;
 
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberJoinDTO;
-import com.idle.kb_i_dle_backend.domain.member.entity.User;
+import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import com.idle.kb_i_dle_backend.domain.member.repository.UserRepository;
 import java.util.*;
 import lombok.extern.slf4j.Slf4j;
@@ -41,13 +41,13 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public User getMember(String id) {
+    public Member getMember(String id) {
         return userRepository.findById(id);
     }
 
 
     @Override
-    public Optional<User> findMemberByUid(int id){
+    public Optional<Member> findMemberByUid(int id){
         return userRepository.findByUid(id);
     }
 
@@ -82,7 +82,7 @@ public class MemberServiceImpl implements MemberService {
             String encodePassword = passwordEncoder.encode(memberjoindto.getPassword());
 
             log.debug("Building User entity");
-            User newUser = User.builder()
+            Member newUser = Member.builder()
                     .id(memberjoindto.getId())
                     .password(encodePassword)
                     .nickname(memberjoindto.getNickname())
@@ -103,7 +103,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public MemberDTO findById(String id) {
-        User user = userRepository.findById(id);
+        Member user = userRepository.findById(id);
         if (user != null) {
             return new MemberDTO(
                     user.getUid(),
@@ -132,7 +132,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public boolean checkAgree(boolean info, boolean finance, String id) {
-        User user = userRepository.findById(id);
+        Member user = userRepository.findById(id);
         if (user != null) {
             user.setAgreementInfo(info);
             user.setAgreementFinance(finance);
@@ -144,7 +144,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public String findIdByEmail(String email) {
-        User user = userRepository.findByEmail(email);
+        Member user = userRepository.findByEmail(email);
         return user != null ? user.getId() : null;
     }
 
@@ -177,7 +177,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public boolean resetPassword(String id, String newPassword) {
-        User user = userRepository.findById(id);
+        Member user = userRepository.findById(id);
         if (user != null) {
             String encodedPassword = passwordEncoder.encode(newPassword);
             user.setPassword(encodedPassword); // Update password
