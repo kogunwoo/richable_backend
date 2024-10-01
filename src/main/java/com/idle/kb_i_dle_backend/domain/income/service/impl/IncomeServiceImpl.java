@@ -4,7 +4,7 @@ import com.idle.kb_i_dle_backend.domain.income.dto.IncomeDTO;
 import com.idle.kb_i_dle_backend.domain.income.entity.Income;
 import com.idle.kb_i_dle_backend.domain.income.repository.IncomeRepository;
 import com.idle.kb_i_dle_backend.domain.income.service.IncomeService;
-import com.idle.kb_i_dle_backend.domain.member.entity.User;
+import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import com.idle.kb_i_dle_backend.domain.member.repository.UserRepository;
 import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.security.access.AccessDeniedException;
@@ -29,7 +29,7 @@ public class IncomeServiceImpl implements IncomeService {
 
     @Override
     public List<IncomeDTO> getIncomeList() throws Exception {
-        User tempUser = userRepository.findByUid(1).orElseThrow();
+        Member tempUser = userRepository.findByUid(1).orElseThrow();
         List<Income> incomes = incomeRepository.findByUid(tempUser);
 
         if (incomes.isEmpty()) throw new NotFoundException("");
@@ -54,7 +54,7 @@ public class IncomeServiceImpl implements IncomeService {
 
     @Override
     public IncomeDTO getIncomeByIndex(Integer index) throws Exception {
-        User tempUser = userRepository.findByUid(1).orElseThrow();
+        Member tempUser = userRepository.findByUid(1).orElseThrow();
         Income isIncome = incomeRepository.findByIndex(index)
                 .orElseThrow(() -> new IllegalArgumentException("Income not found with index: " + index));
 
@@ -71,7 +71,7 @@ public class IncomeServiceImpl implements IncomeService {
 
     @Override
     public IncomeDTO addIncome(IncomeDTO incomeDTO) throws ParseException {
-        User tempUser = userRepository.findByUid(1).orElseThrow();
+        Member tempUser = userRepository.findByUid(1).orElseThrow();
         Income savedIncome = incomeRepository.save(IncomeDTO.convertToEntity(tempUser, incomeDTO));
 
         return IncomeDTO.convertToDTO(savedIncome);
@@ -80,14 +80,14 @@ public class IncomeServiceImpl implements IncomeService {
     @Transactional
     @Override
     public IncomeDTO updateIncome(IncomeDTO incomeDTO) throws ParseException {
-        User tempUser = userRepository.findByUid(1).orElseThrow();
+        Member tempUser = userRepository.findByUid(1).orElseThrow();
 
         // Income 조회
         Income isIncome = incomeRepository.findByIndex(incomeDTO.getIncomeId())
                 .orElseThrow(() -> new IllegalArgumentException("Income not found with id: " + incomeDTO.getIncomeId()));
 
         // User 조회 (User 객체가 없을 경우 예외 처리)
-        User isUser = userRepository.findByUid(tempUser.getUid())
+        Member isUser = userRepository.findByUid(tempUser.getUid())
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + tempUser.getUid()));
 
         // income의 소유자가 해당 User인지 확인
@@ -108,7 +108,7 @@ public class IncomeServiceImpl implements IncomeService {
     @Transactional
     @Override
     public Integer deleteIncomeByUidAndIndex(Integer index) {
-        User tempUser = userRepository.findByUid(1).orElseThrow();
+        Member tempUser = userRepository.findByUid(1).orElseThrow();
         Income isIncome = incomeRepository.findByIndex(index)
                 .orElseThrow(() -> new IllegalArgumentException("Income not found with index: " + index));
 

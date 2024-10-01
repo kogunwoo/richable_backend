@@ -4,8 +4,8 @@ import com.idle.kb_i_dle_backend.domain.member.dto.AuthResultDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.CustomUser;
 import com.idle.kb_i_dle_backend.domain.member.dto.LoginDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberDTO;
+import com.idle.kb_i_dle_backend.domain.member.dto.MemberInfoDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberJoinDTO;
-import com.idle.kb_i_dle_backend.domain.member.dto.UserInfoDTO;
 import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
 import com.idle.kb_i_dle_backend.domain.member.util.JwtProcessor;
 import java.io.BufferedReader;
@@ -64,7 +64,7 @@ public class MemberController {
             Authentication authentication = authenticationManager.authenticate(authenticationToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
             // Assuming you have a method to fetch UserInfoDTO (e.g., from the authenticated user details)
-            UserInfoDTO userInfo = getUserInfoFromAuthentication(authentication);
+            MemberInfoDTO userInfo = getUserInfoFromAuthentication(authentication);
             // Generate JWT token with uid
             String jwtToken = jwtProcessor.generateToken(userInfo.getId(), userInfo.getUid(), userInfo.getNickname());
             // Return the AuthResultDTO with token and user info
@@ -77,10 +77,10 @@ public class MemberController {
     }
 
     // Helper method to retrieve user information from the authentication object
-    private UserInfoDTO getUserInfoFromAuthentication(Authentication authentication) {
+    private MemberInfoDTO getUserInfoFromAuthentication(Authentication authentication) {
         CustomUser customUser = (CustomUser) authentication.getPrincipal();
         MemberDTO member = customUser.getMember();  // Retrieve the MemberDTO object
-        return new UserInfoDTO(member.getUid(), member.getId(), member.getNickname(), member.getAuth().toString());
+        return new MemberInfoDTO(member.getUid(), member.getId(), member.getNickname(), member.getAuth().toString());
     }
 
     @Value("${naver.client.id}")

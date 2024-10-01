@@ -1,7 +1,7 @@
 package com.idle.kb_i_dle_backend.domain.finance.dto;
 
 import com.idle.kb_i_dle_backend.domain.finance.entity.Spot;
-import com.idle.kb_i_dle_backend.domain.member.entity.User;
+import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,11 +25,11 @@ public class SpotDTO {
         return new SpotDTO(spot.getIndex(), spot.getCategory(), spot.getName(), spot.getPrice(), dateFormat.format(spot.getAddDate()));
     }
 
-    public static Spot convertToEntity(User user, SpotDTO spotDTO) throws ParseException {
+    public static Spot convertToEntity(Member member, SpotDTO spotDTO) throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date addDate = (spotDTO.getAddDate() != null)
                 ? dateFormat.parse(spotDTO.getAddDate())
                 : null;  // null 값 유지
-        return new Spot(spotDTO.getIndex(), user, spotDTO.getCategory(), spotDTO.getName(), spotDTO.getPrice(), "spot", addDate, null);
+        return new Spot(spotDTO.getIndex(), member, spotDTO.getCategory(), spotDTO.getName(), spotDTO.getPrice(), "spot", addDate, null);
     }
 }

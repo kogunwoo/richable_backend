@@ -3,7 +3,7 @@ package com.idle.kb_i_dle_backend.domain.member.handler;
 import com.idle.kb_i_dle_backend.domain.member.dto.AuthResultDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.CustomUser;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberDTO;
-import com.idle.kb_i_dle_backend.domain.member.dto.UserInfoDTO;
+import com.idle.kb_i_dle_backend.domain.member.dto.MemberInfoDTO;
 import com.idle.kb_i_dle_backend.domain.member.util.JsonResponse;
 import com.idle.kb_i_dle_backend.domain.member.util.JwtProcessor;
 import java.io.IOException;
@@ -32,7 +32,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         // Generate token
         String token = jwtProcessor.generateToken(username, uid, nickname);
         // Combine token and user info into AuthResultDTO
-        UserInfoDTO userInfo = new UserInfoDTO(uid, username, nickname,auth);
+        MemberInfoDTO userInfo = new MemberInfoDTO(uid, username, nickname,auth);
         return new AuthResultDTO(token, userInfo);
     }
 
