@@ -13,4 +13,6 @@ public interface OutcomeService {
     MonthOutcomeDTO findMonthOutcome(Integer year, Integer month);
 
     CompareAverageCategoryOutcomeDTO compareWithAverage(int uid, Date start, Date end, String category);
+
+    PossibleSaveOutcomeInMonthDTO findPossibleSaveOutcome(Integer uid, Date start, Date end);
 }
