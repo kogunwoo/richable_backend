@@ -17,4 +17,6 @@ public class MemberJoinDTO {
     String email;
     Integer birth_year;
     String auth;
+    boolean agreementInfo;
+    boolean agreementFinance;
 }

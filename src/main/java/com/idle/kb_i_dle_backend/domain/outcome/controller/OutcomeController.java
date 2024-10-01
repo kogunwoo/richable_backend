@@ -86,9 +86,9 @@ public class OutcomeController {
 
 
     @GetMapping("/category/sum/{cntYear}/{cntMonth}")
-    public ResponseEntity<ResponseCategorySumListDTO> categorySumList(@PathVariable int cntYear, @PathVariable int cntMonth) {
+    public ResponseEntity<ResponseDTO> categorySumList(@PathVariable int cntYear, @PathVariable int cntMonth) {
         ResponseCategorySumListDTO responseCategorySumListDTO = outcomeService.findCategorySum(cntYear, cntMonth);
-        return ResponseEntity.ok(responseCategorySumListDTO);
+        return ResponseEntity.ok(new ResponseDTO(true ,responseCategorySumListDTO) );
     }
 
     @GetMapping("/category/dailysum/{cntYear}/{cntMonth}")

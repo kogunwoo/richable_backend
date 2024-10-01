@@ -1,6 +1,6 @@
 package com.idle.kb_i_dle_backend.domain.member.filter;
 
-import com.idle.kb_i_dle_backend.domain.member.service.CustomUserDetailsService;
+import com.idle.kb_i_dle_backend.domain.member.service.CustomMemberDetailsService;
 import com.idle.kb_i_dle_backend.domain.member.util.JwtProcessor;
 import java.io.IOException;
 import javax.servlet.FilterChain;
@@ -25,10 +25,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     public static final String BEARER_PREFIX = "Bearer "; // 끝에 공백 있음
 
     private final JwtProcessor jwtProcessor;
-    private final CustomUserDetailsService customUserDetailsService;
+    private final CustomMemberDetailsService customUserDetailsService;
 
 
-    public JwtAuthenticationFilter(JwtProcessor jwtProcessor, CustomUserDetailsService customUserDetailsService) {
+    public JwtAuthenticationFilter(JwtProcessor jwtProcessor, CustomMemberDetailsService customUserDetailsService) {
         this.jwtProcessor = jwtProcessor;
         this.customUserDetailsService = customUserDetailsService;
     }

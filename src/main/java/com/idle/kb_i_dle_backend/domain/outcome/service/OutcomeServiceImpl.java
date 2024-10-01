@@ -1,8 +1,7 @@
 package com.idle.kb_i_dle_backend.domain.outcome.service;
 
 import com.idle.kb_i_dle_backend.domain.income.service.IncomeService;
-import com.idle.kb_i_dle_backend.domain.member.entity.User;
-import com.idle.kb_i_dle_backend.domain.member.repository.UserRepository;
+import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
 import com.idle.kb_i_dle_backend.domain.outcome.dto.*;
 import com.idle.kb_i_dle_backend.domain.outcome.entity.OutcomeAverage;
@@ -44,9 +43,14 @@ public class OutcomeServiceImpl implements OutcomeService {
      */
     @Override
     public ResponseCategorySumListDTO findCategorySum(Integer year, Integer month) {
-        List<CategorySumDTO> categorySumDTOS = outcomeUserRepository.findCategorySumByUidAndYearAndMonth(1 , year, month);
-        Long sum = categorySumDTOS.stream().mapToLong(CategorySumDTO::getSum).sum();
-        return new ResponseCategorySumListDTO(categorySumDTOS, sum);
+        Optional<Member> optionalMember = memberService.findMemberByUid(1);
+        if(optionalMember.isPresent()) {
+            Member member = optionalMember.get();
+            List<CategorySumDTO> categorySumDTOS = outcomeUserRepository.findCategorySumByUidAndYearAndMonth(member, year, month);
+            Long sum = categorySumDTOS.stream().mapToLong(CategorySumDTO::getSum).sum();
+            return new ResponseCategorySumListDTO(categorySumDTOS, sum);
+        }
+        return new ResponseCategorySumListDTO(new ArrayList<>(), 0L);
     }
 
 
@@ -58,10 +62,10 @@ public class OutcomeServiceImpl implements OutcomeService {
      */
     @Override
     public MonthOutcomeDTO findMonthOutcome(Integer year, Integer month) {
-        Optional<User> optionalUser = memberService.findMemberByUid(1);
+        Optional<Member> optionalUser = memberService.findMemberByUid(1);
         MonthOutcomeDTO monthOutcomeDTO;
         if(optionalUser.isPresent()) {
-            User user = optionalUser.get();
+            Member user = optionalUser.get();
             List<OutcomeUser> consumes = outcomeUserRepository.findAmountAllByUidAndYearAndMonth(user, year, month);
             List<Long> dailyAmount = new ArrayList<>(Collections.nCopies(31, 0L));
             for(OutcomeUser consume : consumes) {
@@ -99,12 +103,12 @@ public class OutcomeServiceImpl implements OutcomeService {
     @Transactional
     public CompareAverageCategoryOutcomeDTO compareWithAverage(int uid, int year, int month, String category) {
         //먼저 사용자 uid를 가져오고
-        Optional<User> optionalUser = memberService.findMemberByUid(uid);
+        Optional<Member> optionalUser = memberService.findMemberByUid(uid);
         //dto 생성
         CompareAverageCategoryOutcomeDTO compareAverageCategoryOutcomeDTO = new CompareAverageCategoryOutcomeDTO();
 
         if(optionalUser.isPresent()) {
-            User user = optionalUser.get();
+            Member user = optionalUser.get();
             //사용자의 나이대를 가져온다.
             String ageRange =  getUserAgeRange(getUserAge(user.getBirth_year()));
             return getCompareAverageCategoryOutcomeDTO(user, year, month, category, ageRange, compareAverageCategoryOutcomeDTO);
@@ -124,12 +128,12 @@ public class OutcomeServiceImpl implements OutcomeService {
     @Override
     public PossibleSaveOutcomeInMonthDTO findPossibleSaveOutcome(Integer uid, int year, int month) {
         //먼저 사용자 uid를 가져오고
-        Optional<User> optionalUser = memberService.findMemberByUid(uid);
+        Optional<Member> optionalUser = memberService.findMemberByUid(uid);
         //dto 생성
         PossibleSaveOutcomeInMonthDTO possibleSaveOutcomeInMonthDTO = new PossibleSaveOutcomeInMonthDTO();
 
         if(optionalUser.isPresent()) {
-            User user = optionalUser.get();
+            Member user = optionalUser.get();
             //사용자의 나이대를 가져온다.
             String ageRange =  getUserAgeRange(getUserAge(user.getBirth_year()));
 
@@ -157,9 +161,9 @@ public class OutcomeServiceImpl implements OutcomeService {
         //이번달 소득
         long monthIncome = incomeService.getIncomeSumInMonth(uid, year, month);
 
-        Optional<User> optionUser = memberService.findMemberByUid(uid);
+        Optional<Member> optionUser = memberService.findMemberByUid(uid);
         if(optionUser.isPresent()) {
-            User user = optionUser.get();
+            Member user = optionUser.get();
             List<OutcomeUser> outcomeUsers = outcomeUserRepository.findAmountAllByUidAndYearAndMonth(user , year, month);
             Long monthOutcome = outcomeUsers.stream().mapToLong(OutcomeUser::getAmount).sum();
             //6개월간 누적합으로 saveAmount
@@ -211,7 +215,7 @@ public class OutcomeServiceImpl implements OutcomeService {
      * @param compareAverageCategoryOutcomeDTO
      * @return
      */
-    public CompareAverageCategoryOutcomeDTO getCompareAverageCategoryOutcomeDTO(User user, int year, int month, String category, String ageRange, CompareAverageCategoryOutcomeDTO compareAverageCategoryOutcomeDTO){
+    public CompareAverageCategoryOutcomeDTO getCompareAverageCategoryOutcomeDTO(Member user, int year, int month, String category, String ageRange, CompareAverageCategoryOutcomeDTO compareAverageCategoryOutcomeDTO){
         //사용자의 한달 동안 소비 조회
         List<OutcomeUser> outcomeUsers = outcomeUserRepository.findAmountAllByUidAndYearAndMonth(user, year, month);
 

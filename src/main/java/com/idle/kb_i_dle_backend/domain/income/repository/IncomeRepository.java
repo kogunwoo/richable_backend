@@ -7,7 +7,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
-import com.idle.kb_i_dle_backend.domain.member.entity.User;
+import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
@@ -21,9 +21,9 @@ public interface IncomeRepository extends CrudRepository<Income, Integer> {
             "WHERE I.uid = :uid " +
             "and YEAR (I.date) = :year " +
             "and month (I.date) = :month")
-    List<Income> findByUidAndYearAndMonth(@Param("uid") User uid, @Param("year") int year, @Param("month") int month);
+    List<Income> findByUidAndYearAndMonth(@Param("uid") Member uid, @Param("year") int year, @Param("month") int month);
     // 소득 전체 조회
-    List<Income> findByUid(User uid);
+    List<Income> findByUid(Member uid);
 
     // 특정 index값의 소득 조회
     Optional<Income> findByIndex(@Param("index")Integer index);

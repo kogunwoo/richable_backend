@@ -1,7 +1,7 @@
 package com.idle.kb_i_dle_backend.domain.income.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.idle.kb_i_dle_backend.domain.member.entity.User;
+import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import java.util.Date;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -25,7 +25,7 @@ public class Income {
 
     @ManyToOne
     @JoinColumn(name = "uid")
-    private User uid;
+    private Member uid;
 
     @NotNull
     @Column(length = 100)

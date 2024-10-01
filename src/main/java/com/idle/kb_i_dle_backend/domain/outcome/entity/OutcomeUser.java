@@ -1,6 +1,7 @@
 package com.idle.kb_i_dle_backend.domain.outcome.entity;
 
-import com.idle.kb_i_dle_backend.domain.member.entity.User;
+import com.idle.kb_i_dle_backend.domain.member.dto.MemberInfoDTO;
+import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -21,7 +22,7 @@ public class OutcomeUser {
 
     @ManyToOne
     @JoinColumn(name = "uid")
-    private User uid;
+    private Member uid;
 
     @NotNull
     @Column(name = "outcome_expenditure_category")  // 실제 테이블의 컬럼과 매핑
