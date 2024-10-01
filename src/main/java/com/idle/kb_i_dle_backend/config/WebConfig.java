@@ -1,6 +1,6 @@
 package com.idle.kb_i_dle_backend.config;
 
-import com.idle.kb_i_dle_backend.member.util.JwtProcessor;
+import com.idle.kb_i_dle_backend.domain.member.util.JwtProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
