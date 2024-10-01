@@ -16,8 +16,11 @@ import org.hibernate.annotations.ColumnDefault;
 @Getter
 public class Goal {
 
+    private static final int ACHIVE_PRIORIY = 999;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "index_b")
     private Integer index;
 
     @ManyToOne
@@ -57,6 +60,11 @@ public class Goal {
         this.priority = priority;
         this.isAchive = false;
 
+    }
+
+    public void updateToAchive(){
+        this.isAchive = true;
+        this.priority = ACHIVE_PRIORIY;
     }
 
 

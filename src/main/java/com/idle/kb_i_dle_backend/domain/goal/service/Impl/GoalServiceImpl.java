@@ -2,11 +2,14 @@ package com.idle.kb_i_dle_backend.domain.goal.service.Impl;
 
 import com.idle.kb_i_dle_backend.domain.goal.dto.AddGoalDTO;
 import com.idle.kb_i_dle_backend.domain.goal.dto.GoalDTO;
+import com.idle.kb_i_dle_backend.domain.goal.dto.RequestIndexDTO;
+import com.idle.kb_i_dle_backend.domain.goal.dto.ResponseUpdateAchiveDTO;
 import com.idle.kb_i_dle_backend.domain.goal.entity.Goal;
 import com.idle.kb_i_dle_backend.domain.goal.repository.GoalRepository;
 import com.idle.kb_i_dle_backend.domain.goal.service.GoalService;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
+import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -64,7 +67,17 @@ public class GoalServiceImpl implements GoalService {
         }
     }
 
-
+    @Override
+    @Transactional
+    public ResponseUpdateAchiveDTO updateAchive(int uid, RequestIndexDTO requestIndexDTO) throws Exception{
+        Member memer = memberService.findMemberByUid(uid).orElseThrow();
+        //해당인덱스의 goal을 가져오고
+        Goal goal = goalRepository.getById(requestIndexDTO.getIndex());
+        //achive와 priority를 수정
+        goal.updateToAchive();
+        //responseUpdateachive에 반환
+        return new ResponseUpdateAchiveDTO(goal.getIndex(), goal.getIsAchive(), goal.getPriority());
+    }
 
 
 }
