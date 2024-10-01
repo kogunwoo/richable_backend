@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface OutcomeUserRepository extends JpaRepository<OutcomeUser, Integer> {
     List<OutcomeUser> findAll();
@@ -43,4 +44,15 @@ public interface OutcomeUserRepository extends JpaRepository<OutcomeUser, Intege
     List<OutcomeUser> findAmountAllByUidAndYearAndMonth(@Param("uid") int uid, @Param("year") int year , @Param("month") int month);
 
     List<OutcomeUser> findByUidAndDateBetween(Member uid, Date start, Date end);
+
+    // 소비 CRUD
+
+    // 소비 전체 조회
+    List<OutcomeUser> findByUid(Member uid);
+
+    // 특정 index값의 소비 조회
+    Optional<OutcomeUser> findByIndex(@Param("index")Integer index);
+
+    // 특정 index값의 소비 삭제
+    void deleteByIndex(@Param("index")Integer index);
 }
