@@ -4,6 +4,7 @@ import com.idle.kb_i_dle_backend.common.dto.ResponseDTO;
 import com.idle.kb_i_dle_backend.domain.outcome.dto.*;
 import com.idle.kb_i_dle_backend.domain.outcome.service.OutcomeService;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,19 @@ import org.springframework.web.bind.annotation.*;
 public class OutcomeController {
 
     private final OutcomeService outcomeService;
+
+
+    @GetMapping("/simulation/{cntYear}/{cntMonth}")
+    public ResponseEntity<ResponseDTO> simulation6Month(@PathVariable int cntYear, @PathVariable int cntMonth){
+
+        try {
+            Simulation6MonthDTO simulation6MonthDTO = outcomeService.calculate6MonthSaveOutcome(1, cntYear, cntMonth);
+            return ResponseEntity.ok(new ResponseDTO(true, simulation6MonthDTO));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return ResponseEntity.ok(new ResponseDTO(false, null));
+    }
 
 
     /**
@@ -40,7 +54,7 @@ public class OutcomeController {
         calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
         Date endDate = calendar.getTime();
 
-        PossibleSaveOutcomeInMonthDTO possibleSaveOutcomeInMonthDTO = outcomeService.findPossibleSaveOutcome(1, startDate, endDate);
+        PossibleSaveOutcomeInMonthDTO possibleSaveOutcomeInMonthDTO = outcomeService.findPossibleSaveOutcome(1, cntYear, cntMonth);
         ResponseDTO responseDTO = new ResponseDTO(true, possibleSaveOutcomeInMonthDTO);
         return ResponseEntity.ok(responseDTO);
     }
@@ -66,7 +80,7 @@ public class OutcomeController {
         calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
         Date endDate = calendar.getTime();
 
-        CompareAverageCategoryOutcomeDTO compareAverageCategoryOutcomeDTO = outcomeService.compareWithAverage(1,startDate, endDate , category);
+        CompareAverageCategoryOutcomeDTO compareAverageCategoryOutcomeDTO = outcomeService.compareWithAverage(1,  cntYear, cntMonth , category);
         return ResponseEntity.ok(compareAverageCategoryOutcomeDTO);
     }
 

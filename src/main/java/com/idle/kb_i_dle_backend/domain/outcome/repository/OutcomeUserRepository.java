@@ -40,7 +40,7 @@ public interface OutcomeUserRepository extends JpaRepository<OutcomeUser, Intege
             "FROM OutcomeUser o " +
             "WHERE o.uid = :uid AND YEAR(o.date) = :year AND MONTH(o.date) = :month " +
             "order by o.date")
-    List<OutcomeUser> findAmountAllByUidAndYearAndMonth(@Param("uid") int uid, @Param("year") int year , @Param("month") int month);
+    List<OutcomeUser> findAmountAllByUidAndYearAndMonth(@Param("uid") User uid, @Param("year") int year , @Param("month") int month);
 
     List<OutcomeUser> findByUidAndDateBetween(User uid, Date start, Date end);
 }
