@@ -1,6 +1,7 @@
 package com.idle.kb_i_dle_backend.domain.finance.repository;
 
 import com.idle.kb_i_dle_backend.domain.finance.entity.UserBond;
+import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import java.util.Date;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -43,4 +44,5 @@ public interface BondRepository extends JpaRepository<UserBond, Integer> {
             "WHERE b.itms_nm = :isinCdNm AND b.add_date <= :endDate", nativeQuery = true)
     Double getBondPriceForMonth(@Param("isinCdNm") String isinCdNm, @Param("endDate")Date endDate,@Param("monthsAgo") int monthsAgo);
 
+    List<UserBond> findByUid(Member uid);
 }

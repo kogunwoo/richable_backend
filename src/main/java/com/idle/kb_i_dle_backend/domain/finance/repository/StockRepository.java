@@ -1,6 +1,8 @@
 package com.idle.kb_i_dle_backend.domain.finance.repository;
 
+import com.idle.kb_i_dle_backend.domain.finance.entity.UserBond;
 import com.idle.kb_i_dle_backend.domain.finance.entity.UserStock;
+import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import java.util.Date;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -64,6 +66,8 @@ public interface StockRepository extends JpaRepository<UserStock,Integer> {
     List<Object[]> getStockBalanceAndClosingPriceBefore(@Param("uid") int uid,
                                                         @Param("endDate") Date endDate,
                                                         @Param("monthsAgo") int monthsAgo);
+
+    List<UserStock> findByUid(Member uid);
 
 
 

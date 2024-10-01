@@ -1,6 +1,8 @@
 package com.idle.kb_i_dle_backend.domain.finance.repository;
 
+import com.idle.kb_i_dle_backend.domain.finance.entity.UserBond;
 import com.idle.kb_i_dle_backend.domain.finance.entity.UserCoin;
+import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import java.util.Date;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -61,6 +63,9 @@ public interface CoinRepository extends JpaRepository <UserCoin,Integer> {
             "JOIN product.coin_list_price clp ON cl.coin_name = clp.coin_name " +
             "WHERE cl.coin_name = :coinName AND c.add_date <= :endDate", nativeQuery = true)
     Double getCoinPriceForMonth(@Param("coinName") String coinName, @Param("endDate") Date endDate, @Param("monthsAgo") int monthsAgo);
+
+    List<UserCoin> findByUid(Member uid);
+
 
 }
 
