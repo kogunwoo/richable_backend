@@ -24,6 +24,12 @@ public class OutcomeController {
     private final OutcomeService outcomeService;
 
 
+    /**
+     * 해당년도 해당 달에 줄일 수 있었던 비용 api
+     * @param cntYear
+     * @param cntMonth
+     * @return
+     */
     @GetMapping("/review/sum/{cntYear}/{cntMonth}")
     public ResponseEntity<ResponseDTO> saveOutcomeInMonth(@PathVariable int cntYear, @PathVariable int cntMonth){
         Calendar calendar = Calendar.getInstance();

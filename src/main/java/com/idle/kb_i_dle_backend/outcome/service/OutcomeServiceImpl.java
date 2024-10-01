@@ -36,6 +36,12 @@ public class OutcomeServiceImpl implements OutcomeService {
     private final UserRepository userRepository;
 
 
+    /**
+     * 카테고리마다 소비 합 과 전체 소비 합 조회
+     * @param year
+     * @param month
+     * @return
+     */
     @Override
     public ResponseCategorySumListDTO findCategorySum(Integer year, Integer month) {
         List<CategorySumDTO> categorySumDTOS = outcomeUserRepository.findCategorySumByUidAndYearAndMonth(1 , year, month);
@@ -43,6 +49,13 @@ public class OutcomeServiceImpl implements OutcomeService {
         return new ResponseCategorySumListDTO(categorySumDTOS, sum);
     }
 
+
+    /**
+     * 해당 달의 소비 누계
+     * @param year
+     * @param month
+     * @return
+     */
     @Override
     public MonthOutcomeDTO findMonthOutcome(Integer year, Integer month) {
         List<OutcomeUser> consumes = outcomeUserRepository.findAmountAllByUidAndYearAndMonth(1, year, month);
@@ -67,6 +80,14 @@ public class OutcomeServiceImpl implements OutcomeService {
         return monthOutcomeDTO;
     }
 
+    /**
+     * start에서 end까지 해당 카테고리의 소비량을 평균과 비교
+     * @param uid
+     * @param start
+     * @param end
+     * @param category
+     * @return
+     */
     @Override
     @Transactional
     public CompareAverageCategoryOutcomeDTO compareWithAverage(int uid, Date start, Date end, String category) {
@@ -86,6 +107,13 @@ public class OutcomeServiceImpl implements OutcomeService {
     }
 
 
+    /**
+     * start에서 end까지 아낄 수 잇었던 비용
+     * @param uid
+     * @param start
+     * @param end
+     * @return
+     */
     @Override
     public PossibleSaveOutcomeInMonthDTO findPossibleSaveOutcome(Integer uid, Date start, Date end) {
         //먼저 사용자 uid를 가져오고
@@ -171,6 +199,11 @@ public class OutcomeServiceImpl implements OutcomeService {
         return Period.between(birthDate , currentDate).getYears();
     }
 
+    /**
+     * 몇 분기인지 반환
+     * @param date
+     * @return
+     */
     private String getQuarter(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
