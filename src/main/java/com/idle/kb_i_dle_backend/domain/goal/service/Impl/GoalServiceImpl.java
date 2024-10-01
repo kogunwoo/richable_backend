@@ -3,6 +3,7 @@ package com.idle.kb_i_dle_backend.domain.goal.service.Impl;
 import com.idle.kb_i_dle_backend.domain.goal.dto.AddGoalDTO;
 import com.idle.kb_i_dle_backend.domain.goal.dto.GoalDTO;
 import com.idle.kb_i_dle_backend.domain.goal.dto.RequestIndexDTO;
+import com.idle.kb_i_dle_backend.domain.goal.dto.ResponseIndexDTO;
 import com.idle.kb_i_dle_backend.domain.goal.dto.ResponseUpdateAchiveDTO;
 import com.idle.kb_i_dle_backend.domain.goal.entity.Goal;
 import com.idle.kb_i_dle_backend.domain.goal.repository.GoalRepository;
@@ -39,13 +40,11 @@ public class GoalServiceImpl implements GoalService {
         }else{
             throw new Exception("없는 카테고리 입니다.");
         }
-
-
     }
 
     public GoalDTO saveOutcomeGoal(Member member, AddGoalDTO addGoalDTO){
         // 사용자가 현재 가지고 있는 목표의 개수를 가져옴
-        int currentGoalCount = goalRepository.countByUidAndCategory(member, addGoalDTO.getCategory());
+        int currentGoalCount = goalRepository.countByUidAndCategoryAndIsAchive(member, addGoalDTO.getCategory(), false);
         //목표 생성
         Goal goal = new Goal(member, addGoalDTO.getCategory(),addGoalDTO.getTitle(), addGoalDTO.getAmount(), currentGoalCount + 1);
         //목표 저장
@@ -55,7 +54,7 @@ public class GoalServiceImpl implements GoalService {
 
     public GoalDTO saveAssetGoal(Member member, AddGoalDTO addGoalDTO) throws Exception {
         // 사용자가 현재 가지고 있는 목표의 개수를 가져옴
-        int currentGoalCount = goalRepository.countByUidAndCategory(member, addGoalDTO.getCategory());
+        int currentGoalCount = goalRepository.countByUidAndCategoryAndIsAchive(member, addGoalDTO.getCategory(), false);
         //목표 생성
         if(currentGoalCount == 0){
             Goal goal = new Goal(member, addGoalDTO.getCategory(),addGoalDTO.getTitle(), addGoalDTO.getAmount(), currentGoalCount + 1);
@@ -70,13 +69,31 @@ public class GoalServiceImpl implements GoalService {
     @Override
     @Transactional
     public ResponseUpdateAchiveDTO updateAchive(int uid, RequestIndexDTO requestIndexDTO) throws Exception{
-        Member memer = memberService.findMemberByUid(uid).orElseThrow();
-        //해당인덱스의 goal을 가져오고
-        Goal goal = goalRepository.getById(requestIndexDTO.getIndex());
-        //achive와 priority를 수정
-        goal.updateToAchive();
-        //responseUpdateachive에 반환
-        return new ResponseUpdateAchiveDTO(goal.getIndex(), goal.getIsAchive(), goal.getPriority());
+        Member member = memberService.findMemberByUid(uid).orElseThrow();
+
+        if(goalRepository.existsByUidAndIndex(member, requestIndexDTO.getIndex())){
+            //해당인덱스의 goal을 가져오고
+            Goal goal = goalRepository.getById(requestIndexDTO.getIndex());
+            //achive와 priority를 수정
+            goal.updateToAchive();
+            //responseUpdateachive에 반환
+            return new ResponseUpdateAchiveDTO(goal.getIndex(), goal.getIsAchive(), goal.getPriority());
+        }else{
+            throw new Exception("없는 index입니다.");
+        }
+    }
+
+    @Override
+    @Transactional
+    public ResponseIndexDTO removeGoal(int uid, RequestIndexDTO requestIndexDTO) throws Exception {
+        Member member = memberService.findMemberByUid(uid).orElseThrow();
+        //해당 goal이 있는지 확인
+        if(goalRepository.existsByUidAndIndex(member, requestIndexDTO.getIndex())){
+            int goal = goalRepository.deleteByUidAndIndex(member, requestIndexDTO.getIndex());
+            return new ResponseIndexDTO(requestIndexDTO.getIndex());
+        }else{
+            throw new Exception("없는 index입니다.");
+        }
     }
 
 

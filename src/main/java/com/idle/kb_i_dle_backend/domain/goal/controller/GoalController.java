@@ -4,10 +4,14 @@ import com.idle.kb_i_dle_backend.common.dto.ResponseDTO;
 import com.idle.kb_i_dle_backend.domain.goal.dto.AddGoalDTO;
 import com.idle.kb_i_dle_backend.domain.goal.dto.GoalDTO;
 import com.idle.kb_i_dle_backend.domain.goal.dto.RequestIndexDTO;
+import com.idle.kb_i_dle_backend.domain.goal.dto.ResponseIndexDTO;
 import com.idle.kb_i_dle_backend.domain.goal.dto.ResponseUpdateAchiveDTO;
 import com.idle.kb_i_dle_backend.domain.goal.service.GoalService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class GoalController {
 
+    private static final Logger log = LoggerFactory.getLogger(GoalController.class);
     private final GoalService goalService;
 
     @PostMapping("/set")
@@ -37,6 +42,17 @@ public class GoalController {
             ResponseUpdateAchiveDTO responseUpdateAchiveDTO = goalService.updateAchive(1, index);
             return ResponseEntity.ok(new ResponseDTO(true, responseUpdateAchiveDTO));
         }catch (Exception e){
+            return ResponseEntity.ok(new ResponseDTO(false, e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<ResponseDTO> deleteGoal(@RequestBody RequestIndexDTO index){
+        try{
+            ResponseIndexDTO responseIndexDTO = goalService.removeGoal(1, index);
+            return ResponseEntity.ok(new ResponseDTO(true, responseIndexDTO));
+        }catch (Exception e){
+            log.error(e.toString());
             return ResponseEntity.ok(new ResponseDTO(false, e.getMessage()));
         }
     }
