@@ -45,6 +45,14 @@ public class MemberServiceImpl implements MemberService {
         return userRepository.findById(id);
     }
 
+
+    @Override
+    public Optional<User> findMemberByUid(int id){
+        return userRepository.findByUid(id);
+    }
+
+
+
     @Override
     @Transactional
     public void MemberJoin(MemberJoinDTO memberjoindto) {

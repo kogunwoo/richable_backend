@@ -3,11 +3,15 @@ package com.idle.kb_i_dle_backend.member.service;
 import com.idle.kb_i_dle_backend.member.dto.MemberDTO;
 import com.idle.kb_i_dle_backend.member.dto.MemberJoinDTO;
 import com.idle.kb_i_dle_backend.member.entity.User;
+import java.util.Optional;
 
 public interface MemberService {
     boolean checkDupl(String id);
 
     User getMember(String id);
+
+    Optional<User> findMemberByUid(int id);
+
 
     void MemberJoin(MemberJoinDTO memberjoindto);
 

@@ -1,6 +1,7 @@
 package com.idle.kb_i_dle_backend.outcome.entity;
 
 import com.idle.kb_i_dle_backend.member.entity.User;
+import java.time.LocalDate;
 import lombok.Getter;
 import lombok.ToString;
 

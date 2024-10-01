@@ -11,5 +11,6 @@ public interface AverageOutcomeRepository extends JpaRepository<OutcomeAverage, 
 
     List<OutcomeAverage> findAll();
 
+    List<OutcomeAverage> findByCategoryAndQuaterAndAgeGroup(String category, String quater, String ageGroup);
 }
 

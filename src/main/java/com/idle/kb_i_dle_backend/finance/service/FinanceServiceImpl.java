@@ -3,11 +3,12 @@ package com.idle.kb_i_dle_backend.finance.service;
 import com.idle.kb_i_dle_backend.finance.dto.*;
 import com.idle.kb_i_dle_backend.finance.entity.*;
 import com.idle.kb_i_dle_backend.income.entity.*;
+import com.idle.kb_i_dle_backend.income.repository.IncomeRepository;
 import com.idle.kb_i_dle_backend.outcome.entity.*;
 import com.idle.kb_i_dle_backend.finance.repository.*;
 import com.idle.kb_i_dle_backend.member.entity.User;
 import java.text.DecimalFormat;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -18,22 +19,22 @@ import java.util.Date;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class FinanceServiceImpl implements FinanceService {
 
-    @Autowired
-    private BankRepository bankRepository;
-    @Autowired
-    private BondRepository bondRepository;
-    @Autowired
-    private CoinRepository coinRepository;
-    @Autowired
-    private SpotRepository spotRepository;
-    @Autowired
-    private StockRepository stockRepository;
-//    @Autowired
-//    private IncomeRepository incomeRepository;
-//    @Autowired
-//    private OutComeUserRepository outComeUserRepository;
+    private final BankRepository bankRepository;
+
+    private final BondRepository bondRepository;
+
+    private final CoinRepository coinRepository;
+
+    private final SpotRepository spotRepository;
+
+    private final StockRepository stockRepository;
+
+    private final IncomeRepository incomeRepository;
+
+    private final OutComeUserRepository outComeUserRepository;
 
     // 소수점 이하 한 자리로 포맷팅할 수 있는 DecimalFormat
     private static final DecimalFormat df = new DecimalFormat("#.#");
