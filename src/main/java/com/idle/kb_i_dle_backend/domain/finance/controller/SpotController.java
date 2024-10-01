@@ -30,7 +30,7 @@ public class SpotController {
     public ResponseEntity<?> getTotalPriceByCategory(@RequestBody HashMap<String, String> map) {
         String category = map.get("category");
         try {
-            ResponseDTO response = new ResponseDTO(true, new DataDTO(spotService.getTotalPriceByCategory(category)));
+            ResponseDTO response = new ResponseDTO(true, spotService.getTotalPriceByCategory(category));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
@@ -44,7 +44,7 @@ public class SpotController {
     @GetMapping("/spot/sum")
     public ResponseEntity<?> getTotalPriceByCategory(){
         try {
-            ResponseDTO response = new ResponseDTO(true, new DataDTO(spotService.getTotalPrice()));
+            ResponseDTO response = new ResponseDTO(true, spotService.getTotalPrice());
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
@@ -56,7 +56,7 @@ public class SpotController {
     @GetMapping("/spot/all")
     public ResponseEntity<?> getTotalSpotList() {
         try {
-            ResponseDTO response = new ResponseDTO(true, new DataDTO(spotService.getSpotList()));
+            ResponseDTO response = new ResponseDTO(true, spotService.getSpotList());
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
@@ -68,7 +68,7 @@ public class SpotController {
     @PostMapping("/spot/add")
     public ResponseEntity<?> addSpot(@RequestBody SpotDTO spotDTO) {
         try {
-            ResponseDTO response = new ResponseDTO(true, new DataDTO(spotService.addSpot(spotDTO)));
+            ResponseDTO response = new ResponseDTO(true, spotService.addSpot(spotDTO));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
@@ -80,7 +80,7 @@ public class SpotController {
     @PutMapping("/spot/update")
     public ResponseEntity<?> updateSpot(@RequestBody SpotDTO spotDTO) {
         try {
-            ResponseDTO response = new ResponseDTO(true, new DataDTO(spotService.updateSpot(spotDTO)));
+            ResponseDTO response = new ResponseDTO(true, spotService.updateSpot(spotDTO));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
@@ -94,7 +94,7 @@ public class SpotController {
         try {
             Map<String, Object> indexData = new HashMap<>();
             indexData.put("index", spotService.deleteSpotByUidAndIndex(index));
-            ResponseDTO response = new ResponseDTO(true, new DataDTO(indexData));
+            ResponseDTO response = new ResponseDTO(true, indexData);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
