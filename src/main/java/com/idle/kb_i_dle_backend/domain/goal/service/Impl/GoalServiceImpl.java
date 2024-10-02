@@ -1,10 +1,6 @@
 package com.idle.kb_i_dle_backend.domain.goal.service.Impl;
 
-import com.idle.kb_i_dle_backend.domain.goal.dto.AddGoalDTO;
-import com.idle.kb_i_dle_backend.domain.goal.dto.GoalDTO;
-import com.idle.kb_i_dle_backend.domain.goal.dto.RequestIndexDTO;
-import com.idle.kb_i_dle_backend.domain.goal.dto.ResponseIndexDTO;
-import com.idle.kb_i_dle_backend.domain.goal.dto.ResponseUpdateAchiveDTO;
+import com.idle.kb_i_dle_backend.domain.goal.dto.*;
 import com.idle.kb_i_dle_backend.domain.goal.entity.Goal;
 import com.idle.kb_i_dle_backend.domain.goal.repository.GoalRepository;
 import com.idle.kb_i_dle_backend.domain.goal.service.GoalService;
@@ -13,6 +9,8 @@ import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -91,6 +89,41 @@ public class GoalServiceImpl implements GoalService {
         if(goalRepository.existsByUidAndIndex(member, requestIndexDTO.getIndex())){
             int goal = goalRepository.deleteByUidAndIndex(member, requestIndexDTO.getIndex());
             return new ResponseIndexDTO(requestIndexDTO.getIndex());
+        }else{
+            throw new Exception("없는 index입니다.");
+        }
+    }
+
+    @Override
+    @Transactional
+    public ResponseUpdateAchiveDTO updatePriority(int uid, RequestPriorityDTO requestPriorityDTO) throws Exception {
+        Member member = memberService.findMemberByUid(uid).orElseThrow();
+
+        if(goalRepository.existsByUidAndIndex(member, requestPriorityDTO.getIndex())){
+            int currentGoalCount = goalRepository.countByUidAndCategoryAndIsAchive(member, "소비", false);
+            List<Goal> currentGoals = goalRepository.findByUidAndCategoryAndIsAchive(member, "소비", false);
+            if(requestPriorityDTO.getPriority() < 0 || requestPriorityDTO.getPriority() > currentGoalCount){
+                throw new IllegalArgumentException("우선 순위 값을 확인해 주세요");
+            }
+
+            Goal targetGoal = goalRepository.getById(requestPriorityDTO.getIndex());
+            int oldPriority = targetGoal.getPriority();
+
+            targetGoal.updatePriority(requestPriorityDTO.getPriority());
+
+
+            for(Goal goal : currentGoals){
+                if(goal != targetGoal){
+                    if(goal.getPriority() < oldPriority && goal.getPriority() >= requestPriorityDTO.getPriority()){
+                        goal.updatePriority(goal.getPriority() + 1);
+                    }else if(goal.getPriority() > oldPriority && goal.getPriority() <= requestPriorityDTO.getPriority()){
+                        goal.updatePriority(goal.getPriority() -1 );
+                    }
+                }
+            }
+
+            goalRepository.saveAll(currentGoals);
+            return new ResponseUpdateAchiveDTO(requestPriorityDTO.getIndex(), targetGoal.getIsAchive(), targetGoal.getPriority());
         }else{
             throw new Exception("없는 index입니다.");
         }
