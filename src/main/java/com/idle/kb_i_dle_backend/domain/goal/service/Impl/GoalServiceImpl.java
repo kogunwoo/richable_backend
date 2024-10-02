@@ -193,6 +193,8 @@ public class GoalServiceImpl implements GoalService {
 
         return outcomeGoalDTOS;
     }
+
+
 //
 //    private OutcomeGoalDTO calculateGather(Long amount, Goal goal){
 //        if(amount > goal.getAmount()){
@@ -206,5 +208,47 @@ public class GoalServiceImpl implements GoalService {
 //    }
 
 
+    @Override
+    public AssetGoalDTO getAssetGoal(int uid) throws Exception{
+        Member member = memberService.findMemberByUid(uid).orElseThrow();
+        //유저의 자산 목표를 가져옴
+        if(goalRepository.existsByUidAndCategoryAndIsAchive(member, "자산", false)){
+            Goal goal = goalRepository.findFirstByUidAndCategoryAndIsAchive(member, "자산", false);
+
+            //날짜 정보를 가져옴
+            Date madeDate = goal.getDate();
+
+            FinancialSumDTO oldDateAssetSum = financeService.getAssetSummeryByDateBefore(uid, madeDate);
+            log.info("new Date!!!!!!!!!!!!!" + new Date());
+            FinancialSumDTO todayAssetSum = financeService.getAssetSummeryByDateBefore(uid, new Timestamp(System.currentTimeMillis()));
+
+            //모은 금액
+            long amount = todayAssetSum.getAmount() - oldDateAssetSum.getAmount();
+
+            if(amount >= goal.getAmount()){
+                return new AssetGoalDTO(goal.getIndex(), amount , goal.getTitle(),goal.getAmount(),goal.getDate(), 0);
+            }else{ //덜 모았을때
+                // 덜 모았을 때 남은 날짜 계산
+                long remainingAmount = goal.getAmount() - amount;
+                long daysPassed = (new Date().getTime() - madeDate.getTime()) / (1000 * 60 * 60 * 24);
+
+                int remainDate;
+                if (daysPassed > 0 && amount > 0) {
+                    long dailyRate = amount / daysPassed;
+
+                    if (dailyRate > 0) {
+                        remainDate = (int) (remainingAmount / dailyRate);
+                    } else {
+                        remainDate = 0;
+                    }
+                } else {
+                    remainDate = 0;  // 날짜가 지나지 않았거나 금액이 없으면 -1로 설정
+                }
+                return new AssetGoalDTO(goal.getIndex(), amount, goal.getTitle(),goal.getAmount(),goal.getDate(),remainDate);
+            }
+        }else{
+            return new AssetGoalDTO();
+        }
+    }
 
 }

@@ -20,9 +20,18 @@ public class GoalController {
     private static final Logger log = LoggerFactory.getLogger(GoalController.class);
     private final GoalService goalService;
 
+    @GetMapping("/")
+    public ResponseEntity<ResponseDTO> getAssetGoal(){
+        try {
+            AssetGoalDTO assetGoalDTO = goalService.getAssetGoal(1);
+            return ResponseEntity.ok(new ResponseDTO(false, assetGoalDTO));
+        }catch (Exception e){
+            return ResponseEntity.ok(new ResponseDTO(false,e.getMessage()));
+        }
+    }
 
     @GetMapping("/outcome")
-    public ResponseEntity<ResponseDTO> getOutcome() {
+    public ResponseEntity<ResponseDTO> getOutcomeGoal() {
         try {
             List<OutcomeGoalDTO> outcomeGoalDTOS = goalService.getOutcomeGoals(1);
             return ResponseEntity.ok(new ResponseDTO(true, outcomeGoalDTOS));

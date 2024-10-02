@@ -31,4 +31,5 @@ public interface GoalService {
     //소비 목표 조회
     List<OutcomeGoalDTO> getOutcomeGoals(int uid) throws Exception;
 
+    AssetGoalDTO getAssetGoal(int uid) throws Exception;
 }
