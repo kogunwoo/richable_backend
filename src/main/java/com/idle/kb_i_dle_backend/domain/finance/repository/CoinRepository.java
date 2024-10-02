@@ -67,6 +67,7 @@ public interface CoinRepository extends JpaRepository <UserCoin,Integer> {
 
     List<UserCoin> findByUid(Member uid);
 
-    List<CoinList> findTop5ByOrderByPriceDesc();
+    @Query("SELECT cl FROM CoinList cl ORDER BY CAST(cl.closingPrice AS double) DESC")
+    List<CoinList> findTop5ByOrderByClosingPriceDesc();
 }
 

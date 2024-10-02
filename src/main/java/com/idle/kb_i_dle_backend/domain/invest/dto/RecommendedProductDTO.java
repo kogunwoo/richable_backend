@@ -11,7 +11,7 @@ import lombok.Setter;
 @RequiredArgsConstructor
 @AllArgsConstructor
 public class RecommendedProductDTO {
-    private String category;
+    private String prodCategroy ;
     private String name;
     private Integer price;
 }

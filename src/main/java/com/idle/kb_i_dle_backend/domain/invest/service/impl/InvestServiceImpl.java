@@ -2,6 +2,7 @@ package com.idle.kb_i_dle_backend.domain.invest.service.impl;
 
 import com.idle.kb_i_dle_backend.domain.finance.entity.*;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BankRepository;
+import com.idle.kb_i_dle_backend.domain.finance.repository.BondListRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BondRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.CoinRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.StockRepository;
@@ -14,8 +15,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class InvestServiceImpl implements InvestService {
     private final UserRepository userRepository;
@@ -23,14 +26,17 @@ public class InvestServiceImpl implements InvestService {
     private final BondRepository bondRepository;
     private final CoinRepository coinRepository;
     private final StockRepository stockRepository;
+    private final BondListRepository bondListRepository;
 
     public InvestServiceImpl(BankRepository bankRepository, UserRepository userRepository,
-                             BondRepository bondRepository,CoinRepository coinRepository,StockRepository stockRepository) {
+                             BondRepository bondRepository, CoinRepository coinRepository,
+                             StockRepository stockRepository, BondListRepository bondListRepository) {
         this.userRepository = userRepository;
         this.bankRepository = bankRepository;
         this.bondRepository = bondRepository;
         this.coinRepository = coinRepository;
         this.stockRepository = stockRepository;
+        this.bondListRepository = bondListRepository;
     }
 
     @Override
@@ -112,21 +118,28 @@ public class InvestServiceImpl implements InvestService {
         MaxPercentageCategoryDTO maxCategory = getMaxPercentageCategory();
         List<RecommendedProductDTO> recommendedProducts = new ArrayList<>();
 
-        if ("공격형".equals(maxCategory.getTendency())) {
-            List<CoinList> coins = coinRepository.findTop5ByOrderByPriceDesc();
-            List<StockList> stocks = stockRepository.findTop5ByOrderByAvgBuyPriceDesc();
+        if ("안정형".equals(maxCategory.getTendency())) {
+            List<CoinList> coins = coinRepository.findTop5ByOrderByClosingPriceDesc()
+                    .stream().limit(5).collect(Collectors.toList());
+            List<StockList> stocks = stockRepository.findTop5ByOrderByPriceDesc()
+                    .stream().limit(5).collect(Collectors.toList());
 
             recommendedProducts.addAll(coins.stream()
-                    .map(coin -> new RecommendedProductDTO("coin", coin.getCoinName(), Integer.parseInt(String.valueOf(coin.getClosingPrice())) ))
+                    .map(coin -> new RecommendedProductDTO("코인", coin.getCoinName(),
+                            (int) Double.parseDouble(coin.getClosingPrice())))
                     .collect(Collectors.toList()));
 
             recommendedProducts.addAll(stocks.stream()
-                    .map(stock -> new RecommendedProductDTO("stock", stock.getKrStockNm(), stock.getPrice()))
+                    .map(stock -> new RecommendedProductDTO("주식", stock.getKrStockNm(), stock.getPrice()))
+                    .collect(Collectors.toList()));
+        } else {
+            List<BondList> bonds = bondListRepository.findTop5ByOrderByPriceDesc();
+
+            recommendedProducts.addAll(bonds.stream()
+                    .map(bond -> new RecommendedProductDTO("채권", bond.getIsinCdNm(), bond.getPrice()))
                     .collect(Collectors.toList()));
         }
 
         return recommendedProducts;
     }
-
-
 }

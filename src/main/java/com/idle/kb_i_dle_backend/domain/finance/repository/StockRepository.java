@@ -70,6 +70,10 @@ public interface StockRepository extends JpaRepository<UserStock,Integer> {
 
     List<UserStock> findByUid(Member uid);
 
+    @Query("SELECT sl FROM StockList sl WHERE sl.price IS NOT NULL ORDER BY sl.price DESC")
+    List<StockList> findTop5StocksByPrice();
 
-    List<StockList> findTop5ByOrderByAvgBuyPriceDesc();
+    // 이 메서드는 StockList 엔티티를 대상으로 하는 별도의 쿼리를 사용합니다.
+    @Query("SELECT sl FROM StockList sl WHERE sl.price IS NOT NULL ORDER BY sl.price DESC")
+    List<StockList> findTop5ByOrderByPriceDesc();
 }
