@@ -44,9 +44,9 @@ public class GoalController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<ResponseDTO> deleteGoal(@RequestBody RequestIndexDTO index){
+    public ResponseEntity<ResponseDTO> deleteGoal(@RequestBody RequestDeleteDTO requestDeleteDTO){
         try{
-            ResponseIndexDTO responseIndexDTO = goalService.removeGoal(1, index);
+            ResponseIndexDTO responseIndexDTO = goalService.removeGoal(1, requestDeleteDTO);
             return ResponseEntity.ok(new ResponseDTO(true, responseIndexDTO));
         }catch (Exception e){
             log.error(e.toString());

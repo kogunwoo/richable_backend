@@ -19,7 +19,7 @@ public interface GoalService {
     ResponseUpdateAchiveDTO updateAchive(int uid , RequestIndexDTO requestIndexDTO) throws Exception;
 
     //목표 삭제 메서드
-    ResponseIndexDTO removeGoal(int uid , RequestIndexDTO requestIndexDTO) throws Exception;
+    ResponseIndexDTO removeGoal(int uid , RequestDeleteDTO requestDeleteDTO) throws Exception;
 
     //우선 순위 변경 메서드
     ResponseUpdateAchiveDTO updatePriority(int uid, RequestPriorityDTO requestPriorityDTO) throws Exception;

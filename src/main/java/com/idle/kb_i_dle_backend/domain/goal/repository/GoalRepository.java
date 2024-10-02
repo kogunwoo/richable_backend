@@ -13,6 +13,7 @@ public interface GoalRepository extends JpaRepository<Goal, Integer> {
     Goal save(Goal goal);
     Integer countByUidAndCategoryAndIsAchive(Member uid, String category, boolean isAchive);
     List<Goal> findByUidAndCategoryAndIsAchive(Member uid, String category, boolean isAchive);
+    Goal findByUidAndIndex(Member uid, int index);
     boolean existsByUidAndIndex(Member uid, int index);
     Integer deleteByUidAndIndex(Member uid, int index);
 }

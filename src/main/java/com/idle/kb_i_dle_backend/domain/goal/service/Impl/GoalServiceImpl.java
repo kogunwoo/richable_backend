@@ -83,13 +83,36 @@ public class GoalServiceImpl implements GoalService {
 
     @Override
     @Transactional
-    public ResponseIndexDTO removeGoal(int uid, RequestIndexDTO requestIndexDTO) throws Exception {
+    public ResponseIndexDTO removeGoal(int uid, RequestDeleteDTO requestDeleteDTO) throws Exception {
         Member member = memberService.findMemberByUid(uid).orElseThrow();
-        //해당 goal이 있는지 확인
-        if(goalRepository.existsByUidAndIndex(member, requestIndexDTO.getIndex())){
-            int goal = goalRepository.deleteByUidAndIndex(member, requestIndexDTO.getIndex());
-            return new ResponseIndexDTO(requestIndexDTO.getIndex());
-        }else{
+
+        // 해당 goal이 있는지 확인
+        if (goalRepository.existsByUidAndIndex(member, requestDeleteDTO.getIndex())) {
+            // 해당 목표 삭제
+
+            Goal deleteGoal = goalRepository.findByUidAndIndex(member, requestDeleteDTO.getIndex());
+            goalRepository.deleteByUidAndIndex(member, requestDeleteDTO.getIndex());
+            if(requestDeleteDTO.getCategory().equals("소비")){
+
+                //미리 삭제하는 우선 순위 저장
+                int oldPriority = deleteGoal.getPriority();
+                List<Goal> currentGoals = goalRepository.findByUidAndCategoryAndIsAchive(member, "소비", false);
+                for(Goal goal : currentGoals){
+                    if(goal.getPriority() > oldPriority) {
+                        goal.updatePriority(goal.getPriority() - 1);
+                    }
+                }
+
+                goalRepository.saveAll(currentGoals);
+
+                return new ResponseIndexDTO(deleteGoal.getIndex());
+            }
+            if(deleteGoal.getCategory().equals("자산")){
+                return new ResponseIndexDTO(deleteGoal.getIndex());
+            }
+
+            return new ResponseIndexDTO(requestDeleteDTO.getIndex());
+        } else {
             throw new Exception("없는 index입니다.");
         }
     }
@@ -100,6 +123,7 @@ public class GoalServiceImpl implements GoalService {
         Member member = memberService.findMemberByUid(uid).orElseThrow();
 
         if(goalRepository.existsByUidAndIndex(member, requestPriorityDTO.getIndex())){
+
             int currentGoalCount = goalRepository.countByUidAndCategoryAndIsAchive(member, "소비", false);
             List<Goal> currentGoals = goalRepository.findByUidAndCategoryAndIsAchive(member, "소비", false);
             if(requestPriorityDTO.getPriority() < 0 || requestPriorityDTO.getPriority() > currentGoalCount){
