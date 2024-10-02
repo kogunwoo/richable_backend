@@ -1,12 +1,9 @@
 package com.idle.kb_i_dle_backend.domain.goal.controller;
 
 import com.idle.kb_i_dle_backend.common.dto.ResponseDTO;
-import com.idle.kb_i_dle_backend.domain.goal.dto.AddGoalDTO;
-import com.idle.kb_i_dle_backend.domain.goal.dto.GoalDTO;
-import com.idle.kb_i_dle_backend.domain.goal.dto.RequestIndexDTO;
-import com.idle.kb_i_dle_backend.domain.goal.dto.ResponseIndexDTO;
-import com.idle.kb_i_dle_backend.domain.goal.dto.ResponseUpdateAchiveDTO;
+import com.idle.kb_i_dle_backend.domain.goal.dto.*;
 import com.idle.kb_i_dle_backend.domain.goal.service.GoalService;
+import io.swagger.models.Response;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +48,17 @@ public class GoalController {
         try{
             ResponseIndexDTO responseIndexDTO = goalService.removeGoal(1, index);
             return ResponseEntity.ok(new ResponseDTO(true, responseIndexDTO));
+        }catch (Exception e){
+            log.error(e.toString());
+            return ResponseEntity.ok(new ResponseDTO(false, e.getMessage()));
+        }
+    }
+
+    @PutMapping("/priority")
+    public ResponseEntity<ResponseDTO> updatePriority(@RequestBody RequestPriorityDTO requestPriorityDTO){
+        try{
+            ResponseUpdateAchiveDTO responseUpdateAchiveDTO = goalService.updatePriority(1, requestPriorityDTO);
+            return ResponseEntity.ok(new ResponseDTO(true, responseUpdateAchiveDTO));
         }catch (Exception e){
             log.error(e.toString());
             return ResponseEntity.ok(new ResponseDTO(false, e.getMessage()));
