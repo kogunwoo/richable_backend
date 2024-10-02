@@ -17,6 +17,6 @@ public interface SpotService {
 
     SpotDTO updateSpot(SpotDTO spotDTO) throws ParseException;
 
-    Integer deleteSpotByUidAndIndex(Integer index);
+    SpotDTO deleteSpot(Integer index);
 
 }

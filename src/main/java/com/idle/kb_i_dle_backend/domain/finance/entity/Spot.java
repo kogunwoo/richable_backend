@@ -23,7 +23,6 @@ public class Spot {
     @Column(name = "`index`")
     private Integer index;
 
-
     @ManyToOne
     @JoinColumn(name = "uid") // foreign key 이름 설정
     private Member uid;

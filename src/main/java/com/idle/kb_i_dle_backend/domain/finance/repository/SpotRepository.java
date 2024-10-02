@@ -17,10 +17,7 @@ public interface SpotRepository extends JpaRepository<Spot, Long> {
     List<Spot> findByUidAndDeleteDateIsNull(Member uid);
 
     // 특정 index값의 정보 조회
-    Optional<Spot> findByIndex(@Param("index")Integer index);
-
-    // 특정 index값의 spot 삭제
-    void deleteByIndex(@Param("index")Integer index);
+    Optional<Spot> findByIndexAndDeleteDateIsNull(@Param("index")Integer index);
 
     List<Spot> findByUidAndAddDateBefore(Member uid, Date date);
     

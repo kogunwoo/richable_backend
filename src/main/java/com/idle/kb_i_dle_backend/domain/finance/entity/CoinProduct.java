@@ -21,7 +21,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Table(name = "coin_list", catalog = "product")
-public class CoinList implements Serializable {
+public class CoinProduct implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -41,5 +41,5 @@ public class CoinList implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coin_name", referencedColumnName = "coin_name", insertable = false, updatable = false)
-    private CoinListPrice coinListPrice;
+    private CoinProductPrice coinProductPrice;
 }
