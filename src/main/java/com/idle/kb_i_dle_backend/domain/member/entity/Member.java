@@ -66,5 +66,8 @@ public class Member {
     // User와 Spot의 양방향 관계 설정
     @OneToMany(mappedBy = "uid", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Spot> spots;
+    // User와 UserApi의 관계 설정
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private MemberAPI memberAPI;
 
 }

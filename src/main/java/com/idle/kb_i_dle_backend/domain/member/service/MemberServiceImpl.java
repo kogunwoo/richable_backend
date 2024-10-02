@@ -16,8 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class MemberServiceImpl implements MemberService {
 
-//    private final MemberMapper memberMapper;
-
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -187,4 +185,13 @@ public class MemberServiceImpl implements MemberService {
         return false; // User not found
     }
 
+    @Override
+    public boolean deleteMemberById(String id) {
+        // ID로 회원 조회 후 삭제
+        Member member = userRepository.findById(id);
+
+        // 회원 삭제
+        userRepository.delete(member);
+        return true;
+    }
 }

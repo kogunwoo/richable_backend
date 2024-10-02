@@ -29,4 +29,6 @@ public interface MemberService {
     boolean verifyCode(String email, String code);
 
     boolean resetPassword(String id, String newPassword);
+
+    boolean deleteMemberById(String id);
 }
