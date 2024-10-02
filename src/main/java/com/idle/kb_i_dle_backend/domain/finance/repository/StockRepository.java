@@ -1,5 +1,6 @@
 package com.idle.kb_i_dle_backend.domain.finance.repository;
 
+import com.idle.kb_i_dle_backend.domain.finance.entity.StockList;
 import com.idle.kb_i_dle_backend.domain.finance.entity.UserBond;
 import com.idle.kb_i_dle_backend.domain.finance.entity.UserStock;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
@@ -69,7 +70,10 @@ public interface StockRepository extends JpaRepository<UserStock,Integer> {
 
     List<UserStock> findByUid(Member uid);
 
+    @Query("SELECT sl FROM StockList sl WHERE sl.price IS NOT NULL ORDER BY sl.price DESC")
+    List<StockList> findTop5StocksByPrice();
 
-
-
+    // 이 메서드는 StockList 엔티티를 대상으로 하는 별도의 쿼리를 사용합니다.
+    @Query("SELECT sl FROM StockList sl WHERE sl.price IS NOT NULL ORDER BY sl.price DESC")
+    List<StockList> findTop5ByOrderByPriceDesc();
 }

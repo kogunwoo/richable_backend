@@ -2,6 +2,7 @@ package com.idle.kb_i_dle_backend.domain.outcome.service.impl;
 
 import com.idle.kb_i_dle_backend.domain.income.service.IncomeService;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
+import com.idle.kb_i_dle_backend.domain.member.repository.UserRepository;
 import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
 import com.idle.kb_i_dle_backend.domain.outcome.dto.*;
 import com.idle.kb_i_dle_backend.domain.outcome.entity.OutcomeAverage;
@@ -35,6 +36,7 @@ public class OutcomeServiceImpl implements OutcomeService {
     private final AverageOutcomeRepository averageOutcomeRepository;
     private final OutcomeUserRepository outcomeUserRepository;
     private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
     private final MemberService memberService;
     private final IncomeService incomeService;
 
