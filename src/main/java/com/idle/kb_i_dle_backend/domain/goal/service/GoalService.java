@@ -3,6 +3,8 @@ package com.idle.kb_i_dle_backend.domain.goal.service;
 import com.idle.kb_i_dle_backend.domain.goal.dto.*;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 
+import java.util.List;
+
 public interface GoalService {
 
 
@@ -23,5 +25,10 @@ public interface GoalService {
 
     //우선 순위 변경 메서드
     ResponseUpdateAchiveDTO updatePriority(int uid, RequestPriorityDTO requestPriorityDTO) throws Exception;
+
+    //자산 목표 조회
+
+    //소비 목표 조회
+    List<OutcomeGoalDTO> getOutcomeGoals(int uid) throws Exception;
 
 }

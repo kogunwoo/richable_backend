@@ -70,7 +70,4 @@ public class Goal {
     public void updatePriority(Integer priority){
         this.priority = priority;
     }
-
-
-
 }

@@ -1,5 +1,7 @@
 package com.idle.kb_i_dle_backend.domain.goal.service.Impl;
 
+import com.idle.kb_i_dle_backend.domain.finance.dto.FinancialSumDTO;
+import com.idle.kb_i_dle_backend.domain.finance.service.FinanceService;
 import com.idle.kb_i_dle_backend.domain.goal.dto.*;
 import com.idle.kb_i_dle_backend.domain.goal.entity.Goal;
 import com.idle.kb_i_dle_backend.domain.goal.repository.GoalRepository;
@@ -8,16 +10,24 @@ import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GoalServiceImpl implements GoalService {
 
     private final GoalRepository goalRepository;
     private final MemberService memberService;
+    private final FinanceService financeService;
 
     /**
      * 목표 저장
@@ -152,6 +162,49 @@ public class GoalServiceImpl implements GoalService {
             throw new Exception("없는 index입니다.");
         }
     }
+
+    @Override
+    public List<OutcomeGoalDTO> getOutcomeGoals(int uid) throws Exception {
+        Member member = memberService.findMemberByUid(uid).orElseThrow();
+        //소비 목표들을 불러옴
+        List<Goal> outcomeGoals = goalRepository.findByUidAndCategoryAndIsAchive(member, "소비", false);
+
+        //가장 오래된 날짜를 가져옴
+        Date oldDate = outcomeGoals.stream().map(Goal::getDate).min(Date::compareTo).orElseThrow();
+        //현재 자산에서 해당 날짜의 자산 을 빼서 모은 금액을 구함
+        FinancialSumDTO oldDateAssetSum = financeService.getAssetSummeryByDateBefore(uid, oldDate);
+        log.info("new Date!!!!!!!!!!!!!" + new Date());
+        FinancialSumDTO todayAssetSum = financeService.getAssetSummeryByDateBefore(uid, new Timestamp(System.currentTimeMillis()));
+        long amount = todayAssetSum.getAmount() - oldDateAssetSum.getAmount();
+        //모은 금액을 우선 순위에 맞게 분배
+        //먼저 정렬
+        outcomeGoals.sort(Comparator.comparing(Goal::getPriority));
+        //gather을 계산하면서 DTO로 만듦
+        List<OutcomeGoalDTO> outcomeGoalDTOS = new ArrayList<>();
+        for(Goal goal : outcomeGoals){
+            if(amount > goal.getAmount()){
+                amount -= goal.getAmount();
+                outcomeGoalDTOS.add( new OutcomeGoalDTO(goal.getIndex(), goal.getAmount(), goal.getTitle(),goal.getAmount(),goal.getDate(),goal.getPriority()));
+            }else{
+                outcomeGoalDTOS.add(new OutcomeGoalDTO(goal.getIndex(), amount, goal.getTitle(),goal.getAmount(),goal.getDate(),goal.getPriority()));
+                amount = 0L;
+            }
+        }
+
+        return outcomeGoalDTOS;
+    }
+//
+//    private OutcomeGoalDTO calculateGather(Long amount, Goal goal){
+//        if(amount > goal.getAmount()){
+//            amount -= goal.getAmount();
+//            return new OutcomeGoalDTO(goal.getIndex(),
+//                    goal.getAmount(), goal.getTitle(),goal.getAmount(),goal.getDate(),goal.getPriority());
+//        }else{
+//            return new OutcomeGoalDTO(goal.getIndex(),
+//                    amount, goal.getTitle(),goal.getAmount(),goal.getDate(),goal.getPriority());
+//        }
+//    }
+
 
 
 }

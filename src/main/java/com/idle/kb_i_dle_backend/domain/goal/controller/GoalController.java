@@ -8,12 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/goal")
@@ -22,6 +19,17 @@ public class GoalController {
 
     private static final Logger log = LoggerFactory.getLogger(GoalController.class);
     private final GoalService goalService;
+
+
+    @GetMapping("/outcome")
+    public ResponseEntity<ResponseDTO> getOutcome() {
+        try {
+            List<OutcomeGoalDTO> outcomeGoalDTOS = goalService.getOutcomeGoals(1);
+            return ResponseEntity.ok(new ResponseDTO(true, outcomeGoalDTOS));
+        }catch (Exception e) {
+            return ResponseEntity.ok(new ResponseDTO(false,e.getMessage()));
+        }
+    }
 
     @PostMapping("/set")
     public ResponseEntity<ResponseDTO> setGoal(@RequestBody AddGoalDTO goal){
