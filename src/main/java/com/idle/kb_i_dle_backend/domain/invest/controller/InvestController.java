@@ -65,4 +65,46 @@ public class InvestController {
         }
     }
 
+    @GetMapping("/highreturn/stock")
+    public ResponseEntity<?> getHighReturnStock() {
+        try {
+            List<HighReturnProductDTO> highReturnProductDTOS = investService.getHighReturnStock();
+            ResponseDTO response = new ResponseDTO(true, highReturnProductDTOS);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("Error in getHighReturnProduct: ", e);
+            ErrorResponseDTO response = new ErrorResponseDTO(false,
+                    "Failed to retrieve high return products: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @GetMapping("/highreturn/coin")
+    public ResponseEntity<?> getHighReturnCoin() {
+        try {
+            List<HighReturnProductDTO> highReturnCoins = investService.getHighReturnCoin();
+            ResponseDTO response = new ResponseDTO(true, highReturnCoins);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error in getHighReturnCoin: ", e);
+            ErrorResponseDTO response = new ErrorResponseDTO(false,
+                    "Failed to retrieve high return coins: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @GetMapping("/highreturn")
+    public ResponseEntity<?> getHighReturnProducts() {
+        try {
+            HighReturnProductsDTO highReturnProducts = investService.getHighReturnProducts();
+            ResponseDTO response = new ResponseDTO(true, highReturnProducts.getProducts());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error in getHighReturnProducts: ", e);
+            ErrorResponseDTO response = new ErrorResponseDTO(false,
+                    "Failed to retrieve high return products: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
 }

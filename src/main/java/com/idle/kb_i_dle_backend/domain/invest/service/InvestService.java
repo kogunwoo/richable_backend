@@ -16,4 +16,10 @@ public interface InvestService {
     MaxPercentageCategoryDTO getMaxPercentageCategory() throws Exception;
 
     List<RecommendedProductDTO> getRecommendedProducts() throws Exception;
+
+    List<HighReturnProductDTO> getHighReturnStock() throws Exception;
+
+    List<HighReturnProductDTO> getHighReturnCoin() throws Exception;
+
+    HighReturnProductsDTO getHighReturnProducts() throws Exception;
 }
