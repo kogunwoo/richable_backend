@@ -20,7 +20,7 @@ public class Goal {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "index_b")
+    @Column(name = "`index`")
     private Integer index;
 
     @ManyToOne
@@ -65,6 +65,10 @@ public class Goal {
     public void updateToAchive(){
         this.isAchive = true;
         this.priority = ACHIVE_PRIORIY;
+    }
+
+    public void updatePriority(Integer priority){
+        this.priority = priority;
     }
 
 
