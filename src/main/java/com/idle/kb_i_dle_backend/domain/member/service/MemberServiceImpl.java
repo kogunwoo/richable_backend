@@ -90,6 +90,11 @@ public class MemberServiceImpl implements MemberService {
                     .email(memberjoindto.getEmail())
                     .birth_year(memberjoindto.getBirth_year())
                     .auth(memberjoindto.getAuth())
+                    .agreementInfo(false)
+                    .agreementFinance(false)
+                    .isCertification(false)
+                    .isMentor(false)
+                    .social("NONE")
                     .build();
 
             log.debug("Saving new user: {}", newUser);
