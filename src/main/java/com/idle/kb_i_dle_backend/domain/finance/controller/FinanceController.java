@@ -16,6 +16,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import com.idle.kb_i_dle_backend.domain.member.util.JwtProcessor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,23 +33,22 @@ public class FinanceController {
 
     @Autowired
     private final FinanceService financeService;
+    private final JwtProcessor jwtProcessor;
+
 
     // AS_1 금융 자산 합 조회
     @GetMapping("/fin/sum")
     public ResponseEntity<ResponseDTO> getFinancialAssetsSum(HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        Integer uid = (Integer) session.getAttribute("uid");
+        Integer uid = (Integer) request.getAttribute("uid");
         if (uid == null) {
             throw new IllegalArgumentException("UID is missing==============================================");
         }
-
         FinancialSumDTO totalPrice = financeService.getFinancialAssetsSum(uid);
 
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("data", totalPrice);
 
         ResponseDTO Response = new ResponseDTO(true, responseData);
-
 
         return ResponseEntity.ok(Response);
     }
