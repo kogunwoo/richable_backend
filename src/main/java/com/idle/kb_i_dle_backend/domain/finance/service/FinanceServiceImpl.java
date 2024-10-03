@@ -9,6 +9,8 @@ import com.idle.kb_i_dle_backend.domain.finance.repository.*;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,7 @@ public class FinanceServiceImpl implements FinanceService {
     private final IncomeRepository incomeRepository;
     private final OutcomeUserRepository outComeUserRepository;
     private final UserRepository userRepository;
+    private  final AssetSummaryRepository assetSummaryRepository;
 
     // 소수점 이하 한 자리로 포맷팅할 수 있는 DecimalFormat
     private static final DecimalFormat df = new DecimalFormat("#.#");
@@ -423,5 +426,55 @@ public class FinanceServiceImpl implements FinanceService {
 
         return new ArrayList<>(balanceMap.values());
     }
+
+    // 같은 나이대 사용자들의 자산 비교
+    @Override
+    public List<AssetComparisonDTO> compareAssetsWithSameAgeGroup(int uid) {
+        Member currentUser = userRepository.findById(uid).orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        // 현재 사용자의 나이대 계산
+        int currentYear = LocalDate.now().getYear();
+        int userAgeGroup = (currentYear - currentUser.getBirth_year()) / 10;
+
+        // 같은 나이대 사용자들의 uid를 조회
+        List<Integer> sameAgeGroupUids = userRepository.findUidsByAgeGroup(userAgeGroup);
+
+        // 나의 자산 조회
+        AssetSummary myAssetSummary = assetSummaryRepository.findByUid(uid);
+        BigInteger myTotalAmount = myAssetSummary != null ? myAssetSummary.getTotalAmount() : BigInteger.ZERO;
+
+        // 같은 나이대 사용자들의 자산 합계 및 평균 계산
+        BigInteger totalAmountSum = BigInteger.ZERO;
+        int count = 0;
+
+        for (Integer ageGroupUid : sameAgeGroupUids) {
+            AssetSummary assetSummary = assetSummaryRepository.findByUid(ageGroupUid);
+            if (assetSummary != null) {
+                totalAmountSum = totalAmountSum.add(assetSummary.getTotalAmount());
+                count++;
+            }
+        }
+        BigInteger averageTotalAmount = (count > 0) ? totalAmountSum.divide(BigInteger.valueOf(count)) : BigInteger.ZERO;
+
+        // 나의 자산과 나이대 평균 자산의 차이 계산
+        BigInteger defer = myTotalAmount.subtract(averageTotalAmount);
+
+        // DTO 생성 및 반환
+        return (List<AssetComparisonDTO>) new AssetComparisonDTO(
+                uid,
+                myTotalAmount,         // 나의 자산
+                averageTotalAmount,    // 나이대 평균 자산
+                defer,                 // 자산 차이
+                myAssetSummary.getBond(),
+                myAssetSummary.getStock(),
+                myAssetSummary.getCoin(),
+                myAssetSummary.getDeposit(),
+                myAssetSummary.getWithdrawal(),
+                myAssetSummary.getSaving(),
+                myAssetSummary.getSubscription(),
+                myAssetSummary.getCash()
+        );
+    }
+
 
 }
