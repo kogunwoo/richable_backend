@@ -12,11 +12,12 @@ import lombok.Setter;
 public class MemberInfoDTO {
     private Integer uid;
     private String id;
+    private String email;
     private String nickname;
     private String auth;
-    private String email;      // 추가 필드
+          // 추가 필드
     private String img;        // 추가 필드
-    private String birthYear;  // 추가 필드
+    private Integer birthYear;  // 추가 필드
     private String gender;     // 추가 필드
     private boolean certification;
     private MemberApiDTO api;

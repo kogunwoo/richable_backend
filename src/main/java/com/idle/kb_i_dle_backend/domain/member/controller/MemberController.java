@@ -1,11 +1,16 @@
 package com.idle.kb_i_dle_backend.domain.member.controller;
 
+import com.idle.kb_i_dle_backend.common.dto.ResponseDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.AuthResultDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.CustomUser;
 import com.idle.kb_i_dle_backend.domain.member.dto.LoginDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberInfoDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberJoinDTO;
+import com.idle.kb_i_dle_backend.domain.member.entity.MemberAPI;
+import com.idle.kb_i_dle_backend.domain.member.repository.MemberApiRepository;
+import com.idle.kb_i_dle_backend.domain.member.service.MemberApiService;
+import com.idle.kb_i_dle_backend.domain.member.service.MemberInfoService;
 import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
 import com.idle.kb_i_dle_backend.domain.member.util.JwtProcessor;
 import java.io.BufferedReader;
@@ -28,9 +33,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -46,12 +53,16 @@ public class MemberController {
     private final AuthenticationManager authenticationManager;
     private final JwtProcessor jwtProcessor;
     private final MemberService memberService;
+    private final MemberInfoService memberInfoService;
+    private final MemberApiService memberApiService;
 
     public MemberController(AuthenticationManager authenticationManager, JwtProcessor jwtProcessor,
-                            MemberService memberService) {
+                            MemberService memberService, MemberInfoService memberInfoService,MemberApiService memberApiService) {
         this.authenticationManager = authenticationManager;
         this.jwtProcessor = jwtProcessor;
         this.memberService = memberService;
+        this.memberInfoService = memberInfoService;
+        this.memberApiService = memberApiService;
     }
 
     @PostMapping("/login")
@@ -292,6 +303,127 @@ public class MemberController {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", "비밀번호 재설정 중 오류가 발생했습니다."));
         }
     }
+    @GetMapping("/info/{nickname}")
+    public ResponseEntity<?> getMemberInfoByNickname(@PathVariable String nickname, HttpServletRequest request) {
+        // 사용자 정보 가져오기
+        MemberInfoDTO memberInfoDTO = memberInfoService.getUserInfoByNickname(nickname);
+
+        // 사용자 정보가 없으면 404 반환
+        if (memberInfoDTO == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("사용자 정보가 없습니다.");
+        }
+
+        // uid를 사용하여 UserApiEntity 가져오기 (단일 객체로 처리)
+        MemberAPI memberAPI = memberApiService.getMemberApiByUid(memberInfoDTO.getUid());
+
+        // userApiEntity가 null인 경우 처리
+        if (memberAPI == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("API 데이터가 없습니다.");
+        }
+
+        // JWT에서 현재 사용자의 닉네임 가져오기
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
+        String tokenNickname = jwtProcessor.getNickname(token);
+
+        // 본인 여부 판단
+        if (tokenNickname.equals(nickname)) {
+            // 본인일 경우 모든 정보 반환
+            Map<String, Object> stockInfo = new HashMap<>();
+            stockInfo.put("base", memberAPI.getStock());
+            stockInfo.put("token", memberAPI.getStockToken());
+            stockInfo.put("secret", memberAPI.getStockSecret());
+            stockInfo.put("app", memberAPI.getStockApp());
+
+            Map<String, Object> coinInfo = new HashMap<>();
+            coinInfo.put("base", memberAPI.getCoin());
+            coinInfo.put("secret", memberAPI.getCoinSecret());
+            coinInfo.put("app", memberAPI.getCoinApp());
+
+            Map<String, Object> apiInfo = new HashMap<>();
+            apiInfo.put("bank", memberAPI.getBank());
+            apiInfo.put("stock", stockInfo);
+            apiInfo.put("coin", coinInfo);
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("nickname", memberInfoDTO.getNickname());
+            data.put("email", memberInfoDTO.getEmail());
+            data.put("img", memberInfoDTO.getImg());
+            data.put("birthYear", memberInfoDTO.getBirthYear());
+            data.put("gender", memberInfoDTO.getGender());
+            data.put("certification", memberInfoDTO.isCertification());
+            data.put("api", apiInfo);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("data", data);
+
+            ResponseDTO successResponse = new ResponseDTO(true, response);
+            return ResponseEntity.ok(successResponse);
+        } else {
+            // 본인이 아닌 경우 제한된 정보만 반환
+            Map<String, Object> limitedData = new HashMap<>();
+            limitedData.put("nickname", memberInfoDTO.getNickname());
+            limitedData.put("img", memberInfoDTO.getImg());
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("data", limitedData);
+
+            ResponseDTO successResponse = new ResponseDTO(true, response);
+            return ResponseEntity.ok(successResponse);
+        }
+    }
+    @PutMapping("/update")
+    public ResponseEntity<?> updateMemberInfo(@RequestBody MemberInfoDTO updatedMemberInfo, HttpServletRequest request) {
+        // JWT에서 현재 사용자의 닉네임 가져오기
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
+        String tokenNickname = jwtProcessor.getNickname(token);
+
+        // 본인 여부 판단
+        if (!tokenNickname.equals(updatedMemberInfo.getNickname())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("자신의 정보만 수정할 수 있습니다.");
+        }
+
+        // 사용자 정보 업데이트 로직
+        try {
+            MemberInfoDTO updatedInfo = memberInfoService.updateMemberInfo(updatedMemberInfo);
+
+            // 성공 응답 반환
+            Map<String, Object> data = new HashMap<>();
+            data.put("nickname", updatedInfo.getNickname());
+            data.put("email", updatedInfo.getEmail());
+            data.put("img", updatedInfo.getImg());
+            data.put("birthYear", updatedInfo.getBirthYear());
+            data.put("gender", updatedInfo.getGender());
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("data", data);
+
+            ResponseDTO successResponse = new ResponseDTO(true, response);
+            return ResponseEntity.ok(successResponse);
+        } catch (Exception e) {
+            // 예외 처리
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회원정보 수정 중 오류가 발생했습니다.");
+        }
+    }
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteMember(@PathVariable String id) {
+        // 서비스 로직을 통해 회원 삭제 처리
+        boolean isDeleted = memberService.deleteMemberById(id);
+
+        if (isDeleted) {
+            // 삭제 성공 시 응답 데이터 구성
+            Map<String, Object> data = new HashMap<>();
+            data.put("id", id);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("data", data);
+
+            ResponseDTO Response = new ResponseDTO(true, response);
+            return ResponseEntity.ok(Response);
+        } else {
+            return ResponseEntity.status(404).body("회원 정보를 찾을 수 없습니다.");
+        }
+    }
+
 
 
 }
