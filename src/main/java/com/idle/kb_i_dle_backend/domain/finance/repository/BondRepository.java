@@ -2,18 +2,22 @@ package com.idle.kb_i_dle_backend.domain.finance.repository;
 
 import com.idle.kb_i_dle_backend.domain.finance.entity.UserBond;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
-import java.util.Date;
+
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import javax.validation.constraints.NotNull;
+
 @Repository
 public interface BondRepository extends JpaRepository<UserBond, Integer> {
 
 
-    List<UserBond> findAllByUidAndDeleteDateIsNull(int uid);
+    List<UserBond> findAllByUidAndDeleteDateIsNull(Optional<Member> uid);
 
     @Query(value = "SELECT CASE :monthsAgo " +
             "  WHEN 1 THEN blp.1m_b_price " +
@@ -25,9 +29,9 @@ public interface BondRepository extends JpaRepository<UserBond, Integer> {
             "END AS closingPrice " +
             "FROM asset.bond b " +
             "JOIN product.bond_list_price blp  ON b.itms_nm = blp.isinCdNm " +
-            "WHERE b.uid = :uid AND b.add_date <= :endDate " +
-            "AND b.delete_date IS NULL", nativeQuery = true)
-    List<UserBond> findAllByUidAndAddDateBefore(@Param("uid")int uid, @Param("endDate")Date endDate, @Param("monthsAgo") int monthsAgo);
+            "WHERE b.uid = :uid " +
+            "AND b.delete_date IS NULL limit 1", nativeQuery = true)
+    List<UserBond> findAllByUidAndAddDateBefore(@Param("uid") Member uid, @Param("monthsAgo") int monthsAgo);
 
 
     @Query(value = "SELECT " +
@@ -41,8 +45,12 @@ public interface BondRepository extends JpaRepository<UserBond, Integer> {
             "END AS closingPrice " +
             "FROM asset.bond b " +
             "JOIN product.bond_list_price blp ON b.itms_nm = blp.isinCdNm " +
-            "WHERE b.itms_nm = :isinCdNm AND b.add_date <= :endDate", nativeQuery = true)
-    Double getBondPriceForMonth(@Param("isinCdNm") String isinCdNm, @Param("endDate")Date endDate,@Param("monthsAgo") int monthsAgo);
+            "WHERE b.itms_nm = :isinCdNm limit 1 ", nativeQuery = true)
+    Double getBondPriceForMonth(@Param("isinCdNm") String isinCdNm,@Param("monthsAgo") int monthsAgo);
 
-    List<UserBond> findByUid(Member uid);
+    List<UserBond> findByUid(Optional<Member> uid);
+
+    @Query(value = "SELECT per_price FROM asset.bond WHERE itms_nm = :name ORDER BY add_date DESC LIMIT 1", nativeQuery = true)
+    double getPriceByName(@Param("name") String name);
+
 }

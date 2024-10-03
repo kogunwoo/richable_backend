@@ -12,10 +12,8 @@ import com.idle.kb_i_dle_backend.domain.invest.dto.*;
 import com.idle.kb_i_dle_backend.domain.invest.service.InvestService;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import com.idle.kb_i_dle_backend.domain.member.repository.UserRepository;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -51,8 +49,8 @@ public class InvestServiceImpl implements InvestService {
     public List<InvestDTO> getInvestList() throws Exception {
         Member tempUser = userRepository.findByUid(1).orElseThrow();
         List<UserBank> userBanks = bankRepository.findByUid(tempUser);
-        List<UserBond> userBonds = bondRepository.findByUid(tempUser);
-        List<UserCoin> userCoins = coinRepository.findByUid(tempUser);
+        List<UserBond> userBonds = bondRepository.findByUid(Optional.of(tempUser));
+        List<UserCoin> userCoins = coinRepository.findByUid(Optional.of(tempUser));
         List<UserStock> userStocks = stockRepository.findByUid(tempUser);
 
         List<InvestDTO> investDTOs = new ArrayList<>();

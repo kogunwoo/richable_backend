@@ -1,15 +1,11 @@
 package com.idle.kb_i_dle_backend.domain.finance.service;
 
 
-import com.idle.kb_i_dle_backend.domain.finance.dto.AssetDTO;
-import com.idle.kb_i_dle_backend.domain.finance.dto.CoinReturnDTO;
-import com.idle.kb_i_dle_backend.domain.finance.dto.FinancialChangeDTO;
-import com.idle.kb_i_dle_backend.domain.finance.dto.FinancialSumDTO;
-import com.idle.kb_i_dle_backend.domain.finance.dto.MonthlySavingRateDTO;
-import com.idle.kb_i_dle_backend.domain.finance.dto.StockReturnDTO;
-import com.idle.kb_i_dle_backend.domain.finance.dto.TotalChangeDTO;
-import com.idle.kb_i_dle_backend.domain.finance.dto.BondReturnDTO;
+import com.idle.kb_i_dle_backend.domain.finance.dto.*;
+import com.idle.kb_i_dle_backend.domain.member.entity.Member;
+
 import java.util.List;
+import java.util.Optional;
 
 public interface FinanceService {
 
@@ -44,5 +40,8 @@ public interface FinanceService {
     // AS_10 달별 채권 수익률
     List<BondReturnDTO> getBondReturnTrend(int uid);
 
+    long sumStockAssets(Optional<Member> memberOpt);
+
+    List<MonthlyBalanceDTO> getMonthlyIncomeOutcomeBalance(int uid);
 
 }

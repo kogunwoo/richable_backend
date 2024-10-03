@@ -1,11 +1,11 @@
 package com.idle.kb_i_dle_backend.domain.finance.repository;
 
 import com.idle.kb_i_dle_backend.domain.finance.entity.StockList;
-import com.idle.kb_i_dle_backend.domain.finance.entity.UserBond;
 import com.idle.kb_i_dle_backend.domain.finance.entity.UserStock;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import java.util.Date;
 import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,7 +18,7 @@ public interface StockRepository extends JpaRepository<UserStock,Integer> {
     @Query(value = "SELECT sl.price " +
             "FROM asset.stock s " +
             "JOIN product.stock_list sl ON CAST(sl.short_code AS UNSIGNED) = s.pdno " +
-            "WHERE s.pdno = :pdno", nativeQuery = true)
+            "WHERE s.pdno = :pdno LIMIT 1", nativeQuery = true)
     double getStockPriceByPdno(@Param("pdno") int pdno);
 
     //uid가 일치하는 주식의 수량과 종가
@@ -29,7 +29,7 @@ public interface StockRepository extends JpaRepository<UserStock,Integer> {
     List<Object[]> getStockBalanceAndPrice(@Param("uid") int uid);
 
 
-    List<UserStock> findAllByUidAndDeleteDateIsNull(int uid);
+    List<UserStock> findAllByUidAndDeleteDateIsNull(Member member);
 
     // 선택한 주식의 해당 시점의 가격을 가져옴
     @Query(value = "SELECT " +
@@ -43,10 +43,9 @@ public interface StockRepository extends JpaRepository<UserStock,Integer> {
             "END " +
             "FROM product.stock_list sl " +
             "JOIN product.stock_list_price slp ON sl.standard_code = slp.standardCode " +
-            "WHERE sl.short_code = :stockId  AND s.add_date <= :endDate", nativeQuery = true)
+            "WHERE sl.short_code = :stockId", nativeQuery = true)
     Double getStockPriceForMonth(
             @Param("stockId") int stockId,
-            @Param("endDate") Date endDate,
             @Param("monthsAgo") int monthsAgo);
 
 
@@ -62,10 +61,9 @@ public interface StockRepository extends JpaRepository<UserStock,Integer> {
             "FROM asset.stock s " +
             "JOIN product.stock_list sl ON CAST(s.pdno AS CHAR) = sl.short_code " +  // pdno를 String으로 변환하여 비교
             "JOIN product.stock_list_price slp ON sl.standard_code = slp.standardCode " +
-            "WHERE s.uid = :uid AND s.add_date <= :endDate " +
+            "WHERE s.uid = :uid " +
             "AND s.delete_date IS NULL", nativeQuery = true)
-    List<Object[]> getStockBalanceAndClosingPriceBefore(@Param("uid") int uid,
-                                                        @Param("endDate") Date endDate,
+    List<Object[]> getStockBalanceAndClosingPriceBefore(@Param("uid") Member uid,
                                                         @Param("monthsAgo") int monthsAgo);
 
     List<UserStock> findByUid(Member uid);
