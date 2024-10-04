@@ -1,6 +1,8 @@
 package com.idle.kb_i_dle_backend.domain.finance.repository;
 
 import com.idle.kb_i_dle_backend.domain.finance.entity.Coin;
+//import com.idle.kb_i_dle_backend.domain.finance.entity.CoinList;
+import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -65,6 +67,11 @@ public interface CoinRepository extends JpaRepository <Coin,Integer> {
             "WHERE cl.coin_name = :coinName AND c.add_date <= :endDate", nativeQuery = true)
     Double getCoinPriceForMonth(@Param("coinName") String coinName, @Param("endDate") Date endDate, @Param("monthsAgo") int monthsAgo);
 
+    List<Coin> findByUid(Member uid);
+
+//    @Query("SELECT cl FROM CoinList cl ORDER BY CAST(cl.closingPrice AS double) DESC")
+//    List<CoinList> findTop5ByOrderByClosingPriceDesc();
+
     // coin crud
     // 삭제되지 않은 금융 자산(Coin) 전체 조회
     List<Coin> findByUidAndDeleteDateIsNull(Member uid);
@@ -73,4 +80,3 @@ public interface CoinRepository extends JpaRepository <Coin,Integer> {
     Optional<Coin> findByIndexAndDeleteDateIsNull(@Param("index")Integer index);
 
 }
-

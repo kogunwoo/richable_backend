@@ -28,7 +28,7 @@ public interface OutcomeUserRepository extends JpaRepository<OutcomeUser, Intege
             "AND YEAR(o.date) = :year AND MONTH(o.date) = :month " +
             "GROUP BY o.category " +
             "order by SUM(o.amount) desc")
-    List<CategorySumDTO> findCategorySumByUidAndYearAndMonth(@Param("uid") int uid, @Param("year") int year , @Param("month") int month);
+    List<CategorySumDTO> findCategorySumByUidAndYearAndMonth(@Param("uid") Member uid, @Param("year") int year , @Param("month") int month);
 
     /**
      * 날짜순으로 해당 년도 해당 달의 소비들을 LIST로 받음
@@ -41,7 +41,7 @@ public interface OutcomeUserRepository extends JpaRepository<OutcomeUser, Intege
             "FROM OutcomeUser o " +
             "WHERE o.uid = :uid AND YEAR(o.date) = :year AND MONTH(o.date) = :month " +
             "order by o.date")
-    List<OutcomeUser> findAmountAllByUidAndYearAndMonth(@Param("uid") int uid, @Param("year") int year , @Param("month") int month);
+    List<OutcomeUser> findAmountAllByUidAndYearAndMonth(@Param("uid") Member uid, @Param("year") int year , @Param("month") int month);
 
     List<OutcomeUser> findByUidAndDateBetween(Member uid, Date start, Date end);
 

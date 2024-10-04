@@ -1,10 +1,10 @@
 package com.idle.kb_i_dle_backend.domain.finance.repository;
 
-import com.idle.kb_i_dle_backend.domain.finance.entity.Bond;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import com.idle.kb_i_dle_backend.domain.finance.entity.Bond;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -13,7 +13,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BondRepository extends JpaRepository<Bond, Integer> {
-
 
     List<Bond> findAllByUidAndDeleteDateIsNull(int uid);
 
@@ -30,7 +29,6 @@ public interface BondRepository extends JpaRepository<Bond, Integer> {
             "WHERE b.uid = :uid AND b.add_date <= :endDate " +
             "AND b.delete_date IS NULL", nativeQuery = true)
     List<Bond> findAllByUidAndAddDateBefore(@Param("uid")int uid, @Param("endDate")Date endDate, @Param("monthsAgo") int monthsAgo);
-
 
     @Query(value = "SELECT " +
             "CASE :monthsAgo " +

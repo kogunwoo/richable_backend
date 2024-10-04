@@ -1,6 +1,7 @@
 package com.idle.kb_i_dle_backend.domain.finance.repository;
 
 import com.idle.kb_i_dle_backend.domain.finance.entity.Stock;
+import com.idle.kb_i_dle_backend.domain.finance.entity.StockList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -68,12 +69,20 @@ public interface StockRepository extends JpaRepository<Stock,Integer> {
                                                         @Param("endDate") Date endDate,
                                                         @Param("monthsAgo") int monthsAgo);
 
+    List<Stock> findByUid(Member uid);
+
+    @Query("SELECT sl FROM StockList sl WHERE sl.price IS NOT NULL ORDER BY sl.price DESC")
+    List<StockList> findTop5StocksByPrice();
+
+    // 이 메서드는 StockList 엔티티를 대상으로 하는 별도의 쿼리를 사용합니다.
+    @Query("SELECT sl FROM StockList sl WHERE sl.price IS NOT NULL ORDER BY sl.price DESC")
+    List<StockList> findTop5ByOrderByPriceDesc();
+
     // stock crud
     // 삭제되지 않은 금융 자산(Stock) 전체 조회
     List<Stock> findByUidAndDeleteDateIsNull(Member uid);
 
     // 특정 index값의 정보 조회
     Optional<Stock> findByIndexAndDeleteDateIsNull(@Param("index")Integer index);
-
 
 }
