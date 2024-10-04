@@ -130,13 +130,13 @@ public class FinanceServiceImpl implements FinanceService {
     @Override
     public List<StockReturnDTO> getStockReturnTrend(int uid) {
         List<StockReturnDTO> stockReturns = new ArrayList<>();
-        List<UserStock> userStocks = stockRepository.findAllByUidAndDeleteDateIsNull(uid);
+        List<Stock> stocks = stockRepository.findAllByUidAndDeleteDateIsNull(uid);
 
         for (int i = 0; i < 6; i++) {
             double totalStockReturn = 0;
             int stockCount = 0;
 
-            for (UserStock stock : userStocks) {
+            for (Stock stock : stocks) {
                 Date purchaseDateAsDate = stock.getAddDate();
                 LocalDate purchaseDate = purchaseDateAsDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
                 LocalDate currentMonthDate = LocalDate.now().minusMonths(i);
@@ -185,14 +185,14 @@ public class FinanceServiceImpl implements FinanceService {
     public List<CoinReturnDTO> getCoinReturnTrend(int uid) {
 
         List<CoinReturnDTO> coinReturns = new ArrayList<>();
-        List<UserCoin> userCoins = coinRepository.findAllByUidAndDeleteDateIsNull(uid);
+        List<Coin> coins = coinRepository.findAllByUidAndDeleteDateIsNull(uid);
 
         for (int i = 0; i < 6; i++) {
             double totalCoinReturn = 0;
             int coinCount = 0;
 
 
-            for (UserCoin coin : userCoins) {
+            for (Coin coin : coins) {
                 Date purchaseDateAsDate = coin.getAddDate();
                 LocalDate purchaseDate = purchaseDateAsDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
                 LocalDate currentMonthDate = LocalDate.now().minusMonths(i);
@@ -254,13 +254,13 @@ public class FinanceServiceImpl implements FinanceService {
     @Override
     public List<BondReturnDTO> getBondReturnTrend(int uid) {
         List<BondReturnDTO> bondReturns = new ArrayList<>();
-        List<UserBond> userBonds = bondRepository.findAllByUidAndDeleteDateIsNull(uid);
+        List<Bond> bonds = bondRepository.findAllByUidAndDeleteDateIsNull(uid);
 
         for (int i = 0; i < 6; i++) {
             double totalBondReturn = 0;
             int bondCount = 0;
 
-            for (UserBond bond : userBonds) {
+            for (Bond bond : bonds) {
                 Date purchaseDateAsDate = bond.getAddDate();
                 LocalDate purchaseDate = purchaseDateAsDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
                 LocalDate currentMonthDate = LocalDate.now().minusMonths(i);
@@ -326,7 +326,7 @@ public class FinanceServiceImpl implements FinanceService {
 
     // 은행 자산 합계
     private long sumBankAssets(int uid) {
-        return bankRepository.findAllByUidAndDeleteDateIsNull(uid).stream().mapToLong(UserBank::getBalanceAmt).sum();
+        return bankRepository.findAllByUidAndDeleteDateIsNull(uid).stream().mapToLong(Bank::getBalanceAmt).sum();
     }
 
     // 주식 자산 합계
@@ -363,12 +363,12 @@ public class FinanceServiceImpl implements FinanceService {
         long monthlySum = 0;
 
         // 은행 자산 합산
-        List<UserBank> bankAssets = bankRepository.findAllByUidAndAddDateBefore(uid, endOfMonth);
-        monthlySum += bankAssets.stream().mapToLong(UserBank::getBalanceAmt).sum();
+        List<Bank> bankAssets = bankRepository.findAllByUidAndAddDateBefore(uid, endOfMonth);
+        monthlySum += bankAssets.stream().mapToLong(Bank::getBalanceAmt).sum();
 
         // 채권 자산 합산
-        List<UserBond> bondAssets = bondRepository.findAllByUidAndAddDateBefore(uid, endOfMonth,monthsAgo);
-        monthlySum += bondAssets.stream().mapToLong(UserBond -> (long) UserBond.getPrice() * UserBond.getCnt()).sum();
+        List<Bond> bondAssets = bondRepository.findAllByUidAndAddDateBefore(uid, endOfMonth,monthsAgo);
+        monthlySum += bondAssets.stream().mapToLong(Bond -> (long) Bond.getPrice() * Bond.getCnt()).sum();
 
         // 가상화폐 자산 합산
         List<Object[]> coinData = coinRepository.findCoinBalanceAndPriceByUserIdAndBefore(uid, endOfMonth, monthsAgo);

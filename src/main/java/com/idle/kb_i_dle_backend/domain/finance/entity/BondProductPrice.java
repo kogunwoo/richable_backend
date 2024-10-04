@@ -1,7 +1,7 @@
 package com.idle.kb_i_dle_backend.domain.finance.entity;
 
-import java.io.Serializable;
 import java.util.Date;
+import javax.persistence.Entity;
 import javax.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,37 +10,38 @@ import javax.persistence.*;
 @Entity
 @Getter
 @Setter
-@Table(name="coin_list_price" , catalog="product")
-public class CoinListPrice implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+@Table(name="bond_list_price" , catalog="product")
+public class BondProductPrice {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer index;
+    private int index;
 
-    @Column(name = "coin_name")
-    private String coinName;
+    @Column(name = "isinCd")
+    private String isinCd;
+
+    @Column(name = "isinCdNm")
+    private String isinCdNm;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "date")
     private Date date;
 
     @Column(name = "1m_b_price")
-    private String oneMonthAgoPrice;
+    private int oneMonthAgoPrice;
 
     @Column(name = "2m_b_price")
-    private String twoMonthsAgoPrice;
+    private int twoMonthsAgoPrice;
 
     @Column(name = "3m_b_price")
-    private String threeMonthsAgoPrice;
+    private int threeMonthsAgoPrice;
 
     @Column(name = "4m_b_price")
-    private String fourMonthsAgoPrice;
+    private int fourMonthsAgoPrice;
 
     @Column(name = "5m_b_price")
-    private String fiveMonthsAgoPrice;
+    private int fiveMonthsAgoPrice;
 
     @Column(name = "6m_b_price")
-    private String sixMonthsAgoPrice;
+    private int sixMonthsAgoPrice;
 }

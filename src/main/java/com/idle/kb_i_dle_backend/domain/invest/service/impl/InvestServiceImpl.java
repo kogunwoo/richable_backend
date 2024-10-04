@@ -2,7 +2,7 @@ package com.idle.kb_i_dle_backend.domain.invest.service.impl;
 
 import com.idle.kb_i_dle_backend.domain.finance.entity.*;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BankRepository;
-import com.idle.kb_i_dle_backend.domain.finance.repository.BondListRepository;
+import com.idle.kb_i_dle_backend.domain.finance.repository.BondProductRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BondRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.CoinPriceRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.CoinRepository;
@@ -11,7 +11,7 @@ import com.idle.kb_i_dle_backend.domain.finance.repository.StockRepository;
 import com.idle.kb_i_dle_backend.domain.invest.dto.*;
 import com.idle.kb_i_dle_backend.domain.invest.service.InvestService;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
-import com.idle.kb_i_dle_backend.domain.member.repository.UserRepository;
+import com.idle.kb_i_dle_backend.domain.member.repository.MemberRepository;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -24,42 +24,42 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class InvestServiceImpl implements InvestService {
-    private final UserRepository userRepository;
+    private final MemberRepository memberRepository;
     private final BankRepository bankRepository;
     private final BondRepository bondRepository;
     private final CoinRepository coinRepository;
     private final StockRepository stockRepository;
-    private final BondListRepository bondListRepository;
+    private final BondProductRepository bondProductRepository;
     private final StockPriceRepository stockPriceRepository;
     private final CoinPriceRepository coinPriceRepository;
 
-    public InvestServiceImpl(BankRepository bankRepository, UserRepository userRepository,
+    public InvestServiceImpl(BankRepository bankRepository, MemberRepository memberRepository,
                              BondRepository bondRepository, CoinRepository coinRepository,
-                             StockRepository stockRepository, BondListRepository bondListRepository,
-                             StockPriceRepository stockPriceRepository,CoinPriceRepository coinPriceRepository) {
-        this.userRepository = userRepository;
+                             StockRepository stockRepository, BondProductRepository bondProductRepository,
+                             StockPriceRepository stockPriceRepository, CoinPriceRepository coinPriceRepository) {
+        this.memberRepository = memberRepository;
         this.bankRepository = bankRepository;
         this.bondRepository = bondRepository;
         this.coinRepository = coinRepository;
         this.stockRepository = stockRepository;
-        this.bondListRepository = bondListRepository;
+        this.bondProductRepository = bondProductRepository;
         this.stockPriceRepository = stockPriceRepository;
         this.coinPriceRepository = coinPriceRepository;
     }
 
     @Override
     public List<InvestDTO> getInvestList() throws Exception {
-        Member tempUser = userRepository.findByUid(1).orElseThrow();
-        List<UserBank> userBanks = bankRepository.findByUid(tempUser);
-        List<UserBond> userBonds = bondRepository.findByUid(tempUser);
-        List<UserCoin> userCoins = coinRepository.findByUid(tempUser);
-        List<UserStock> userStocks = stockRepository.findByUid(tempUser);
+        Member tempUser = memberRepository.findByUid(1).orElseThrow();
+        List<Bank> banks = bankRepository.findByUid(tempUser);
+        List<Bond> bonds = bondRepository.findByUid(tempUser);
+        List<Coin> coins = coinRepository.findByUid(tempUser);
+        List<Stock> stocks = stockRepository.findByUid(tempUser);
 
         List<InvestDTO> investDTOs = new ArrayList<>();
-        investDTOs.addAll(InvestDTO.fromUserBankList(userBanks));
-        investDTOs.addAll(InvestDTO.fromBondList(userBonds));
-        investDTOs.addAll(InvestDTO.fromCoinList(userCoins));
-        investDTOs.addAll(InvestDTO.fromStockList(userStocks));
+        investDTOs.addAll(InvestDTO.fromUserBankList(banks));
+        investDTOs.addAll(InvestDTO.fromBondList(bonds));
+        investDTOs.addAll(InvestDTO.fromCoinList(coins));
+        investDTOs.addAll(InvestDTO.fromStockList(stocks));
 
         return investDTOs;
     }
@@ -88,11 +88,11 @@ public class InvestServiceImpl implements InvestService {
 
     @Override
     public AvailableCashDTO getAvailableCash() throws Exception {
-        Member tempUser = userRepository.findByUid(1).orElseThrow(() -> new Exception("User not found"));
-        List<UserBank> userBanks = bankRepository.findByUidAndSpecificCategoriesAndDeleteDateIsNull(tempUser);
+        Member tempUser = memberRepository.findByUid(1).orElseThrow(() -> new Exception("User not found"));
+        List<Bank> banks = bankRepository.findByUidAndSpecificCategoriesAndDeleteDateIsNull(tempUser);
 
-        Long totalAvailableCash = userBanks.stream()
-                .mapToLong(UserBank::getBalanceAmt)
+        Long totalAvailableCash = banks.stream()
+                .mapToLong(Bank::getBalanceAmt)
                 .sum();
 
         Long totalAsset = totalAsset();
@@ -102,7 +102,7 @@ public class InvestServiceImpl implements InvestService {
 
     @Override
     public List<CategorySumDTO> getInvestmentTendency() throws Exception {
-        Member tempUser = userRepository.findByUid(1).orElseThrow(() -> new Exception("User not found"));
+        Member tempUser = memberRepository.findByUid(1).orElseThrow(() -> new Exception("User not found"));
         List<InvestDTO> investDTOs = getInvestList();
 
         Map<String, Long> categorySums = investDTOs.stream()
@@ -127,9 +127,9 @@ public class InvestServiceImpl implements InvestService {
         List<RecommendedProductDTO> recommendedProducts = new ArrayList<>();
 
         if ("안정형".equals(maxCategory.getTendency())) {
-            List<CoinList> coins = coinRepository.findTop5ByOrderByClosingPriceDesc()
+            List<CoinProduct> coins = coinRepository.findTop5ByOrderByClosingPriceDesc()
                     .stream().limit(5).collect(Collectors.toList());
-            List<StockList> stocks = stockRepository.findTop5ByOrderByPriceDesc()
+            List<StockProduct> stocks = stockRepository.findTop5ByOrderByPriceDesc()
                     .stream().limit(5).collect(Collectors.toList());
 
             recommendedProducts.addAll(coins.stream()
@@ -141,7 +141,7 @@ public class InvestServiceImpl implements InvestService {
                     .map(stock -> new RecommendedProductDTO("주식", stock.getKrStockNm(), stock.getPrice()))
                     .collect(Collectors.toList()));
         } else {
-            List<BondList> bonds = bondListRepository.findTop5ByOrderByPriceDesc();
+            List<BondProduct> bonds = bondProductRepository.findTop5ByOrderByPriceDesc();
 
             recommendedProducts.addAll(bonds.stream()
                     .map(bond -> new RecommendedProductDTO("채권", bond.getIsinCdNm(), bond.getPrice()))
