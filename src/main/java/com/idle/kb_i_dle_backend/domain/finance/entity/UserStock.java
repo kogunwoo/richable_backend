@@ -38,4 +38,7 @@ public class UserStock {
 
     @Column(name = "delete_date")
     private Date deleteDate;
+
+    @Column(name = "avg_buy_price")
+    private Integer avgBuyPrice;
 }

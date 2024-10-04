@@ -1,6 +1,6 @@
 package com.idle.kb_i_dle_backend.domain.finance.controller;
 
-import com.idle.kb_i_dle_backend.common.dto.SuccessResponseDTO;
+import com.idle.kb_i_dle_backend.common.dto.ResponseDTO;
 import com.idle.kb_i_dle_backend.domain.finance.dto.AssetDTO;
 import com.idle.kb_i_dle_backend.domain.finance.dto.BondReturnDTO;
 import com.idle.kb_i_dle_backend.domain.finance.dto.CoinReturnDTO;
@@ -35,7 +35,7 @@ public class FinanceController {
 
     // AS_1 금융 자산 합 조회
     @GetMapping("/fin/sum")
-    public ResponseEntity<SuccessResponseDTO> getFinancialAssetsSum(HttpServletRequest request) {
+    public ResponseEntity<ResponseDTO> getFinancialAssetsSum(HttpServletRequest request) {
         HttpSession session = request.getSession();
         Integer uid = (Integer) session.getAttribute("uid");
         if (uid == null) {
@@ -47,10 +47,10 @@ public class FinanceController {
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("data", totalPrice);
 
-        SuccessResponseDTO successResponse = new SuccessResponseDTO("true", responseData);
+        ResponseDTO Response = new ResponseDTO(true, responseData);
 
 
-        return ResponseEntity.ok(successResponse);
+        return ResponseEntity.ok(Response);
     }
 
 
@@ -66,7 +66,7 @@ public class FinanceController {
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("data", totalPrice);
 
-        SuccessResponseDTO successResponse = new SuccessResponseDTO("true", responseData);
+        ResponseDTO successResponse = new ResponseDTO(true, responseData);
 
         return ResponseEntity.ok(successResponse);
     }
@@ -83,7 +83,7 @@ public class FinanceController {
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("data", totalPrice);
 
-        SuccessResponseDTO successResponse = new SuccessResponseDTO("true", responseData);
+        ResponseDTO successResponse = new ResponseDTO(true, responseData);
 
         return ResponseEntity.ok(successResponse);
     }
@@ -100,7 +100,7 @@ public class FinanceController {
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("data", result);
 
-        SuccessResponseDTO successResponse = new SuccessResponseDTO("true", responseData);
+        ResponseDTO successResponse = new ResponseDTO(true, responseData);
 
         return ResponseEntity.ok(successResponse);
     }
@@ -116,7 +116,7 @@ public class FinanceController {
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("data", result);
 
-        SuccessResponseDTO successResponse = new SuccessResponseDTO("true", responseData);
+        ResponseDTO successResponse = new ResponseDTO(true, responseData);
 
         return ResponseEntity.ok(successResponse);
     }
@@ -131,7 +131,7 @@ public class FinanceController {
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("data", totalPrice);
 
-        SuccessResponseDTO successResponse = new SuccessResponseDTO("true", responseData);
+        ResponseDTO successResponse = new ResponseDTO(true, responseData);
 
         return ResponseEntity.ok(successResponse);
 
@@ -147,7 +147,7 @@ public class FinanceController {
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("data", stockReturn);
 
-        SuccessResponseDTO successResponse = new SuccessResponseDTO("true", responseData);
+        ResponseDTO successResponse = new ResponseDTO(true, responseData);
 
         return ResponseEntity.ok(successResponse);
     }
@@ -162,7 +162,7 @@ public class FinanceController {
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("data", coinReturn);
 
-        SuccessResponseDTO successResponse = new SuccessResponseDTO("true", responseData);
+        ResponseDTO successResponse = new ResponseDTO(true, responseData);
 
         return ResponseEntity.ok(successResponse);
     }
@@ -177,7 +177,7 @@ public class FinanceController {
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("data", bondReturn);
 
-        SuccessResponseDTO successResponse = new SuccessResponseDTO("true", responseData);
+        ResponseDTO successResponse = new ResponseDTO(true, responseData);
 
         return ResponseEntity.ok(successResponse);
     }

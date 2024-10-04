@@ -36,6 +36,7 @@ public class OutcomeServiceImpl implements OutcomeService {
     private final AverageOutcomeRepository averageOutcomeRepository;
     private final OutcomeUserRepository outcomeUserRepository;
     private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
     private final MemberService memberService;
     private final IncomeService incomeService;
     private final UserRepository userRepository;
