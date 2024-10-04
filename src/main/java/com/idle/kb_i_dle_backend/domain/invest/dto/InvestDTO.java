@@ -1,12 +1,10 @@
 package com.idle.kb_i_dle_backend.domain.invest.dto;
 
-import com.idle.kb_i_dle_backend.domain.finance.entity.Spot;
-import com.idle.kb_i_dle_backend.domain.finance.entity.UserBank;
-import com.idle.kb_i_dle_backend.domain.finance.entity.UserBond;
-import com.idle.kb_i_dle_backend.domain.finance.entity.UserCoin;
-import com.idle.kb_i_dle_backend.domain.finance.entity.UserStock;
-import com.idle.kb_i_dle_backend.domain.income.dto.IncomeDTO;
-import com.idle.kb_i_dle_backend.domain.income.entity.Income;
+import com.idle.kb_i_dle_backend.domain.finance.entity.Bank;
+import com.idle.kb_i_dle_backend.domain.finance.entity.Bond;
+import com.idle.kb_i_dle_backend.domain.finance.entity.Coin;
+import com.idle.kb_i_dle_backend.domain.finance.entity.Stock;
+
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,60 +23,60 @@ public class InvestDTO {
     private String name;
     private Long price;
 
-    public InvestDTO(UserBank userBank){
+    public InvestDTO(Bank userBank){
         this.assetId = userBank.getIndex();
         this.category = userBank.getCategory();
         this.name = userBank.getName();
         this.price = userBank.getBalanceAmt();
     }
-    public InvestDTO(UserBond userBond){
+    public InvestDTO(Bond userBond){
         this.assetId = userBond.getIndex();
         this.category = userBond.getCategory();
         this.name = userBond.getName();
         this.price = Long.valueOf(userBond.getPrice());
     }
-    public InvestDTO(UserCoin userCoin){
-        this.assetId = userCoin.getIndex();
-        this.category = userCoin.getCategory();
-        this.name = userCoin.getCurrency();
-        this.price =calculateCoinPrice(userCoin);
+    public InvestDTO(Coin coin){
+        this.assetId = coin.getIndex();
+        this.category = coin.getCategory();
+        this.name = coin.getCurrency();
+        this.price =calculateCoinPrice(coin);
     }
 
-    public InvestDTO(UserStock userStock){
-        this.assetId = userStock.getIndex();
-        this.category = userStock.getCategory();
-        this.name = userStock.getPrdtName();
-        this.price = calculateStockPrice(userStock);
+    public InvestDTO(Stock stock){
+        this.assetId = stock.getIndex();
+        this.category = stock.getCategory();
+        this.name = stock.getPrdtName();
+        this.price = calculateStockPrice(stock);
     }
 
-    private Long calculateStockPrice(UserStock userStock) {
-        return Long.valueOf(userStock.getHldgQty() * userStock.getAvgBuyPrice());
+    private Long calculateStockPrice(Stock stock) {
+        return Long.valueOf(stock.getHldgQty() * stock.getAvgBuyPrice());
     }
-    private Long calculateCoinPrice(UserCoin userCoin) {
-        return (long) (userCoin.getBalance() * userCoin.getAvgBuyPrice());
+    private Long calculateCoinPrice(Coin coin) {
+        return (long) (coin.getBalance() * coin.getAvgBuyPrice());
     }
-    private Long calculateBondPrice(UserBond userBond) {
-        return (long) (userBond.getPrice() * userBond.getCnt());
+    private Long calculateBondPrice(Bond bond) {
+        return (long) (bond.getPrice() * bond.getCnt());
     }
 
-    public static List<InvestDTO> fromUserBankList(List<UserBank> userBanks) {
-        return userBanks.stream()
+    public static List<InvestDTO> fromUserBankList(List<Bank> banks) {
+        return banks.stream()
                 .map(InvestDTO::new)
                 .collect(Collectors.toList());
     }
 
-    public static List<InvestDTO> fromBondList(List<UserBond> userBond) {
-        return userBond.stream()
+    public static List<InvestDTO> fromBondList(List<Bond> bonds) {
+        return bonds.stream()
                 .map(InvestDTO::new)
                 .collect(Collectors.toList());
     }
-    public static List<InvestDTO> fromCoinList(List<UserCoin> userCoin) {
-        return userCoin.stream()
+    public static List<InvestDTO> fromCoinList(List<Coin> coins) {
+        return coins.stream()
                 .map(InvestDTO::new)
                 .collect(Collectors.toList());
     }
-    public static List<InvestDTO> fromStockList(List<UserStock> userStock) {
-        return userStock.stream()
+    public static List<InvestDTO> fromStockList(List<Stock> stocks) {
+        return stocks.stream()
                 .map(InvestDTO::new)
                 .collect(Collectors.toList());
     }

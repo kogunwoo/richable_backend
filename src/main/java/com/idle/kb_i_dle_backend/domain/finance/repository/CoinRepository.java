@@ -1,7 +1,7 @@
 package com.idle.kb_i_dle_backend.domain.finance.repository;
 
 import com.idle.kb_i_dle_backend.domain.finance.entity.Coin;
-//import com.idle.kb_i_dle_backend.domain.finance.entity.CoinList;
+import com.idle.kb_i_dle_backend.domain.finance.entity.CoinProduct;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import java.util.Date;
 import java.util.List;
@@ -69,8 +69,8 @@ public interface CoinRepository extends JpaRepository <Coin,Integer> {
 
     List<Coin> findByUid(Member uid);
 
-//    @Query("SELECT cl FROM CoinList cl ORDER BY CAST(cl.closingPrice AS double) DESC")
-//    List<CoinList> findTop5ByOrderByClosingPriceDesc();
+    @Query("SELECT cl FROM CoinProduct cl ORDER BY CAST(cl.closingPrice AS double) DESC")
+    List<CoinProduct> findTop5ByOrderByClosingPriceDesc();
 
     // coin crud
     // 삭제되지 않은 금융 자산(Coin) 전체 조회

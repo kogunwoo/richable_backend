@@ -22,7 +22,7 @@ public interface BankRepository extends JpaRepository<Bank, Integer> {
     @Query("SELECT ub FROM Bank ub WHERE ub.uid = :uid AND ub.addDate < :date")
     List<Bank> findInvestmentsByUidAndDate(@Param("uid") Integer uid, @Param("date") Date date);
 
-    // 소득 전체 조회
+    // Bank 전체 조회
     List<Bank> findByUid(Member uid);
 
     // 새로운 메서드: 특정 사용자의 "입출금" 또는 "현금" 카테고리에 해당하는 은행 계좌 조회

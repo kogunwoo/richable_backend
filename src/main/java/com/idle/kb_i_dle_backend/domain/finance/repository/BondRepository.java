@@ -44,6 +44,9 @@ public interface BondRepository extends JpaRepository<Bond, Integer> {
             "WHERE b.itms_nm = :isinCdNm AND b.add_date <= :endDate", nativeQuery = true)
     Double getBondPriceForMonth(@Param("isinCdNm") String isinCdNm, @Param("endDate")Date endDate,@Param("monthsAgo") int monthsAgo);
 
+    // Bond 전체 조회
+    List<Bond> findByUid(Member uid);
+
     // bond crud
     // 삭제되지 않은 금융 자산(Bond) 전체 조회
     List<Bond> findByUidAndDeleteDateIsNull(Member uid);
