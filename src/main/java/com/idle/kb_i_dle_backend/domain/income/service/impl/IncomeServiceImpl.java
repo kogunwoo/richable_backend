@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,7 +90,9 @@ public class IncomeServiceImpl implements IncomeService {
             throw new AccessDeniedException("You do not have permission to modify this income.");
         }
 
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         isIncome.setType(incomeDTO.getType());
+        isIncome.setDate(dateFormat.parse(incomeDTO.getIncomeDate()));
         isIncome.setAmount(incomeDTO.getPrice());
         isIncome.setDescript(incomeDTO.getContents());
         isIncome.setMemo(incomeDTO.getMemo());
