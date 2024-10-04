@@ -18,7 +18,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Table(name = "stock_list", catalog = "product")
-public class StockList implements Serializable {
+public class StockProduct implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -46,5 +46,5 @@ public class StockList implements Serializable {
     // StockList와 ManyToOne 관계를 설정하고, pdno와 short_code를 기준으로 조인
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "standard_code", referencedColumnName = "standardCode", insertable = false, updatable = false)
-    private StockListPrice stockListPrice;
+    private StockProductPrice stockProductPrice;
 }

@@ -10,8 +10,8 @@ import javax.persistence.*;
 @Entity
 @Getter
 @Setter
-@Table(name="stock_list_price" , catalog="product")
-public class StockListPrice implements Serializable {
+@Table(name="coin_list_price" , catalog="product")
+public class CoinProductPrice implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -19,28 +19,28 @@ public class StockListPrice implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer index;
 
-    @Column(name = "standardCode")
-    private String standardCode;
+    @Column(name = "coin_name")
+    private String coinName;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "date")
     private Date date;
 
     @Column(name = "1m_b_price")
-    private Integer oneMonthAgoPrice;
+    private String oneMonthAgoPrice;
 
     @Column(name = "2m_b_price")
-    private Integer twoMonthsAgoPrice;
+    private String twoMonthsAgoPrice;
 
     @Column(name = "3m_b_price")
-    private Integer threeMonthsAgoPrice;
+    private String threeMonthsAgoPrice;
 
     @Column(name = "4m_b_price")
-    private Integer fourMonthsAgoPrice;
+    private String fourMonthsAgoPrice;
 
     @Column(name = "5m_b_price")
-    private Integer fiveMonthsAgoPrice;
+    private String fiveMonthsAgoPrice;
 
     @Column(name = "6m_b_price")
-    private Integer sixMonthsAgoPrice;
+    private String sixMonthsAgoPrice;
 }

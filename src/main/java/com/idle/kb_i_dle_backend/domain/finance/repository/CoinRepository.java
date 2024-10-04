@@ -1,17 +1,22 @@
 package com.idle.kb_i_dle_backend.domain.finance.repository;
 
-import com.idle.kb_i_dle_backend.domain.finance.entity.UserCoin;
+import com.idle.kb_i_dle_backend.domain.finance.entity.Coin;
+import com.idle.kb_i_dle_backend.domain.finance.entity.CoinProduct;
+import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+
+import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface CoinRepository extends JpaRepository <UserCoin,Integer> {
+public interface CoinRepository extends JpaRepository <Coin,Integer> {
 
-    List<UserCoin> findAllByUidAndDeleteDateIsNull(int uid);
+    List<Coin> findAllByUidAndDeleteDateIsNull(int uid);
 
     @Query(value = "SELECT a.balance, b.closing_price " +
             "FROM asset.coin a " +
@@ -62,5 +67,16 @@ public interface CoinRepository extends JpaRepository <UserCoin,Integer> {
             "WHERE cl.coin_name = :coinName AND c.add_date <= :endDate", nativeQuery = true)
     Double getCoinPriceForMonth(@Param("coinName") String coinName, @Param("endDate") Date endDate, @Param("monthsAgo") int monthsAgo);
 
-}
+    List<Coin> findByUid(Member uid);
 
+    @Query("SELECT cl FROM CoinProduct cl ORDER BY CAST(cl.closingPrice AS double) DESC")
+    List<CoinProduct> findTop5ByOrderByClosingPriceDesc();
+
+    // coin crud
+    // 삭제되지 않은 금융 자산(Coin) 전체 조회
+    List<Coin> findByUidAndDeleteDateIsNull(Member uid);
+
+    // 특정 index값의 정보 조회
+    Optional<Coin> findByIndexAndDeleteDateIsNull(@Param("index")Integer index);
+
+}

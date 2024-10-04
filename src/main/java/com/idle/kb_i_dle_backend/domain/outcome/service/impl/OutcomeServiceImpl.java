@@ -2,7 +2,7 @@ package com.idle.kb_i_dle_backend.domain.outcome.service.impl;
 
 import com.idle.kb_i_dle_backend.domain.income.service.IncomeService;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
-import com.idle.kb_i_dle_backend.domain.member.repository.UserRepository;
+import com.idle.kb_i_dle_backend.domain.member.repository.MemberRepository;
 import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
 import com.idle.kb_i_dle_backend.domain.outcome.dto.*;
 import com.idle.kb_i_dle_backend.domain.outcome.entity.OutcomeAverage;
@@ -36,9 +36,9 @@ public class OutcomeServiceImpl implements OutcomeService {
     private final AverageOutcomeRepository averageOutcomeRepository;
     private final OutcomeUserRepository outcomeUserRepository;
     private final CategoryRepository categoryRepository;
+    private final MemberRepository memberRepository;
     private final MemberService memberService;
     private final IncomeService incomeService;
-    private final UserRepository userRepository;
 
 
     /**
@@ -282,7 +282,7 @@ public class OutcomeServiceImpl implements OutcomeService {
 
     @Override
     public List<OutcomeUserDTO> getOutcomeList() throws Exception {
-        Member tempMember = userRepository.findByUid(1).orElseThrow();
+        Member tempMember = memberRepository.findByUid(1).orElseThrow();
         List<OutcomeUser> outcomes = outcomeUserRepository.findByUid(tempMember);
 
         if (outcomes.isEmpty()) throw new NotFoundException("");
@@ -298,7 +298,7 @@ public class OutcomeServiceImpl implements OutcomeService {
 
     @Override
     public OutcomeUserDTO getOutcomeByIndex(Integer index) throws Exception {
-        Member tempMember = userRepository.findByUid(1).orElseThrow();
+        Member tempMember = memberRepository.findByUid(1).orElseThrow();
         OutcomeUser isOutcomeUser = outcomeUserRepository.findByIndex(index)
                 .orElseThrow(() -> new IllegalArgumentException("Outcome not found with index: " + index));
 
@@ -312,7 +312,7 @@ public class OutcomeServiceImpl implements OutcomeService {
 
     @Override
     public OutcomeUserDTO addOutcome(OutcomeUserDTO outcomeUserDTO) throws ParseException {
-        Member tempMember = userRepository.findByUid(1).orElseThrow();
+        Member tempMember = memberRepository.findByUid(1).orElseThrow();
         OutcomeUser savedOutcome = outcomeUserRepository.save(OutcomeUserDTO.convertToEntity(tempMember, outcomeUserDTO));
 
         return OutcomeUserDTO.convertToDTO(savedOutcome);
@@ -321,14 +321,14 @@ public class OutcomeServiceImpl implements OutcomeService {
     @Transactional
     @Override
     public OutcomeUserDTO updateOutcome(OutcomeUserDTO outcomeUserDTO) throws ParseException {
-        Member tempMember = userRepository.findByUid(1).orElseThrow();
+        Member tempMember = memberRepository.findByUid(1).orElseThrow();
 
         // Outcome 조회
         OutcomeUser isOutcomeUser = outcomeUserRepository.findByIndex(outcomeUserDTO.getIndex())
                 .orElseThrow(() -> new IllegalArgumentException("Outcome not found with id: " + outcomeUserDTO.getIndex()));
 
         // Member 조회 (Member 객체가 없을 경우 예외 처리)
-        Member isMember = userRepository.findByUid(tempMember.getUid())
+        Member isMember = memberRepository.findByUid(tempMember.getUid())
                 .orElseThrow(() -> new IllegalArgumentException("Member not found with id: " + tempMember.getUid()));
 
         // Outcome의 소유자가 해당 User인지 확인
@@ -348,7 +348,7 @@ public class OutcomeServiceImpl implements OutcomeService {
     @Transactional
     @Override
     public Integer deleteOutcomeByUidAndIndex(Integer index) {
-        Member tempMember = userRepository.findByUid(1).orElseThrow();
+        Member tempMember = memberRepository.findByUid(1).orElseThrow();
         OutcomeUser isOutcomeUser = outcomeUserRepository.findByIndex(index)
                 .orElseThrow(() -> new IllegalArgumentException("Outcome not found with index: " + index));
 
