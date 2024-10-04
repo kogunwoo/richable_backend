@@ -9,7 +9,7 @@ import lombok.Getter;
 @Entity
 @Table(name = "stock", catalog = "asset")
 @Getter
-public class UserStock {
+public class Stock {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer index;

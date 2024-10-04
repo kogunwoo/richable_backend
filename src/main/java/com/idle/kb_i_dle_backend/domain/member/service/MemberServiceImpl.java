@@ -3,7 +3,7 @@ package com.idle.kb_i_dle_backend.domain.member.service;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberJoinDTO;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
-import com.idle.kb_i_dle_backend.domain.member.repository.UserRepository;
+import com.idle.kb_i_dle_backend.domain.member.repository.MemberRepository;
 import java.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class MemberServiceImpl implements MemberService {
 
-    private final UserRepository userRepository;
+    private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -26,27 +26,27 @@ public class MemberServiceImpl implements MemberService {
     private Map<String, String> verificationCodes = new HashMap<>();
 
     @Autowired
-    public MemberServiceImpl(UserRepository userRepository, @Lazy PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
+    public MemberServiceImpl(MemberRepository memberRepository, @Lazy PasswordEncoder passwordEncoder) {
+        this.memberRepository = memberRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public boolean checkDupl(String id) {
-        return userRepository.existsById(id);
+        return memberRepository.existsById(id);
     }
 
 
     @Override
     @Transactional
     public Member getMember(String id) {
-        return userRepository.findById(id);
+        return memberRepository.findById(id);
     }
 
 
     @Override
     public Optional<Member> findMemberByUid(int id){
-        return userRepository.findByUid(id);
+        return memberRepository.findByUid(id);
     }
 
 
@@ -62,7 +62,7 @@ public class MemberServiceImpl implements MemberService {
             }
 
             log.debug("Checking if user exists");
-            if (userRepository.existsById(memberjoindto.getId())) {
+            if (memberRepository.existsById(memberjoindto.getId())) {
                 throw new IllegalStateException("User already exists");
             }
 
@@ -96,7 +96,7 @@ public class MemberServiceImpl implements MemberService {
                     .build();
 
             log.debug("Saving new user: {}", newUser);
-            userRepository.save(newUser);
+            memberRepository.save(newUser);
             log.debug("User saved successfully");
         } catch (Exception e) {
             log.error("Error in MemberJoin: ", e);
@@ -106,7 +106,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public MemberDTO findById(String id) {
-        Member user = userRepository.findById(id);
+        Member user = memberRepository.findById(id);
         if (user != null) {
             return new MemberDTO(
                     user.getUid(),
@@ -135,11 +135,11 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public boolean checkAgree(boolean info, boolean finance, String id) {
-        Member user = userRepository.findById(id);
+        Member user = memberRepository.findById(id);
         if (user != null) {
             user.setAgreementInfo(info);
             user.setAgreementFinance(finance);
-            userRepository.save(user); // Save updated user
+            memberRepository.save(user); // Save updated user
             return true;
         }
         return false; // User not found
@@ -147,7 +147,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public String findIdByEmail(String email) {
-        Member user = userRepository.findByEmail(email);
+        Member user = memberRepository.findByEmail(email);
         return user != null ? user.getId() : null;
     }
 
@@ -180,11 +180,11 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public boolean resetPassword(String id, String newPassword) {
-        Member user = userRepository.findById(id);
+        Member user = memberRepository.findById(id);
         if (user != null) {
             String encodedPassword = passwordEncoder.encode(newPassword);
             user.setPassword(encodedPassword); // Update password
-            userRepository.save(user); // Save updated user
+            memberRepository.save(user); // Save updated user
             return true;
         }
         return false; // User not found
@@ -193,10 +193,10 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public boolean deleteMemberById(String id) {
         // ID로 회원 조회 후 삭제
-        Member member = userRepository.findById(id);
+        Member member = memberRepository.findById(id);
 
         // 회원 삭제
-        userRepository.delete(member);
+        memberRepository.delete(member);
         return true;
     }
 }

@@ -13,7 +13,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Table(name="bond_list" , catalog="product")
-public class BondList {
+public class BondProduct {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

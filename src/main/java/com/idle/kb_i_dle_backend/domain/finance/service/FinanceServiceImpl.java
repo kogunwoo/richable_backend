@@ -4,16 +4,14 @@ import com.idle.kb_i_dle_backend.domain.finance.dto.*;
 import com.idle.kb_i_dle_backend.domain.finance.entity.*;
 import com.idle.kb_i_dle_backend.domain.income.repository.IncomeRepository;
 import com.idle.kb_i_dle_backend.domain.outcome.repository.OutcomeUserRepository;
-import com.idle.kb_i_dle_backend.domain.member.repository.UserRepository;
+import com.idle.kb_i_dle_backend.domain.member.repository.MemberRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.*;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
-import javax.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -33,8 +31,9 @@ public class FinanceServiceImpl implements FinanceService {
     private final StockRepository stockRepository;
     private final IncomeRepository incomeRepository;
     private final OutcomeUserRepository outComeUserRepository;
-    private final UserRepository userRepository;
-    private final EntityManagerFactory entityManagerFactory;
+    private final MemberRepository memberRepository;
+    private final AssetSummaryRepository assetSummaryRepository;
+
 
     // 소수점 이하 한 자리로 포맷팅할 수 있는 DecimalFormat
     private static final DecimalFormat df = new DecimalFormat("#.#");
@@ -42,7 +41,7 @@ public class FinanceServiceImpl implements FinanceService {
     // 금융 자산 합계 계산
     @Override
     public FinancialSumDTO getFinancialAssetsSum(int uid) {
-        Optional<Member> member = userRepository.findByUid(uid);
+        Optional<Member> member = memberRepository.findByUid(uid);
         long financialAssetsSum = calculateFinancialAssetsSum(member);
         return new FinancialSumDTO(financialAssetsSum);
     }
@@ -50,7 +49,7 @@ public class FinanceServiceImpl implements FinanceService {
     // 총 자산 합계 계산 (금융 자산 + Spot 자산)
     @Override
     public FinancialSumDTO getTotalAssetsSum(int uid) {
-        Optional<Member> member = userRepository.findByUid(uid);
+        Optional<Member> member = memberRepository.findByUid(uid);
         long totalAssetsSum = calculateFinancialAssetsSum(member) + calculateSpotAssetsSum(member);
         return new FinancialSumDTO(totalAssetsSum);
     }
@@ -58,14 +57,14 @@ public class FinanceServiceImpl implements FinanceService {
     // 금융 자산 목록 조회
     @Override
     public List<AssetDTO> getFinancialAsset(int uid) {
-        Optional<Member> member = userRepository.findByUid(uid);
+        Optional<Member> member = memberRepository.findByUid(uid);
         List<AssetDTO> assetList = new ArrayList<>();
 
-            assetList.add(new AssetDTO("예적금", sumBankAssets(member)));
-            assetList.add(new AssetDTO("주식", sumStockAssets(member)));
-            assetList.add(new AssetDTO("코인", sumCoinAssets(member)));
-            //채권은 매입가격으로 계산 (종가가 없음)
-            assetList.add(new AssetDTO("채권", sumBondAssets(member)));
+        assetList.add(new AssetDTO("예적금", sumBankAssets(member)));
+        assetList.add(new AssetDTO("주식", sumStockAssets(member)));
+        assetList.add(new AssetDTO("코인", sumCoinAssets(member)));
+        //채권은 매입가격으로 계산 (종가가 없음)
+        assetList.add(new AssetDTO("채권", sumBondAssets(member)));
 
         return assetList;
     }
@@ -73,11 +72,12 @@ public class FinanceServiceImpl implements FinanceService {
     // 6개월 금융 자산 변동 계산
     @Override
     public List<FinancialChangeDTO> getSixMonthFinancialChanges(int uid) {
-        Optional<Member> member = userRepository.findByUid(uid);
+        Optional<Member> member = memberRepository.findByUid(uid);
         List<FinancialChangeDTO> financialChanges = new ArrayList<>();
         member.ifPresent(m -> {
             for (int i = 0; i < 6; i++) {
-                long monthlySum = (i == 0) ? calculateFinancialAssetsSum(Optional.of(m)) : calculateMonthlyAssetsSum(m, i);
+                long monthlySum =
+                        (i == 0) ? calculateFinancialAssetsSum(Optional.of(m)) : calculateMonthlyAssetsSum(m, i);
                 financialChanges.add(new FinancialChangeDTO(i, monthlySum));
             }
         });
@@ -87,11 +87,12 @@ public class FinanceServiceImpl implements FinanceService {
     // 6개월 총 자산 변동 계산 (금융 자산 + Spot 자산)
     @Override
     public List<TotalChangeDTO> getSixMonthTotalChanges(int uid) {
-        Optional<Member> member = userRepository.findByUid(uid);
+        Optional<Member> member = memberRepository.findByUid(uid);
         List<TotalChangeDTO> totalChanges = new ArrayList<>();
         member.ifPresent(m -> {
             for (int i = 0; i < 6; i++) {
-                long monthlySum = (i == 0) ? (calculateFinancialAssetsSum(Optional.of(m)) + calculateSpotAssetsSum(Optional.of(m)))
+                long monthlySum = (i == 0) ? (calculateFinancialAssetsSum(Optional.of(m)) + calculateSpotAssetsSum(
+                        Optional.of(m)))
                         : calculateMonthlyAssetsSum(m, i) + calculateSpotAssetsSumBefore(m, i);
                 totalChanges.add(new TotalChangeDTO(i, monthlySum));
             }
@@ -102,7 +103,7 @@ public class FinanceServiceImpl implements FinanceService {
     //6개월 간 저축률
     @Override
     public List<MonthlySavingRateDTO> getMonthlySavingRateTrend(int uid) {
-        Optional<Member> member = userRepository.findByUid(uid);
+        Optional<Member> member = memberRepository.findByUid(uid);
         List<MonthlySavingRateDTO> monthlySavingRates = new ArrayList<>();
 
 //        for (int i = 0; i < 6; i++) {
@@ -143,56 +144,58 @@ public class FinanceServiceImpl implements FinanceService {
     @Override
     public List<StockReturnDTO> getStockReturnTrend(int uid) {
 //        Optional<Member> member = userRepository.findByUid(uid);
-        return userRepository.findByUid(uid)
+        return memberRepository.findByUid(uid)
                 .map(member -> {
-        List<StockReturnDTO> stockReturns = new ArrayList<>();
-        List<UserStock> userStocks = stockRepository.findAllByUidAndDeleteDateIsNull(member);
+                    List<StockReturnDTO> stockReturns = new ArrayList<>();
+                    List<Stock> stocks = stockRepository.findAllByUidAndDeleteDateIsNull(member);
 
-        for (int i = 0; i < 6; i++) {
-            double totalStockReturn = 0;
-            int stockCount = 0;
+                    for (int i = 0; i < 6; i++) {
+                        double totalStockReturn = 0;
+                        int stockCount = 0;
 
-            for (UserStock stock : userStocks) {
-                Date purchaseDateAsDate = stock.getAddDate();
-                LocalDate purchaseDate = purchaseDateAsDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                LocalDate currentMonthDate = LocalDate.now().minusMonths(i);
-                Date endDate = Date.from(currentMonthDate.withDayOfMonth(currentMonthDate.lengthOfMonth())
-                        .atStartOfDay(ZoneId.systemDefault()).toInstant());
+                        for (Stock stock : stocks) {
+                            Date purchaseDateAsDate = stock.getAddDate();
+                            LocalDate purchaseDate = purchaseDateAsDate.toInstant().atZone(ZoneId.systemDefault())
+                                    .toLocalDate();
+                            LocalDate currentMonthDate = LocalDate.now().minusMonths(i);
+                            Date endDate = Date.from(currentMonthDate.withDayOfMonth(currentMonthDate.lengthOfMonth())
+                                    .atStartOfDay(ZoneId.systemDefault()).toInstant());
 
-                if (i == 0) {
-                    // 현재 가격과 매입 가격 비교하여 수익률 계산
-                    double currentPrice = 50000; // 임의로 설정된 현재 가격
-                    double purchasePrice = stockRepository.getStockPriceByPdno(stock.getPdno());
+                            if (i == 0) {
+                                // 현재 가격과 매입 가격 비교하여 수익률 계산
+                                double currentPrice = 50000; // 임의로 설정된 현재 가격
+                                double purchasePrice = stockRepository.getStockPriceByPdno(stock.getPdno());
 
-                    if (purchasePrice > 0) {
-                        double stockReturn = ((currentPrice / purchasePrice) * 100) - 100;
-                        totalStockReturn += stockReturn;
-                        stockCount++;
-                    }
-                } else {
-                    // 특정 달의 가격으로 수익률 계산
-                    if (!purchaseDate.isAfter(currentMonthDate)) {
-                        Double currentMonthPrice = stockRepository.getStockPriceForMonth(stock.getPdno(), i);
-                        double purchasePrice = stockRepository.getStockPriceByPdno(stock.getPdno());
+                                if (purchasePrice > 0) {
+                                    double stockReturn = ((currentPrice / purchasePrice) * 100) - 100;
+                                    totalStockReturn += stockReturn;
+                                    stockCount++;
+                                }
+                            } else {
+                                // 특정 달의 가격으로 수익률 계산
+                                if (!purchaseDate.isAfter(currentMonthDate)) {
+                                    Double currentMonthPrice = stockRepository.getStockPriceForMonth(stock.getPdno(),
+                                            i);
+                                    double purchasePrice = stockRepository.getStockPriceByPdno(stock.getPdno());
 
-                        if (currentMonthPrice != null && purchasePrice > 0) {
-                            double stockReturn = ((currentMonthPrice / purchasePrice) * 100) - 100;
-                            totalStockReturn += stockReturn;
-                            stockCount++;
+                                    if (currentMonthPrice != null && purchasePrice > 0) {
+                                        double stockReturn = ((currentMonthPrice / purchasePrice) * 100) - 100;
+                                        totalStockReturn += stockReturn;
+                                        stockCount++;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (stockCount > 0) {
+                            double averageStockReturn = totalStockReturn / stockCount;
+                            stockReturns.add(new StockReturnDTO(i, Double.parseDouble(df.format(averageStockReturn))));
+                        } else {
+                            stockReturns.add(new StockReturnDTO(i, 0));
                         }
                     }
-                }
-            }
 
-            if (stockCount > 0) {
-                double averageStockReturn = totalStockReturn / stockCount;
-                stockReturns.add(new StockReturnDTO(i, Double.parseDouble(df.format(averageStockReturn))));
-            } else {
-                stockReturns.add(new StockReturnDTO(i, 0));
-            }
-        }
-
-        return stockReturns;
+                    return stockReturns;
                 })
                 .orElse(Collections.emptyList());
     }
@@ -203,15 +206,15 @@ public class FinanceServiceImpl implements FinanceService {
     public List<CoinReturnDTO> getCoinReturnTrend(int uid) {
         List<CoinReturnDTO> coinReturns = new ArrayList<>();
         DecimalFormat df = new DecimalFormat("#.##");
-        Optional<Member> member =  userRepository.findByUid(uid);
+        Optional<Member> member = memberRepository.findByUid(uid);
 
         for (int i = 0; i < 6; i++) {
             double totalCoinReturn = 0;
             int coinCount = 0;
 
-            List<UserCoin> userCoins = coinRepository.findByUid(member);
+            List<Coin> coins = coinRepository.findByUid(member);
 
-            for (UserCoin coin : userCoins) {
+            for (Coin coin : coins) {
                 Date purchaseDateAsDate = coin.getAddDate();
                 LocalDate purchaseDate = purchaseDateAsDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
                 LocalDate currentMonthDate = LocalDate.now().minusMonths(i);
@@ -258,15 +261,15 @@ public class FinanceServiceImpl implements FinanceService {
     public List<BondReturnDTO> getBondReturnTrend(int uid) {
         List<BondReturnDTO> bondReturns = new ArrayList<>();
         DecimalFormat df = new DecimalFormat("#.##");
-        Optional<Member> member =  userRepository.findByUid(uid);
+        Optional<Member> member = memberRepository.findByUid(uid);
 
         for (int i = 0; i < 6; i++) {
             double totalBondReturn = 0;
             int bondCount = 0;
 
-            List<UserBond> userBonds = bondRepository.findByUid(member);
+            List<Bond> bonds = bondRepository.findByUid(member);
 
-            for (UserBond bond : userBonds) {
+            for (Bond bond : bonds) {
                 Date purchaseDateAsDate = bond.getAddDate();
                 LocalDate purchaseDate = purchaseDateAsDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
                 LocalDate currentMonthDate = LocalDate.now().minusMonths(i);
@@ -310,7 +313,6 @@ public class FinanceServiceImpl implements FinanceService {
     }
 
 
-
     // Helper 메서드: 다양한 타입을 double로 변환
     private double convertToDouble(Object obj) {
         if (obj instanceof Integer) {
@@ -329,7 +331,7 @@ public class FinanceServiceImpl implements FinanceService {
 
     // 은행 자산 합계
     private long sumBankAssets(Optional<Member> uid) {
-        return bankRepository.findAllByUidAndDeleteDateIsNull(uid).stream().mapToLong(UserBank::getBalanceAmt).sum();
+        return bankRepository.findAllByUidAndDeleteDateIsNull(uid).stream().mapToLong(Bank::getBalanceAmt).sum();
     }
 
     // 주식 자산 합계
@@ -364,19 +366,18 @@ public class FinanceServiceImpl implements FinanceService {
     // 월별 금융 자산 합산 메서드
     private long calculateMonthlyAssetsSum(Member uid, int monthsAgo) {
 
-
         LocalDateTime endOfMonthLDT = LocalDate.now().minusMonths(monthsAgo).withDayOfMonth(1).atStartOfDay();
         Date endOfMonth = Date.from(endOfMonthLDT.atZone(ZoneId.systemDefault()).toInstant());
 
         long monthlySum = 0;
 
         // 은행 자산 합산
-        List<UserBank> bankAssets = bankRepository.findAllByUidAndAddDateBefore(uid, endOfMonth);
-        monthlySum += bankAssets.stream().mapToLong(UserBank::getBalanceAmt).sum();
+        List<Bank> bankAssets = bankRepository.findAllByUidAndAddDateBefore(uid, endOfMonth);
+        monthlySum += bankAssets.stream().mapToLong(Bank::getBalanceAmt).sum();
 
         // 채권 자산 합산
-        List<UserBond> bondAssets = bondRepository.findAllByUidAndAddDateBefore(uid,monthsAgo);
-        monthlySum += bondAssets.stream().mapToLong(UserBond -> (long) UserBond.getPrice() * UserBond.getCnt()).sum();
+        List<Bond> bondAssets = bondRepository.findAllByUidAndAddDateBefore(uid, monthsAgo);
+        monthlySum += bondAssets.stream().mapToLong(Bond -> (long) Bond.getPrice() * Bond.getCnt()).sum();
 
         // 가상화폐 자산 합산
         List<Object[]> coinData = coinRepository.findCoinBalanceAndPriceByUserIdAndBefore(uid, endOfMonth, monthsAgo);
@@ -421,11 +422,104 @@ public class FinanceServiceImpl implements FinanceService {
                 dto.setTotalOutcome(totalOutcome);
                 dto.setBalance(dto.getTotalIncome().subtract(totalOutcome));
             } else {
-                balanceMap.put(month, new MonthlyBalanceDTO(month, BigDecimal.ZERO, totalOutcome, totalOutcome.negate()));
+                balanceMap.put(month,
+                        new MonthlyBalanceDTO(month, BigDecimal.ZERO, totalOutcome, totalOutcome.negate()));
             }
         }
 
         return new ArrayList<>(balanceMap.values());
     }
+
+    public Map<String, Object> compareAssetsWithAgeGroup(int uid) {
+
+        // 1. 현재 사용자의 uid를 기반으로 나이 정보 추출
+        Optional<Member> member = memberRepository.findByUid(uid);
+
+        if (!member.isPresent()) {
+            throw new IllegalArgumentException("Member not found for uid: " + uid);
+        }
+
+        int birthYear = member.get().getBirth_year();
+
+        // 2. 10대, 20대 구분 (예: 10대는 2000~2009년 출생, 20대는 1990~1999년 출생)
+        int lowerBoundYear = birthYear - (birthYear % 10); // 연령대 시작 연도
+        int upperBoundYear = lowerBoundYear + 9; // 연령대 끝 연도
+
+        // 3. 해당 연령대의 평균 자산 구하기
+        BigInteger avgAmount = assetSummaryRepository.findAverageAmountByAgeRange(lowerBoundYear, upperBoundYear);
+
+        // 4. 현재 사용자의 자산 정보 구하기
+        AssetSummary userAssetSummary = assetSummaryRepository.findLatestByUid(member);
+        BigInteger userTotalAmount = userAssetSummary.getTotalAmount();
+
+        // 5. 차이 계산
+        BigInteger deferAmount = userTotalAmount.subtract(avgAmount);
+
+        // 6. 결과값 반환
+        Map<String, Object> response = new HashMap<>();
+        response.put("bsAmount", userTotalAmount);
+        response.put("spotAvgAmount", avgAmount);
+        response.put("defer", deferAmount);
+
+        return response;
+    }
+
+    @Override
+    public Map<String, Object> compareAssetsByCategoryWithAgeGroup(int uid) {
+        // 1. 현재 사용자의 uid를 기반으로 나이 정보 추출
+        Optional<Member> member = memberRepository.findByUid(uid);
+        if (!member.isPresent()) {
+            throw new IllegalArgumentException("Member not found for uid: " + uid);
+        }
+        int birthYear = member.get().getBirth_year();
+
+        // 2. 10대, 20대 구분
+        int lowerBoundYear = birthYear - (birthYear % 10);
+        int upperBoundYear = lowerBoundYear + 9;
+
+        // 3. 자산 요약 가져오기
+        AssetSummary userAssetSummary = assetSummaryRepository.findLatestByUid(member);
+        if (userAssetSummary == null) {
+            throw new IllegalArgumentException("Asset summary not found for uid: " + uid);
+        }
+
+        // 4. 자산 카테고리별로 비교
+        List<Map<String, Object>> assetComparisonList = new ArrayList<>();
+        addComparisonData("채권", userAssetSummary.getBond(), lowerBoundYear, upperBoundYear, assetComparisonList);
+        addComparisonData("예금", userAssetSummary.getDeposit(), lowerBoundYear, upperBoundYear, assetComparisonList);
+        addComparisonData("적금", userAssetSummary.getSaving(), lowerBoundYear, upperBoundYear, assetComparisonList);
+        addComparisonData("청약", userAssetSummary.getSubscription(), lowerBoundYear, upperBoundYear, assetComparisonList);
+        addComparisonData("입출금", userAssetSummary.getWithdrawal(), lowerBoundYear, upperBoundYear, assetComparisonList);
+        addComparisonData("주식", userAssetSummary.getStock(), lowerBoundYear, upperBoundYear, assetComparisonList);
+        addComparisonData("현금", userAssetSummary.getCash(), lowerBoundYear, upperBoundYear, assetComparisonList);
+        addComparisonData("코인", userAssetSummary.getCoin(), lowerBoundYear, upperBoundYear, assetComparisonList);
+
+        // 5. 결과 반환
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", "true");
+        response.put("response", Collections.singletonMap("data", assetComparisonList));
+
+        return response;
+    }
+
+    private void addComparisonData(String category, BigInteger bsAmount, int lowerBoundYear, int upperBoundYear, List<Map<String, Object>> assetComparisonList) {
+        if (bsAmount == null) {
+            bsAmount = BigInteger.ZERO;
+        }
+
+        // 연령대의 평균 자산 구하기
+        BigInteger avgAmount = assetSummaryRepository.findAverageAmountByAgeRange(lowerBoundYear, upperBoundYear);
+        BigInteger deferAmount = bsAmount.subtract(avgAmount);
+
+        // 각 카테고리별 결과값 추가
+        Map<String, Object> comparisonData = new HashMap<>();
+        comparisonData.put("bsAmount", bsAmount);
+        comparisonData.put("spotAvgAmount", avgAmount);
+        comparisonData.put("defer", deferAmount);
+        comparisonData.put("category", category);
+
+        assetComparisonList.add(comparisonData);
+    }
+
 
 }

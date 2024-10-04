@@ -1,18 +1,18 @@
 package com.idle.kb_i_dle_backend.domain.finance.repository;
 
-import com.idle.kb_i_dle_backend.domain.finance.entity.StockList;
-import com.idle.kb_i_dle_backend.domain.finance.entity.UserStock;
+import com.idle.kb_i_dle_backend.domain.finance.entity.StockProduct;
+import com.idle.kb_i_dle_backend.domain.finance.entity.Stock;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
-import java.util.Date;
 import java.util.List;
 
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface StockRepository extends JpaRepository<UserStock,Integer> {
+public interface StockRepository extends JpaRepository<Stock,Integer> {
 
     //선택한 주식의 종가
     @Query(value = "SELECT sl.price " +
@@ -29,7 +29,7 @@ public interface StockRepository extends JpaRepository<UserStock,Integer> {
     List<Object[]> getStockBalanceAndPrice(@Param("uid") int uid);
 
 
-    List<UserStock> findAllByUidAndDeleteDateIsNull(Member member);
+    List<Stock> findAllByUidAndDeleteDateIsNull(Member member);
 
     // 선택한 주식의 해당 시점의 가격을 가져옴
     @Query(value = "SELECT " +
@@ -66,12 +66,12 @@ public interface StockRepository extends JpaRepository<UserStock,Integer> {
     List<Object[]> getStockBalanceAndClosingPriceBefore(@Param("uid") Member uid,
                                                         @Param("monthsAgo") int monthsAgo);
 
-    List<UserStock> findByUid(Member uid);
+    List<Stock> findByUid(Optional<Member> uid);
 
-    @Query("SELECT sl FROM StockList sl WHERE sl.price IS NOT NULL ORDER BY sl.price DESC")
-    List<StockList> findTop5StocksByPrice();
+    @Query("SELECT sl FROM StockProduct sl WHERE sl.price IS NOT NULL ORDER BY sl.price DESC")
+    List<StockProduct> findTop5StocksByPrice();
 
     // 이 메서드는 StockList 엔티티를 대상으로 하는 별도의 쿼리를 사용합니다.
-    @Query("SELECT sl FROM StockList sl WHERE sl.price IS NOT NULL ORDER BY sl.price DESC")
-    List<StockList> findTop5ByOrderByPriceDesc();
+    @Query("SELECT sl FROM StockProduct sl WHERE sl.price IS NOT NULL ORDER BY sl.price DESC")
+    List<StockProduct> findTop5ByOrderByPriceDesc();
 }

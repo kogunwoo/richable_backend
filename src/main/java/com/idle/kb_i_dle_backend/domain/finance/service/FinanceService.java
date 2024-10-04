@@ -4,8 +4,7 @@ package com.idle.kb_i_dle_backend.domain.finance.service;
 import com.idle.kb_i_dle_backend.domain.finance.dto.*;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public interface FinanceService {
 
@@ -43,6 +42,10 @@ public interface FinanceService {
     long sumStockAssets(Optional<Member> memberOpt);
 
     List<MonthlyBalanceDTO> getMonthlyIncomeOutcomeBalance(int uid);
+
+    Map<String, Object> compareAssetsWithAgeGroup(int uid);
+
+    Map<String, Object> compareAssetsByCategoryWithAgeGroup(int uid);
 
 
 }

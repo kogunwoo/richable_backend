@@ -7,10 +7,9 @@ import javax.validation.constraints.NotNull;
 import lombok.Getter;
 
 @Entity
-@Table(name = "bond", catalog = "asset")
+@Table(name = "coin", catalog = "asset")
 @Getter
-public class UserBond {
-
+public class Coin {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer index;
@@ -20,17 +19,22 @@ public class UserBond {
     private Member uid;
 
     @NotNull
-    @Column(name = "itms_nm")
-    private String  name;
+    @Column(length = 10)
+    private String currency;
 
     @NotNull
-    private Integer cnt;
+    private Double balance;
+
+    @NotNull
+    @Column(name = "avg_buy_price")
+    private Double avgBuyPrice;
+
+    @NotNull
+    @Column(name = "unit_currency", length = 10)
+    private String curreny;
 
     @Column(name = "prod_category", length = 100)
     private String category;
-
-    @Column(name = "per_price")
-    private Integer price;
 
     @NotNull
     @Temporal(TemporalType.TIMESTAMP)
@@ -39,5 +43,4 @@ public class UserBond {
 
     @Column(name = "delete_date")
     private Date deleteDate;
-
 }

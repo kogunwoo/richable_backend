@@ -1,7 +1,7 @@
 package com.idle.kb_i_dle_backend.domain.finance.repository;
 
-import com.idle.kb_i_dle_backend.domain.finance.entity.CoinList;
-import com.idle.kb_i_dle_backend.domain.finance.entity.UserCoin;
+import com.idle.kb_i_dle_backend.domain.finance.entity.CoinProduct;
+import com.idle.kb_i_dle_backend.domain.finance.entity.Coin;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import java.util.Date;
 import java.util.List;
@@ -13,9 +13,9 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface CoinRepository extends JpaRepository <UserCoin,Integer> {
+public interface CoinRepository extends JpaRepository <Coin,Integer> {
 
-    List<UserCoin> findAllByUidAndDeleteDateIsNull(Optional<Member> uid);
+    List<Coin> findAllByUidAndDeleteDateIsNull(Optional<Member> uid);
 
     @Query(value = "SELECT a.balance, b.closing_price " +
             "FROM asset.coin a " +
@@ -68,9 +68,9 @@ public interface CoinRepository extends JpaRepository <UserCoin,Integer> {
             "WHERE cl.coin_name = :coinName ", nativeQuery = true)
     Double getCoinPriceForMonth(@Param("coinName") String coinName, @Param("monthsAgo") int monthsAgo);
 
-    List<UserCoin> findByUid(Optional<Member> uid);
+    List<Coin> findByUid(Optional<Member> uid);
 
-    @Query("SELECT cl FROM CoinList cl ORDER BY CAST(cl.closingPrice AS double) DESC")
-    List<CoinList> findTop5ByOrderByClosingPriceDesc();
+    @Query("SELECT cl FROM CoinProduct cl ORDER BY CAST(cl.closingPrice AS double) DESC")
+    List<CoinProduct> findTop5ByOrderByClosingPriceDesc();
 }
 

@@ -7,16 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
-import com.idle.kb_i_dle_backend.domain.income.repository.IncomeRepository;
 import com.idle.kb_i_dle_backend.domain.member.util.JwtProcessor;
-import com.idle.kb_i_dle_backend.domain.outcome.repository.OutcomeUserRepository;
-import com.idle.kb_i_dle_backend.domain.outcome.service.OutcomeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.ResponseEntity;
@@ -161,6 +156,27 @@ public class FinanceController {
         ResponseDTO successResponse = new ResponseDTO(true, bondReturn);
 
         return ResponseEntity.ok(successResponse);
+    }
+
+    // AS_11
+    @GetMapping("/peer")
+    public ResponseEntity<ResponseDTO> compareAssetsWithAgeGroup(HttpServletRequest request) {
+        Integer uid = getUidFromSession(request);
+        Map<String, Object> response = financeService.compareAssetsWithAgeGroup(uid);
+        ResponseDTO Response = new ResponseDTO(true, response);
+
+        return ResponseEntity.ok(Response);
+    }
+
+    @GetMapping("/peer/finance")
+    public ResponseEntity<ResponseDTO> compareAssetsByCategoryWithAgeGroup(HttpServletRequest request) {
+
+        Integer uid = getUidFromSession(request);
+        Map<String, Object> response = financeService.compareAssetsByCategoryWithAgeGroup(uid);
+        ResponseDTO Response = new ResponseDTO(true, response);
+
+        return ResponseEntity.ok(Response);
+
     }
 
 

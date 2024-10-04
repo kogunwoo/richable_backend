@@ -4,7 +4,7 @@ import com.idle.kb_i_dle_backend.domain.member.dto.MemberApiDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberInfoDTO;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import com.idle.kb_i_dle_backend.domain.member.entity.MemberAPI;
-import com.idle.kb_i_dle_backend.domain.member.repository.UserRepository;
+import com.idle.kb_i_dle_backend.domain.member.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,11 +12,11 @@ import org.springframework.stereotype.Service;
 public class MemberInfoService {
 
     @Autowired
-    private UserRepository userRepository;
+    private MemberRepository memberRepository;
 
     // 기존 사용자의 정보를 가져오는 메서드
     public MemberInfoDTO getUserInfoByNickname(String nickname) {
-        Member member = userRepository.findByNickname(nickname);
+        Member member = memberRepository.findByNickname(nickname);
 
         if (member != null) {
             // UserApiEntity -> UserApiDTO 변환
@@ -57,7 +57,7 @@ public class MemberInfoService {
     // 사용자 정보를 업데이트하는 메서드 추가
     public MemberInfoDTO updateMemberInfo(MemberInfoDTO updatedUserInfo) throws Exception {
         // 닉네임을 사용하여 사용자 찾기
-        Member member = userRepository.findByNickname(updatedUserInfo.getNickname());
+        Member member = memberRepository.findByNickname(updatedUserInfo.getNickname());
 
         if (member == null) {
             throw new Exception("사용자를 찾을 수 없습니다.");
@@ -70,7 +70,7 @@ public class MemberInfoService {
         member.setGender(updatedUserInfo.getGender());
 
         // 사용자 정보 저장
-        userRepository.save(member);
+        memberRepository.save(member);
 
         // 업데이트된 사용자 정보를 반환 (UserInfoDTO 변환)
         return new MemberInfoDTO(

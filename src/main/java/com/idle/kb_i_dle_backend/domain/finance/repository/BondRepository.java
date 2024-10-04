@@ -1,6 +1,6 @@
 package com.idle.kb_i_dle_backend.domain.finance.repository;
 
-import com.idle.kb_i_dle_backend.domain.finance.entity.UserBond;
+import com.idle.kb_i_dle_backend.domain.finance.entity.Bond;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 
 import java.util.List;
@@ -11,13 +11,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import javax.validation.constraints.NotNull;
-
 @Repository
-public interface BondRepository extends JpaRepository<UserBond, Integer> {
+public interface BondRepository extends JpaRepository<Bond, Integer> {
 
 
-    List<UserBond> findAllByUidAndDeleteDateIsNull(Optional<Member> uid);
+    List<Bond> findAllByUidAndDeleteDateIsNull(Optional<Member> uid);
 
     @Query(value = "SELECT CASE :monthsAgo " +
             "  WHEN 1 THEN blp.1m_b_price " +
@@ -31,7 +29,7 @@ public interface BondRepository extends JpaRepository<UserBond, Integer> {
             "JOIN product.bond_list_price blp  ON b.itms_nm = blp.isinCdNm " +
             "WHERE b.uid = :uid " +
             "AND b.delete_date IS NULL limit 1", nativeQuery = true)
-    List<UserBond> findAllByUidAndAddDateBefore(@Param("uid") Member uid, @Param("monthsAgo") int monthsAgo);
+    List<Bond> findAllByUidAndAddDateBefore(@Param("uid") Member uid, @Param("monthsAgo") int monthsAgo);
 
 
     @Query(value = "SELECT " +
@@ -48,7 +46,7 @@ public interface BondRepository extends JpaRepository<UserBond, Integer> {
             "WHERE b.itms_nm = :isinCdNm limit 1 ", nativeQuery = true)
     Double getBondPriceForMonth(@Param("isinCdNm") String isinCdNm,@Param("monthsAgo") int monthsAgo);
 
-    List<UserBond> findByUid(Optional<Member> uid);
+    List<Bond> findByUid(Optional<Member> uid);
 
     @Query(value = "SELECT per_price FROM asset.bond WHERE itms_nm = :name ORDER BY add_date DESC LIMIT 1", nativeQuery = true)
     double getPriceByName(@Param("name") String name);
