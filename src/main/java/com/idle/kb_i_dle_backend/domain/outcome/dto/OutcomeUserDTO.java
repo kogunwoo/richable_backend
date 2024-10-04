@@ -29,7 +29,7 @@ public class OutcomeUserDTO {
     }
 
     public static OutcomeUser convertToEntity(Member member, OutcomeUserDTO outcomeUserDTO) throws ParseException {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date oDate = (outcomeUserDTO.getDate() != null)
                 ? dateFormat.parse(outcomeUserDTO.getDate())
                 : null;  // null 값 유지
