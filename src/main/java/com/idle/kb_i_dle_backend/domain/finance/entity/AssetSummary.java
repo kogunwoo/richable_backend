@@ -1,6 +1,7 @@
 package com.idle.kb_i_dle_backend.domain.finance.entity;
 
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
+import java.math.BigDecimal;
 import lombok.Getter;
 
 import javax.persistence.*;
@@ -12,24 +13,23 @@ import java.util.Date;
 public class AssetSummary {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long index;
+    private Integer index;
 
     @ManyToOne
     @JoinColumn(name = "uid")
     private Member uid;
 
-    private Long bond;
-
-    private Long deposit;
-    private Long saving;
-    private Long subscription;
-    private Long withdrawal;
-    private Long cash;
-    private Long stock;
-    private Long coin;
+    private BigDecimal bond;
+    private BigDecimal deposit;
+    private BigDecimal saving;
+    private BigDecimal subscription;
+    private BigDecimal withdrawal;
+    private BigDecimal cash;
+    private BigDecimal stock;
+    private BigDecimal coin;
 
     @Column(name = "total_amount")
-    private Long totalAmount;
+    private BigDecimal totalAmount;
 
     @Column(name = "update_date")
     private Date updateDate;

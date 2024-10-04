@@ -79,7 +79,7 @@ public class StockServiceImpl implements StockService {
         Member tempUser = memberRepository.findByUid(1).orElseThrow();
 
         // Stock 조회
-        Stock isStock = stockRepository.findByIndexAndDeleteDateIsNull(index)
+        Stock isStock = (Stock) stockRepository.findByIndexAndDeleteDateIsNull(index)
                 .orElseThrow(() -> new IllegalArgumentException("Stock not found with id: " + index));
 
         // User 조회 (User 객체가 없을 경우 예외 처리)

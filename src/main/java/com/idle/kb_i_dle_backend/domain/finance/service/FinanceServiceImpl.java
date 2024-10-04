@@ -13,7 +13,6 @@ import java.math.BigInteger;
 import java.text.DecimalFormat;
 
 
-import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -43,14 +42,16 @@ public class FinanceServiceImpl implements FinanceService {
     @Override
     public FinancialSumDTO getFinancialAssetsSum(int uid) {
         Optional<Member> member = memberRepository.findByUid(uid);
-        long financialAssetsSum = calculateFinancialAssetsSum(member);
+        BigDecimal financialAssetsSum = BigDecimal.valueOf(calculateFinancialAssetsSum(member));
         return new FinancialSumDTO(financialAssetsSum);
     }
 
     // 총 자산 합계 계산 (금융 자산 + Spot 자산)
     @Override
     public FinancialSumDTO getTotalAssetsSum(int uid) {
-        long totalAssetsSum = calculateFinancialAssetsSum(uid) + calculateSpotAssetsSum(uid);
+        Optional<Member> member = memberRepository.findByUid(uid);
+        BigDecimal totalAssetsSum = BigDecimal.valueOf(
+                calculateFinancialAssetsSum(member) + calculateSpotAssetsSum(member));
         return new FinancialSumDTO(totalAssetsSum);
     }
 
@@ -453,14 +454,14 @@ public class FinanceServiceImpl implements FinanceService {
         int upperBoundYear = lowerBoundYear + 9; // 연령대 끝 연도
 
         // 3. 해당 연령대의 평균 자산 구하기
-        BigInteger avgAmount = assetSummaryRepository.findAverageAmountByAgeRange(lowerBoundYear, upperBoundYear);
+        BigDecimal avgAmount = assetSummaryRepository.findAverageAmountByAgeRange(lowerBoundYear, upperBoundYear);
 
         // 4. 현재 사용자의 자산 정보 구하기
         AssetSummary userAssetSummary = assetSummaryRepository.findLatestByUid(member);
-        BigInteger userTotalAmount = userAssetSummary.getTotalAmount();
+        BigDecimal userTotalAmount = userAssetSummary.getTotalAmount();
 
         // 5. 차이 계산
-        BigInteger deferAmount = userTotalAmount.subtract(avgAmount);
+        BigDecimal deferAmount = userTotalAmount.subtract(avgAmount);
 
         // 6. 결과값 반환
         Map<String, Object> response = new HashMap<>();
@@ -509,14 +510,14 @@ public class FinanceServiceImpl implements FinanceService {
         return response;
     }
 
-    private void addComparisonData(String category, BigInteger bsAmount, int lowerBoundYear, int upperBoundYear, List<Map<String, Object>> assetComparisonList) {
+    private void addComparisonData(String category, BigDecimal bsAmount, int lowerBoundYear, int upperBoundYear, List<Map<String, Object>> assetComparisonList) {
         if (bsAmount == null) {
-            bsAmount = BigInteger.ZERO;
+            bsAmount = BigDecimal.ZERO;
         }
 
         // 연령대의 평균 자산 구하기
-        BigInteger avgAmount = assetSummaryRepository.findAverageAmountByAgeRange(lowerBoundYear, upperBoundYear);
-        BigInteger deferAmount = bsAmount.subtract(avgAmount);
+        BigDecimal avgAmount = assetSummaryRepository.findAverageAmountByAgeRange(lowerBoundYear, upperBoundYear);
+        BigDecimal deferAmount = bsAmount.subtract(avgAmount);
 
         // 각 카테고리별 결과값 추가
         Map<String, Object> comparisonData = new HashMap<>();

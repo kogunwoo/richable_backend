@@ -14,10 +14,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BankRepository extends JpaRepository<Bank, Integer> {
 
-    List<Bank> findAllByUidAndDeleteDateIsNull(int uid);
+    List<Bank> findAllByUidAndDeleteDateIsNull(Optional<Member> uid);
 
     // 특정 날짜 이전의 모든 데이터를 가져오는 쿼리 메서드
-    List<Bank> findAllByUidAndAddDateBefore(int uid, Date endDate);
+    List<Bank> findAllByUidAndAddDateBefore(Member uid, Date endDate);
 
     @Query("SELECT ub FROM Bank ub WHERE ub.uid = :uid AND ub.addDate < :date")
     List<Bank> findInvestmentsByUidAndDate(@Param("uid") Integer uid, @Param("date") Date date);
