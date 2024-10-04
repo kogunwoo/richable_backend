@@ -306,8 +306,13 @@ public class MemberController {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", "비밀번호 재설정 중 오류가 발생했습니다."));
         }
     }
-    @GetMapping("/info/{nickname}")
-    public ResponseEntity<?> getMemberInfoByNickname(@PathVariable String nickname, HttpServletRequest request) {
+    @GetMapping("/info")
+    public ResponseEntity<?> getMemberInfoByNickname(HttpServletRequest request) {
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
+        String nickname = jwtProcessor.getNickname(token);
+        Integer uid = jwtProcessor.getUid(token);
+        log.error("nickname"+nickname+" / "+"uid"+uid);
+
         // 사용자 정보 가져오기
         MemberInfoDTO memberInfoDTO = memberInfoService.getUserInfoByNickname(nickname);
 
@@ -317,19 +322,15 @@ public class MemberController {
         }
 
         // uid를 사용하여 UserApiEntity 가져오기 (단일 객체로 처리)
-        MemberAPI memberAPI = memberApiService.getMemberApiByUid(memberInfoDTO.getUid());
+        MemberAPI memberAPI = memberApiService.getMemberApiByUid(uid);
 
         // userApiEntity가 null인 경우 처리
         if (memberAPI == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("API 데이터가 없습니다.");
         }
 
-        // JWT에서 현재 사용자의 닉네임 가져오기
-        String token = request.getHeader("Authorization").replace("Bearer ", "");
-        String tokenNickname = jwtProcessor.getNickname(token);
-
         // 본인 여부 판단
-        if (tokenNickname.equals(nickname)) {
+//        if (tokenNickname.equals(nickname)) {
             // 본인일 경우 모든 정보 반환
             Map<String, Object> stockInfo = new HashMap<>();
             stockInfo.put("base", memberAPI.getStock());
@@ -361,18 +362,18 @@ public class MemberController {
 
             ResponseDTO successResponse = new ResponseDTO(true, response);
             return ResponseEntity.ok(successResponse);
-        } else {
+//        } else {
             // 본인이 아닌 경우 제한된 정보만 반환
-            Map<String, Object> limitedData = new HashMap<>();
-            limitedData.put("nickname", memberInfoDTO.getNickname());
-            limitedData.put("img", memberInfoDTO.getImg());
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("data", limitedData);
-
-            ResponseDTO successResponse = new ResponseDTO(true, response);
-            return ResponseEntity.ok(successResponse);
-        }
+//            Map<String, Object> limitedData = new HashMap<>();
+//            limitedData.put("nickname", memberInfoDTO.getNickname());
+//            limitedData.put("img", memberInfoDTO.getImg());
+//
+//            Map<String, Object> response = new HashMap<>();
+//            response.put("data", limitedData);
+//
+//            ResponseDTO successResponse = new ResponseDTO(true, response);
+//            return ResponseEntity.ok(successResponse);
+//        }
     }
     @PutMapping("/update")
     public ResponseEntity<?> updateMemberInfo(@RequestBody MemberInfoDTO updatedMemberInfo, HttpServletRequest request) {
