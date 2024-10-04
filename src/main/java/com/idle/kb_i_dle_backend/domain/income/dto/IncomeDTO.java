@@ -26,7 +26,7 @@ public class IncomeDTO {
     }
 
     public static Income convertToEntity(Member member, IncomeDTO incomeDTO) throws ParseException {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date iDate = (incomeDTO.getIncomeDate() != null)
                 ? dateFormat.parse(incomeDTO.getIncomeDate())
                 : null;  // null 값 유지

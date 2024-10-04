@@ -31,8 +31,17 @@ public class SpotServiceImpl implements SpotService {
     // 카테고리별 현물 자산 총합
     @Override
     public PriceSumDTO getTotalPriceByCategory(String category) throws Exception{
-        Member tempUser = memberRepository.findByUid(40).orElseThrow();
-        List<Spot> spots = spotRepository.findByUidAndCategoryAndDeleteDateIsNull(tempUser, category);
+
+        Member tempUser = memberRepository.findByUid(1).orElseThrow();
+
+        String result = category.equals("car") ? "자동차" :
+                        category.equals("elec") ? "전자기기" :
+                        category.equals("brand") ? "브랜드" :
+                        category.equals("luxury") ? "명품" :
+                        "기타";
+
+
+        List<Spot> spots = spotRepository.findByUidAndCategoryAndDeleteDateIsNull(tempUser, result);
 
         if (spots.isEmpty()) throw new NotFoundException("");
 

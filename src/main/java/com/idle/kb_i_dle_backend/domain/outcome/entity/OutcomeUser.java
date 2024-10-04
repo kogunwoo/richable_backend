@@ -44,9 +44,9 @@ public class OutcomeUser {
 
     private String memo;
 
-    // 엔티티가 처음 영속화될 때(Date를 자동으로 설정)
-    @PrePersist
-    protected void onCreate() {
-        this.date = new Date();  // 현재 시간을 자동으로 설정
-    }
+//    // 엔티티가 처음 영속화될 때(Date를 자동으로 설정)
+//    @PrePersist
+//    protected void onCreate() {
+//        this.date = new Date();  // 현재 시간을 자동으로 설정
+//    }
 }
