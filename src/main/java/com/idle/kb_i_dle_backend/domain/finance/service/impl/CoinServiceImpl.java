@@ -5,7 +5,7 @@ import com.idle.kb_i_dle_backend.domain.finance.entity.Coin;
 import com.idle.kb_i_dle_backend.domain.finance.repository.CoinRepository;
 import com.idle.kb_i_dle_backend.domain.finance.service.CoinService;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
-import com.idle.kb_i_dle_backend.domain.member.repository.UserRepository;
+import com.idle.kb_i_dle_backend.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.security.access.AccessDeniedException;
@@ -21,12 +21,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CoinServiceImpl implements CoinService {
 
-    private final UserRepository userRepository;
+    private final MemberRepository memberRepository;
     private final CoinRepository coinRepository;
 
     @Override
     public List<CoinDTO> getCoinList() throws Exception {
-        Member tempUser = userRepository.findByUid(1).orElseThrow();
+        Member tempUser = memberRepository.findByUid(1).orElseThrow();
         List<Coin> coins = coinRepository.findByUidAndDeleteDateIsNull(tempUser);
 
         if (coins.isEmpty()) throw new NotFoundException("");
@@ -42,7 +42,7 @@ public class CoinServiceImpl implements CoinService {
 
     @Override
     public CoinDTO addCoin(CoinDTO coinDTO) throws ParseException {
-        Member tempUser = userRepository.findByUid(1).orElseThrow();
+        Member tempUser = memberRepository.findByUid(1).orElseThrow();
         Coin savedCoin = coinRepository.save(CoinDTO.convertToEntity(tempUser, coinDTO));
 
         return CoinDTO.convertToDTO(savedCoin);
@@ -51,14 +51,14 @@ public class CoinServiceImpl implements CoinService {
     @Transactional
     @Override
     public CoinDTO updateCoin(CoinDTO coinDTO) throws ParseException {
-        Member tempUser = userRepository.findByUid(1).orElseThrow();
+        Member tempUser = memberRepository.findByUid(1).orElseThrow();
 
         // Coin 조회
         Coin isCoin = coinRepository.findByIndexAndDeleteDateIsNull(coinDTO.getIndex())
                 .orElseThrow(() -> new IllegalArgumentException("Coin not found with id: " + coinDTO.getIndex()));
 
         // User 조회 (User 객체가 없을 경우 예외 처리)
-        Member isUser = userRepository.findByUid(tempUser.getUid())
+        Member isUser = memberRepository.findByUid(tempUser.getUid())
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + tempUser.getUid()));
 
         // Coin의 소유자가 해당 User인지 확인
@@ -76,14 +76,14 @@ public class CoinServiceImpl implements CoinService {
     @Transactional
     @Override
     public CoinDTO deleteCoin(Integer index) throws ParseException {
-        Member tempUser = userRepository.findByUid(1).orElseThrow();
+        Member tempUser = memberRepository.findByUid(1).orElseThrow();
 
         // Coin 조회
         Coin isCoin = coinRepository.findByIndexAndDeleteDateIsNull(index)
                 .orElseThrow(() -> new IllegalArgumentException("Coin not found with id: " + index));
 
         // User 조회 (User 객체가 없을 경우 예외 처리)
-        Member isUser = userRepository.findByUid(tempUser.getUid())
+        Member isUser = memberRepository.findByUid(tempUser.getUid())
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + tempUser.getUid()));
 
         // Coin의 소유자가 해당 User인지 확인

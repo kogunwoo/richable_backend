@@ -5,7 +5,7 @@ import com.idle.kb_i_dle_backend.domain.finance.entity.Bank;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BankRepository;
 import com.idle.kb_i_dle_backend.domain.finance.service.BankService;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
-import com.idle.kb_i_dle_backend.domain.member.repository.UserRepository;
+import com.idle.kb_i_dle_backend.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.security.access.AccessDeniedException;
@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -22,12 +21,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BankServiceImpl implements BankService {
 
-    private final UserRepository userRepository;
+    private final MemberRepository memberRepository;
     private final BankRepository bankRepository;
 
     @Override
     public List<BankDTO> getBankList() throws Exception {
-        Member tempUser = userRepository.findByUid(1).orElseThrow();
+        Member tempUser = memberRepository.findByUid(1).orElseThrow();
         List<Bank> banks = bankRepository.findByUidAndDeleteDateIsNull(tempUser);
 
         if (banks.isEmpty()) throw new NotFoundException("");
@@ -43,7 +42,7 @@ public class BankServiceImpl implements BankService {
 
     @Override
     public BankDTO addBank(BankDTO bankDTO) throws ParseException {
-        Member tempUser = userRepository.findByUid(1).orElseThrow();
+        Member tempUser = memberRepository.findByUid(1).orElseThrow();
         Bank savedBank = bankRepository.save(BankDTO.convertToEntity(tempUser, bankDTO));
 
         return BankDTO.convertToDTO(savedBank);
@@ -52,14 +51,14 @@ public class BankServiceImpl implements BankService {
     @Transactional
     @Override
     public BankDTO updateBank(BankDTO bankDTO) throws ParseException {
-        Member tempUser = userRepository.findByUid(1).orElseThrow();
+        Member tempUser = memberRepository.findByUid(1).orElseThrow();
 
         // Bank 조회
         Bank isBank = bankRepository.findByIndexAndDeleteDateIsNull(bankDTO.getIndex())
                 .orElseThrow(() -> new IllegalArgumentException("Bank not found with id: " + bankDTO.getIndex()));
 
         // User 조회 (User 객체가 없을 경우 예외 처리)
-        Member isUser = userRepository.findByUid(tempUser.getUid())
+        Member isUser = memberRepository.findByUid(tempUser.getUid())
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + tempUser.getUid()));
 
         // Bank의 소유자가 해당 User인지 확인
@@ -77,14 +76,14 @@ public class BankServiceImpl implements BankService {
     @Transactional
     @Override
     public BankDTO deleteBank(Integer index) throws ParseException {
-        Member tempUser = userRepository.findByUid(1).orElseThrow();
+        Member tempUser = memberRepository.findByUid(1).orElseThrow();
 
         // Bank 조회
         Bank isBank = bankRepository.findByIndexAndDeleteDateIsNull(index)
                 .orElseThrow(() -> new IllegalArgumentException("Bank not found with id: " + index));
 
         // User 조회 (User 객체가 없을 경우 예외 처리)
-        Member isUser = userRepository.findByUid(tempUser.getUid())
+        Member isUser = memberRepository.findByUid(tempUser.getUid())
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + tempUser.getUid()));
 
         // Bank의 소유자가 해당 User인지 확인

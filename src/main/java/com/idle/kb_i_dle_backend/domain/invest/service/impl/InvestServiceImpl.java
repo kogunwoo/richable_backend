@@ -11,7 +11,7 @@ import com.idle.kb_i_dle_backend.domain.finance.repository.StockRepository;
 import com.idle.kb_i_dle_backend.domain.invest.dto.*;
 import com.idle.kb_i_dle_backend.domain.invest.service.InvestService;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
-import com.idle.kb_i_dle_backend.domain.member.repository.UserRepository;
+import com.idle.kb_i_dle_backend.domain.member.repository.MemberRepository;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class InvestServiceImpl implements InvestService {
-    private final UserRepository userRepository;
+    private final MemberRepository memberRepository;
     private final BankRepository bankRepository;
     private final BondRepository bondRepository;
     private final CoinRepository coinRepository;
@@ -33,11 +33,11 @@ public class InvestServiceImpl implements InvestService {
     private final StockPriceRepository stockPriceRepository;
     private final CoinPriceRepository coinPriceRepository;
 
-    public InvestServiceImpl(BankRepository bankRepository, UserRepository userRepository,
+    public InvestServiceImpl(BankRepository bankRepository, MemberRepository memberRepository,
                              BondRepository bondRepository, CoinRepository coinRepository,
                              StockRepository stockRepository, BondProductRepository bondProductRepository,
                              StockPriceRepository stockPriceRepository, CoinPriceRepository coinPriceRepository) {
-        this.userRepository = userRepository;
+        this.memberRepository = memberRepository;
         this.bankRepository = bankRepository;
         this.bondRepository = bondRepository;
         this.coinRepository = coinRepository;
@@ -49,7 +49,7 @@ public class InvestServiceImpl implements InvestService {
 
     @Override
     public List<InvestDTO> getInvestList() throws Exception {
-        Member tempUser = userRepository.findByUid(1).orElseThrow();
+        Member tempUser = memberRepository.findByUid(1).orElseThrow();
         List<Bank> banks = bankRepository.findByUid(tempUser);
         List<Bond> bonds = bondRepository.findByUid(tempUser);
         List<Coin> coins = coinRepository.findByUid(tempUser);
@@ -88,7 +88,7 @@ public class InvestServiceImpl implements InvestService {
 
     @Override
     public AvailableCashDTO getAvailableCash() throws Exception {
-        Member tempUser = userRepository.findByUid(1).orElseThrow(() -> new Exception("User not found"));
+        Member tempUser = memberRepository.findByUid(1).orElseThrow(() -> new Exception("User not found"));
         List<Bank> banks = bankRepository.findByUidAndSpecificCategoriesAndDeleteDateIsNull(tempUser);
 
         Long totalAvailableCash = banks.stream()
@@ -102,7 +102,7 @@ public class InvestServiceImpl implements InvestService {
 
     @Override
     public List<CategorySumDTO> getInvestmentTendency() throws Exception {
-        Member tempUser = userRepository.findByUid(1).orElseThrow(() -> new Exception("User not found"));
+        Member tempUser = memberRepository.findByUid(1).orElseThrow(() -> new Exception("User not found"));
         List<InvestDTO> investDTOs = getInvestList();
 
         Map<String, Long> categorySums = investDTOs.stream()
