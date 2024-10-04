@@ -44,6 +44,5 @@ public interface FinanceService {
 
     List<MonthlyBalanceDTO> getMonthlyIncomeOutcomeBalance(int uid);
 
-    List<AssetComparisonDTO> compareAssetsWithSameAgeGroup(int uid);
 
 }

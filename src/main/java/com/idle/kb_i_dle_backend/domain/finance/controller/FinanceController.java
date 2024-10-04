@@ -163,29 +163,6 @@ public class FinanceController {
         return ResponseEntity.ok(successResponse);
     }
 
-    // AS_11,12
-    @GetMapping("/peer")
-    @ResponseBody
-    public ResponseEntity<?> compareAssetsWithSameAgeGroup(@RequestParam("uid") int uid) {
-        try {
-            // 같은 나이대 자산 비교 결과 가져오기
-            AssetComparisonDTO assetComparison = (AssetComparisonDTO) financeService.compareAssetsWithSameAgeGroup(uid);
-
-            // 응답 데이터 구성
-            Map<String, Object> responseData = new HashMap<>();
-            responseData.put("bsAmount", assetComparison.getBsAmount());
-            responseData.put("spotAvgAmount", assetComparison.getSpotAvgAmount());
-            responseData.put("defer", assetComparison.getDefer());
-
-            ResponseDTO successResponse = new ResponseDTO(true, responseData);
-
-            // 성공적인 응답 반환
-            return ResponseEntity.ok(successResponse);
-        } catch (Exception e) {
-            // 예외 처리
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ResponseDTO(false, "에러가 발생했습니다: " + e.getMessage()));
-        }
-    }
 
 
 }
