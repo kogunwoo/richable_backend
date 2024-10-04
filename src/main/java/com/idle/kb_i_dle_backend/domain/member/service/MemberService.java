@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface MemberService {
     boolean checkDupl(String id);
 
-    Member getMember(String id);
+    Optional<Member> getMember(String id);
 
     Optional<Member> findMemberByUid(int id);
 
@@ -29,4 +29,6 @@ public interface MemberService {
     boolean verifyCode(String email, String code);
 
     boolean resetPassword(String id, String newPassword);
+
+    boolean deleteMemberById(String id);
 }

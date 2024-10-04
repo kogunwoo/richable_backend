@@ -1,12 +1,11 @@
 package com.idle.kb_i_dle_backend.domain.finance.repository;
 
-import com.idle.kb_i_dle_backend.domain.finance.entity.Stock;
 import com.idle.kb_i_dle_backend.domain.finance.entity.StockProduct;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
+import com.idle.kb_i_dle_backend.domain.finance.entity.Stock;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
+import java.util.List;
+
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,7 +18,7 @@ public interface StockRepository extends JpaRepository<Stock,Integer> {
     @Query(value = "SELECT sl.price " +
             "FROM asset.stock s " +
             "JOIN product.stock_list sl ON CAST(sl.short_code AS UNSIGNED) = s.pdno " +
-            "WHERE s.pdno = :pdno", nativeQuery = true)
+            "WHERE s.pdno = :pdno LIMIT 1", nativeQuery = true)
     double getStockPriceByPdno(@Param("pdno") int pdno);
 
     //uid가 일치하는 주식의 수량과 종가
@@ -28,7 +27,6 @@ public interface StockRepository extends JpaRepository<Stock,Integer> {
             "JOIN product.stock_list sl ON CAST(sl.short_code AS UNSIGNED) = s.pdno " +
             "WHERE s.uid = :uid", nativeQuery = true)
     List<Object[]> getStockBalanceAndPrice(@Param("uid") int uid);
-
 
     List<Stock> findAllByUidAndDeleteDateIsNull(Member uid);
 
@@ -44,10 +42,9 @@ public interface StockRepository extends JpaRepository<Stock,Integer> {
             "END " +
             "FROM product.stock_list sl " +
             "JOIN product.stock_list_price slp ON sl.standard_code = slp.standardCode " +
-            "WHERE sl.short_code = :stockId  AND s.add_date <= :endDate", nativeQuery = true)
+            "WHERE sl.short_code = :stockId", nativeQuery = true)
     Double getStockPriceForMonth(
             @Param("stockId") int stockId,
-            @Param("endDate") Date endDate,
             @Param("monthsAgo") int monthsAgo);
 
 
@@ -63,13 +60,12 @@ public interface StockRepository extends JpaRepository<Stock,Integer> {
             "FROM asset.stock s " +
             "JOIN product.stock_list sl ON CAST(s.pdno AS CHAR) = sl.short_code " +  // pdno를 String으로 변환하여 비교
             "JOIN product.stock_list_price slp ON sl.standard_code = slp.standardCode " +
-            "WHERE s.uid = :uid AND s.add_date <= :endDate " +
+            "WHERE s.uid = :uid " +
             "AND s.delete_date IS NULL", nativeQuery = true)
-    List<Object[]> getStockBalanceAndClosingPriceBefore(@Param("uid") int uid,
-                                                        @Param("endDate") Date endDate,
+    List<Object[]> getStockBalanceAndClosingPriceBefore(@Param("uid") Member uid,
                                                         @Param("monthsAgo") int monthsAgo);
 
-    List<Stock> findByUid(Member uid);
+    List<Stock> findByUid(Optional<Member> uid);
 
     @Query("SELECT sl FROM StockProduct sl WHERE sl.price IS NOT NULL ORDER BY sl.price DESC")
     List<StockProduct> findTop5StocksByPrice();
@@ -78,11 +74,7 @@ public interface StockRepository extends JpaRepository<Stock,Integer> {
     @Query("SELECT sl FROM StockProduct sl WHERE sl.price IS NOT NULL ORDER BY sl.price DESC")
     List<StockProduct> findTop5ByOrderByPriceDesc();
 
-    // stock crud
-    // 삭제되지 않은 금융 자산(Stock) 전체 조회
-    List<Stock> findByUidAndDeleteDateIsNull(Member uid);
+    List<Stock> findByUidAndDeleteDateIsNull(Member tempUser);
 
-    // 특정 index값의 정보 조회
-    Optional<Stock> findByIndexAndDeleteDateIsNull(@Param("index")Integer index);
-
+    Optional<Object> findByIndexAndDeleteDateIsNull(Integer index);
 }

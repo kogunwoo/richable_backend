@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -30,6 +31,7 @@ public class SpotServiceImpl implements SpotService {
     // 카테고리별 현물 자산 총합
     @Override
     public PriceSumDTO getTotalPriceByCategory(String category) throws Exception{
+
         Member tempUser = memberRepository.findByUid(1).orElseThrow();
 
         String result = category.equals("car") ? "자동차" :
@@ -55,7 +57,7 @@ public class SpotServiceImpl implements SpotService {
     // 전체 현물 자산 총합
     @Override
     public PriceSumDTO getTotalPrice() throws Exception {
-        Member tempUser = memberRepository.findByUid(1).orElseThrow();
+        Member tempUser = memberRepository.findByUid(40).orElseThrow();
         List<Spot> spots = spotRepository.findByUidAndDeleteDateIsNull(tempUser);
 
         if (spots.isEmpty()) throw new NotFoundException("");
@@ -72,14 +74,21 @@ public class SpotServiceImpl implements SpotService {
     // 현물 자산 목록 전체 조회
     @Override
     public List<SpotDTO> getSpotList() throws Exception {
-        Member tempUser = memberRepository.findByUid(1).orElseThrow();
+        Member tempUser = memberRepository.findByUid(40).orElseThrow();
         List<Spot> spots = spotRepository.findByUidAndDeleteDateIsNull(tempUser);
 
         if (spots.isEmpty()) throw new NotFoundException("");
 
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         List<SpotDTO> spotList = new ArrayList<>();
         for (Spot s : spots) {
-            SpotDTO spotDTO = SpotDTO.convertToDTO(s);
+            SpotDTO spotDTO = new SpotDTO();
+            spotDTO.setIndex(s.getIndex());
+            spotDTO.setCategory(s.getCategory());
+            spotDTO.setName(s.getName());
+            spotDTO.setPrice(s.getPrice());
+            String formattedAddDate = dateFormat.format(s.getAddDate());
+            spotDTO.setAddDate(formattedAddDate);
             spotList.add(spotDTO);
         }
 
@@ -89,7 +98,7 @@ public class SpotServiceImpl implements SpotService {
     // 현물 자산 추가
     @Override
     public SpotDTO addSpot(SpotDTO spotDTO) throws ParseException {
-        Member tempUser = memberRepository.findByUid(1).orElseThrow();
+        Member tempUser = memberRepository.findByUid(40).orElseThrow();
         Spot savedSpot = spotRepository.save(SpotDTO.convertToEntity(tempUser, spotDTO));
 
         return SpotDTO.convertToDTO(savedSpot);
@@ -99,7 +108,7 @@ public class SpotServiceImpl implements SpotService {
     @Transactional
     @Override
     public SpotDTO updateSpot(SpotDTO spotDTO) throws ParseException {
-        Member tempUser = memberRepository.findByUid(1).orElseThrow();
+        Member tempUser = memberRepository.findByUid(40).orElseThrow();
 
         // Spot 조회
         Spot isSpot = spotRepository.findByIndexAndDeleteDateIsNull(spotDTO.getIndex())

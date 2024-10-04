@@ -16,16 +16,16 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 public class MemberDTO {
     Integer uid;
     String id;
-    String nickname;
-    char gender;
-    String email;
     String password;
+    String email;
+    char gender;
     String birth_year;
     String profile;
     boolean agreement_info;
     boolean agreement_finance;
     boolean is_mentor;
     boolean is_certification;
+    String nickname;
     String auth;
 
     public MemberDTO(Integer uid, String id, String password, String nickname, String social, Integer birthYear, char gender, String email, boolean birth_year,

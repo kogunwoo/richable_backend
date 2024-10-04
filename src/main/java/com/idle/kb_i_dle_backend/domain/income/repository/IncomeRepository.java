@@ -23,6 +23,13 @@ public interface IncomeRepository extends JpaRepository<Income, Long> {
             "and YEAR (I.date) = :year " +
             "and month (I.date) = :month")
     List<Income> findByUidAndYearAndMonth(@Param("uid") Member uid, @Param("year") int year, @Param("month") int month);
+
+    @Query(value = "SELECT DATE_FORMAT(i.date, '%Y-%m') AS month, SUM(i.amount) AS total_income " +
+            "FROM asset.income i " +
+            "WHERE i.uid = :uid " +
+            "GROUP BY DATE_FORMAT(i.date, '%Y-%m')", nativeQuery = true)
+    List<Object[]> findMonthlyIncomeByUid(@Param("uid") int uid);
+
     // 소득 전체 조회
     List<Income> findByUid(Member uid);
 

@@ -1,5 +1,6 @@
 package com.idle.kb_i_dle_backend.domain.goal.dto;
 
+import java.math.BigDecimal;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,7 +19,7 @@ public class AssetGoalDTO {
     private int remaindate;
 
 
-    public AssetGoalDTO(int index, String title, long amount, Date date) {
+    public AssetGoalDTO(int index, BigDecimal bigDecimal, String title, long amount, Date date, int remaindate) {
         this.index = index;
         this.gather = 0;
         this.title = title;

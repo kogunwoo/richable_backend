@@ -3,6 +3,7 @@ package com.idle.kb_i_dle_backend.domain.member.service;
 import com.idle.kb_i_dle_backend.domain.member.dto.CustomUser;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import com.idle.kb_i_dle_backend.domain.member.repository.MemberRepository;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -21,9 +22,9 @@ public class CustomMemberDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Member member = memberRepository.findById(username); // Fetch member directly from UserRepository
+        Optional<Member> member = memberRepository.findById(username); // Fetch member directly from UserRepository
 //                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
-        return CustomUser.from(member); // Map User entity to CustomUser
+        return CustomUser.from(member.orElse(null)); // Map User entity to CustomUser
     }
 }
