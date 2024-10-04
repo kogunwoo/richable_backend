@@ -77,7 +77,8 @@ public class MemberController {
             // Assuming you have a method to fetch UserInfoDTO (e.g., from the authenticated user details)
             MemberInfoDTO userInfo = getUserInfoFromAuthentication(authentication);
             // Generate JWT token with uid
-            String jwtToken = jwtProcessor.generateToken(userInfo.getId(), userInfo.getUid(), userInfo.getNickname());
+            String jwtToken = jwtProcessor.generateToken(userInfo.getId(), userInfo.getUid(), userInfo.getNickname(),userInfo.getEmail());
+            log.error("jwtProcessor 값 확인 : "+userInfo.getId()+" / "+userInfo.getUid()+" / "+ userInfo.getNickname());
             // Return the AuthResultDTO with token and user info
             return ResponseEntity.ok(new AuthResultDTO(jwtToken, userInfo));
 
@@ -91,7 +92,9 @@ public class MemberController {
     private MemberInfoDTO getUserInfoFromAuthentication(Authentication authentication) {
         CustomUser customUser = (CustomUser) authentication.getPrincipal();
         MemberDTO member = customUser.getMember();  // Retrieve the MemberDTO object
-        return new MemberInfoDTO(member.getUid(), member.getId(), member.getNickname(), member.getAuth().toString());
+        log.error("memberDTO 확인 : "+ member.getNickname()+" / "+member.getEmail());
+        return new MemberInfoDTO(member.getUid(), member.getId(), member.getNickname(), member.getAuth().toString(),
+                member.getEmail());
     }
 
     @Value("${naver.client.id}")

@@ -14,8 +14,7 @@ public class MemberInfoDTO {
     private String id;
     private String email;
     private String nickname;
-    private String auth;
-          // 추가 필드
+    private String auth;          // 추가 필드
     private String img;        // 추가 필드
     private Integer birthYear;  // 추가 필드
     private String gender;     // 추가 필드
@@ -24,13 +23,13 @@ public class MemberInfoDTO {
 
     // 필요한 필드만 사용하는 생성자 (이 경우 uid, id, nickname, auth)
 
-    public MemberInfoDTO(Integer uid, String id, String nickname, String auth) {
+    public MemberInfoDTO(Integer uid, String id, String nickname, String auth, String email) {
         this.uid = uid;
         this.id = id;
         this.nickname = nickname;
         this.auth = auth;
         // 나머지 필드는 기본 값으로 설정
-        this.email = null;
+        this.email = email;
         this.img = null;
         this.birthYear = null;
         this.gender = null;

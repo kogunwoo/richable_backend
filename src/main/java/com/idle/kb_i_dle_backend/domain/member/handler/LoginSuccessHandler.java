@@ -28,11 +28,12 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         String username = member.getId();
         Integer uid = member.getUid();
         String nickname = member.getNickname();
+        String email = member.getEmail();
         String auth = member.getAuth().toString();
         // Generate token
-        String token = jwtProcessor.generateToken(username, uid, nickname);
+        String token = jwtProcessor.generateToken(username, uid, nickname, email);
         // Combine token and user info into AuthResultDTO
-        MemberInfoDTO userInfo = new MemberInfoDTO(uid, username, nickname,auth);
+        MemberInfoDTO userInfo = new MemberInfoDTO(uid, username, nickname,auth,email);
         return new AuthResultDTO(token, userInfo);
     }
 

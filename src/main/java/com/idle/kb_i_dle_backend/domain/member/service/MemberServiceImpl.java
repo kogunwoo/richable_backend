@@ -108,22 +108,24 @@ public class MemberServiceImpl implements MemberService {
     public MemberDTO findById(String id) {
         Optional<Member> user = memberRepository.findById(id);
         if (user.isPresent()) {
-            return new MemberDTO(
-                    user.get().getUid(),
-                    user.get().getId(),
-                    user.get().getPassword(),
-                    user.get().getEmail(),
-                    user.get().getSocial(),
-                    user.get().getBirth_year(),
-                    user.get().getGender().charAt(0), // Assuming gender is stored as a String
-                    user.get().getProfile(),
-                    user.get().getAgreementInfo(),
-                    user.get().getAgreementFinance(),
-                    user.get().getIsMentor(),
-                    user.get().getIsCertification(),
-                    user.get().getNickname(),
-                    user.get().getAuth()
-            );
+            Member member = user.get();
+
+            // MemberDTO를 builder를 사용하여 생성
+            return MemberDTO.builder()
+                    .uid(member.getUid())
+                    .id(member.getId())
+                    .password(member.getPassword())
+                    .email(member.getEmail())
+                    .gender(member.getGender().charAt(0))  // gender가 String일 경우
+                    .birth_year(String.valueOf(member.getBirth_year()))
+                    .profile(member.getProfile())
+                    .agreement_info(member.getAgreementInfo())
+                    .agreement_finance(member.getAgreementFinance())
+                    .is_mentor(member.getIsMentor())
+                    .is_certification(member.getIsCertification())
+                    .nickname(member.getNickname())
+                    .auth(member.getAuth())
+                    .build();
         }
         return null; // Or handle user not found as needed
     }
