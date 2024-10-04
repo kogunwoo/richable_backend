@@ -31,7 +31,15 @@ public class SpotServiceImpl implements SpotService {
     @Override
     public PriceSumDTO getTotalPriceByCategory(String category) throws Exception{
         Member tempUser = memberRepository.findByUid(1).orElseThrow();
-        List<Spot> spots = spotRepository.findByUidAndCategoryAndDeleteDateIsNull(tempUser, category);
+
+        String result = category.equals("car") ? "자동차" :
+                        category.equals("elec") ? "전자기기" :
+                        category.equals("brand") ? "브랜드" :
+                        category.equals("luxury") ? "명품" :
+                        "기타";
+
+
+        List<Spot> spots = spotRepository.findByUidAndCategoryAndDeleteDateIsNull(tempUser, result);
 
         if (spots.isEmpty()) throw new NotFoundException("");
 

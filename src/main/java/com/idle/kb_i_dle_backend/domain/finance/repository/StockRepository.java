@@ -30,7 +30,7 @@ public interface StockRepository extends JpaRepository<Stock,Integer> {
     List<Object[]> getStockBalanceAndPrice(@Param("uid") int uid);
 
 
-    List<Stock> findAllByUidAndDeleteDateIsNull(int uid);
+    List<Stock> findAllByUidAndDeleteDateIsNull(Member uid);
 
     // 선택한 주식의 해당 시점의 가격을 가져옴
     @Query(value = "SELECT " +

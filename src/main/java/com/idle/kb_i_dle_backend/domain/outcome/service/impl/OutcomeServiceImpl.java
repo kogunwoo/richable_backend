@@ -337,7 +337,9 @@ public class OutcomeServiceImpl implements OutcomeService {
             throw new AccessDeniedException("You do not have permission to modify this outcome.");
         }
 
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         isOutcomeUser.setCategory(outcomeUserDTO.getExpCategory());
+        isOutcomeUser.setDate(dateFormat.parse(outcomeUserDTO.getDate()));
         isOutcomeUser.setAmount(outcomeUserDTO.getAmount());
         isOutcomeUser.setDescript(outcomeUserDTO.getDescript());
         isOutcomeUser.setMemo(outcomeUserDTO.getMemo());
