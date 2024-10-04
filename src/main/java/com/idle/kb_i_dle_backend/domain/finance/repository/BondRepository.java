@@ -51,4 +51,12 @@ public interface BondRepository extends JpaRepository<Bond, Integer> {
     @Query(value = "SELECT per_price FROM asset.bond WHERE itms_nm = :name ORDER BY add_date DESC LIMIT 1", nativeQuery = true)
     double getPriceByName(@Param("name") String name);
 
+    // bond crud
+    // 삭제되지 않은 금융 자산(Bond) 전체 조회
+    List<Bond> findByUidAndDeleteDateIsNull(Member uid);
+
+    // 특정 index값의 정보 조회
+    Optional<Bond> findByIndexAndDeleteDateIsNull(@Param("index")Integer index);
+
+
 }

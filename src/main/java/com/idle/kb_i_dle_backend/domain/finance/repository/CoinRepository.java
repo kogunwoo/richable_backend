@@ -1,20 +1,18 @@
 package com.idle.kb_i_dle_backend.domain.finance.repository;
 
-import com.idle.kb_i_dle_backend.domain.finance.entity.CoinProduct;
 import com.idle.kb_i_dle_backend.domain.finance.entity.Coin;
+import com.idle.kb_i_dle_backend.domain.finance.entity.CoinProduct;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface CoinRepository extends JpaRepository <Coin,Integer> {
-
+public interface CoinRepository extends JpaRepository<Coin, Long> {
     List<Coin> findAllByUidAndDeleteDateIsNull(Optional<Member> uid);
 
     @Query(value = "SELECT a.balance, b.closing_price " +
@@ -29,7 +27,6 @@ public interface CoinRepository extends JpaRepository <Coin,Integer> {
             "JOIN product.coin_list b ON a.currency = b.coin_name " +
             "WHERE b.coin_name = :currency limit 1", nativeQuery = true)
     Double findCoinPriceBy(@Param("currency") String currency);
-
 
 
     @Query(value = "SELECT c.balance, " +
@@ -52,8 +49,6 @@ public interface CoinRepository extends JpaRepository <Coin,Integer> {
                                                             @Param("monthsAgo") int monthsAgo);
 
 
-
-
     @Query(value = "SELECT " +
             "CASE :monthsAgo " +
             "  WHEN 1 THEN clp.1m_b_price " +
@@ -72,5 +67,12 @@ public interface CoinRepository extends JpaRepository <Coin,Integer> {
 
     @Query("SELECT cl FROM CoinProduct cl ORDER BY CAST(cl.closingPrice AS double) DESC")
     List<CoinProduct> findTop5ByOrderByClosingPriceDesc();
+
+    // coin crud
+// 삭제되지 않은 금융 자산(Coin) 전체 조회
+    List<Coin> findByUidAndDeleteDateIsNull(Member uid);
+
+    // 특정 index값의 정보 조회
+    Optional<Coin> findByIndexAndDeleteDateIsNull(@Param("index") Integer index);
 }
 

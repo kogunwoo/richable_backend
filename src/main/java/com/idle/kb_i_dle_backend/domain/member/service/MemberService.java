@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface MemberService {
     boolean checkDupl(String id);
 
-    Member getMember(String id);
+    Optional<Member> getMember(String id);
 
     Optional<Member> findMemberByUid(int id);
 

@@ -74,4 +74,8 @@ public interface StockRepository extends JpaRepository<Stock,Integer> {
     // 이 메서드는 StockList 엔티티를 대상으로 하는 별도의 쿼리를 사용합니다.
     @Query("SELECT sl FROM StockProduct sl WHERE sl.price IS NOT NULL ORDER BY sl.price DESC")
     List<StockProduct> findTop5ByOrderByPriceDesc();
+
+    List<Stock> findByUidAndDeleteDateIsNull(Member tempUser);
+
+    Optional<Object> findByIndexAndDeleteDateIsNull(Integer index);
 }

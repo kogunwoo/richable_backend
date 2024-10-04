@@ -93,7 +93,7 @@ public class SpotController {
     public ResponseEntity<?> deleteSpot(@PathVariable("index") Integer index) {
         try {
             Map<String, Object> indexData = new HashMap<>();
-            indexData.put("index", spotService.deleteSpotByUidAndIndex(index));
+            indexData.put("index", spotService.deleteSpot(index).getIndex());
             ResponseDTO response = new ResponseDTO(true, indexData);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {

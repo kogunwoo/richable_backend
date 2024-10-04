@@ -39,7 +39,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public Member getMember(String id) {
+    public Optional<Member> getMember(String id) {
         return memberRepository.findById(id);
     }
 
@@ -106,23 +106,23 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public MemberDTO findById(String id) {
-        Member user = memberRepository.findById(id);
-        if (user != null) {
+        Optional<Member> user = memberRepository.findById(id);
+        if (user.isPresent()) {
             return new MemberDTO(
-                    user.getUid(),
-                    user.getId(),
-                    user.getPassword(),
-                    user.getEmail(),
-                    user.getSocial(),
-                    user.getBirth_year(),
-                    user.getGender().charAt(0), // Assuming gender is stored as a String
-                    user.getProfile(),
-                    user.getAgreementInfo(),
-                    user.getAgreementFinance(),
-                    user.getIsMentor(),
-                    user.getIsCertification(),
-                    user.getNickname(),
-                    user.getAuth()
+                    user.get().getUid(),
+                    user.get().getId(),
+                    user.get().getPassword(),
+                    user.get().getEmail(),
+                    user.get().getSocial(),
+                    user.get().getBirth_year(),
+                    user.get().getGender().charAt(0), // Assuming gender is stored as a String
+                    user.get().getProfile(),
+                    user.get().getAgreementInfo(),
+                    user.get().getAgreementFinance(),
+                    user.get().getIsMentor(),
+                    user.get().getIsCertification(),
+                    user.get().getNickname(),
+                    user.get().getAuth()
             );
         }
         return null; // Or handle user not found as needed
@@ -135,10 +135,10 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public boolean checkAgree(boolean info, boolean finance, String id) {
-        Member user = memberRepository.findById(id);
-        if (user != null) {
-            user.setAgreementInfo(info);
-            user.setAgreementFinance(finance);
+        Optional<Member> user = memberRepository.findById(id);
+        if (user.isPresent()) {
+            user.get().setAgreementInfo(info);
+            user.get().setAgreementFinance(finance);
             memberRepository.save(user); // Save updated user
             return true;
         }
@@ -180,10 +180,10 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public boolean resetPassword(String id, String newPassword) {
-        Member user = memberRepository.findById(id);
-        if (user != null) {
+        Optional<Member> user = memberRepository.findById(id);
+        if (user.isPresent()) {
             String encodedPassword = passwordEncoder.encode(newPassword);
-            user.setPassword(encodedPassword); // Update password
+            user.get().setPassword(encodedPassword); // Update password
             memberRepository.save(user); // Save updated user
             return true;
         }
@@ -193,10 +193,10 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public boolean deleteMemberById(String id) {
         // ID로 회원 조회 후 삭제
-        Member member = memberRepository.findById(id);
+        Optional<Member> member = memberRepository.findById(id);
 
         // 회원 삭제
-        memberRepository.delete(member);
+        memberRepository.deleteMemberById(member);
         return true;
     }
 }

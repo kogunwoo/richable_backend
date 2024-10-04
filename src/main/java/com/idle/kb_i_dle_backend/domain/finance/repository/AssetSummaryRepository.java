@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import java.util.Date;
 
 public interface AssetSummaryRepository extends JpaRepository<AssetSummary, Integer> {
     AssetSummary findByUid(Optional<Member> uid);
@@ -17,5 +18,5 @@ public interface AssetSummaryRepository extends JpaRepository<AssetSummary, Inte
     @Query(value = "SELECT * FROM asset.asset_summary WHERE uid = :uid ORDER BY update_date DESC LIMIT 1", nativeQuery = true)
     AssetSummary findLatestByUid(@Param("uid") Optional<Member> uid);
 
-
+    AssetSummary findFirstByUidAndUpdateDateBeforeOrderByUpdateDateDesc(Member uid, Date updateDate);
 }

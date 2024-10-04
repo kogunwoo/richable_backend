@@ -3,6 +3,7 @@ package com.idle.kb_i_dle_backend.domain.invest.service.impl;
 import com.idle.kb_i_dle_backend.domain.finance.entity.*;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BankRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BondListRepository;
+import com.idle.kb_i_dle_backend.domain.finance.repository.BondProductRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BondRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.CoinPriceRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.CoinRepository;
@@ -27,20 +28,20 @@ public class InvestServiceImpl implements InvestService {
     private final BondRepository bondRepository;
     private final CoinRepository coinRepository;
     private final StockRepository stockRepository;
-    private final BondListRepository bondListRepository;
+    private final BondProductRepository bondProductRepository;
     private final StockPriceRepository stockPriceRepository;
     private final CoinPriceRepository coinPriceRepository;
 
     public InvestServiceImpl(BankRepository bankRepository, MemberRepository memberRepository,
                              BondRepository bondRepository, CoinRepository coinRepository,
-                             StockRepository stockRepository, BondListRepository bondListRepository,
+                             StockRepository stockRepository, BondProductRepository bondProductRepository,
                              StockPriceRepository stockPriceRepository,CoinPriceRepository coinPriceRepository) {
         this.memberRepository = memberRepository;
         this.bankRepository = bankRepository;
         this.bondRepository = bondRepository;
         this.coinRepository = coinRepository;
         this.stockRepository = stockRepository;
-        this.bondListRepository = bondListRepository;
+        this.bondProductRepository = bondProductRepository;
         this.stockPriceRepository = stockPriceRepository;
         this.coinPriceRepository = coinPriceRepository;
     }
@@ -141,7 +142,7 @@ public class InvestServiceImpl implements InvestService {
                     .map(stock -> new RecommendedProductDTO("주식", stock.getKrStockNm(), stock.getPrice()))
                     .collect(Collectors.toList()));
         } else {
-            List<BondProduct> bonds = bondListRepository.findTop5ByOrderByPriceDesc();
+            List<BondProduct> bonds = bondProductRepository.findTop5ByOrderByPriceDesc();
 
             recommendedProducts.addAll(bonds.stream()
                     .map(bond -> new RecommendedProductDTO("채권", bond.getIsinCdNm(), bond.getPrice()))

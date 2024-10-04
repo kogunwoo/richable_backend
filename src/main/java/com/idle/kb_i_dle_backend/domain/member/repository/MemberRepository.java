@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface MemberRepository extends JpaRepository<Member, Integer> {
     Optional<Member> findByUid(int uid);
 
-    Member findById(String id);
+    Optional<Member> findById(String id);
 
     Member findByNickname(String nickname);
 
@@ -22,4 +22,8 @@ public interface MemberRepository extends JpaRepository<Member, Integer> {
     // 같은 나이대(10대, 20대, 30대 등) 사용자들의 uid를 찾는 쿼리
     @Query("SELECT m.uid FROM Member m WHERE FLOOR((YEAR(CURRENT_DATE) - m.birth_year) / 10) = :ageGroup")
     List<Integer> findUidsByAgeGroup(@Param("ageGroup") int ageGroup);
+
+    boolean deleteMemberById(Optional<Member> id);
+
+    boolean save(Optional<Member> id);
 }

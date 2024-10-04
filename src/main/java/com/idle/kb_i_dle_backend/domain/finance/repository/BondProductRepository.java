@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface BondListRepository extends JpaRepository<BondProduct,Integer> {
+public interface BondProductRepository extends JpaRepository<BondProduct,Integer> {
     List<BondProduct> findTop5ByOrderByPriceDesc();
 
 }

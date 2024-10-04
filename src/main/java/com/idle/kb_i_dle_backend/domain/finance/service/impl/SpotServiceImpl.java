@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -101,7 +102,7 @@ public class SpotServiceImpl implements SpotService {
         Member tempUser = memberRepository.findByUid(40).orElseThrow();
 
         // Spot 조회
-        Spot isSpot = spotRepository.findByIndex(spotDTO.getIndex())
+        Spot isSpot = spotRepository.findByIndexAndDeleteDateIsNull(spotDTO.getIndex())
                 .orElseThrow(() -> new IllegalArgumentException("Spot not found with id: " + spotDTO.getIndex()));
 
         // User 조회 (User 객체가 없을 경우 예외 처리)
@@ -123,19 +124,26 @@ public class SpotServiceImpl implements SpotService {
     // 특정 유저와 index에 해당하는 Spot 삭제
     @Transactional
     @Override
-    public Integer deleteSpotByUidAndIndex(Integer index) {
-        Member tempUser = memberRepository.findByUid(40).orElseThrow();
-        Spot isSpot = spotRepository.findByIndex(index)
-                .orElseThrow(() -> new IllegalArgumentException("Spot not found with index: " + index));
+    public SpotDTO deleteSpot(Integer index) {
+        Member tempUser = memberRepository.findByUid(1).orElseThrow();
 
-        // 유저가 소유한 Spot인지 확인
-        if (!isSpot.getUid().getUid().equals(tempUser.getUid())) {
-            throw new AccessDeniedException("You do not have permission to delete this spot.");
+        // Spot 조회
+        Spot isSpot = spotRepository.findByIndexAndDeleteDateIsNull(index)
+                .orElseThrow(() -> new IllegalArgumentException("Spot not found with id: " + index));
+
+        // User 조회 (User 객체가 없을 경우 예외 처리)
+        Member isUser = memberRepository.findByUid(tempUser.getUid())
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + tempUser.getUid()));
+
+        // Spot의 소유자가 해당 User인지 확인
+        if (!isSpot.getUid().equals(isUser)) {
+            throw new AccessDeniedException("You do not have permission to modify this spot.");
         }
 
-        spotRepository.deleteByIndex(index);  // Spot 삭제
+        isSpot.setDeleteDate(new Date());
 
-        return index;
+        Spot savedSpot = spotRepository.save(isSpot);
+        return SpotDTO.convertToDTO(savedSpot);
     }
 
 }

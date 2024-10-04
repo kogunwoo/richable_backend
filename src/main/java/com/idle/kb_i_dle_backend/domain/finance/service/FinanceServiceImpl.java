@@ -12,6 +12,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
 
+
+import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +36,6 @@ public class FinanceServiceImpl implements FinanceService {
     private final MemberRepository memberRepository;
     private final AssetSummaryRepository assetSummaryRepository;
 
-
     // 소수점 이하 한 자리로 포맷팅할 수 있는 DecimalFormat
     private static final DecimalFormat df = new DecimalFormat("#.#");
 
@@ -49,9 +50,15 @@ public class FinanceServiceImpl implements FinanceService {
     // 총 자산 합계 계산 (금융 자산 + Spot 자산)
     @Override
     public FinancialSumDTO getTotalAssetsSum(int uid) {
-        Optional<Member> member = memberRepository.findByUid(uid);
-        long totalAssetsSum = calculateFinancialAssetsSum(member) + calculateSpotAssetsSum(member);
+        long totalAssetsSum = calculateFinancialAssetsSum(uid) + calculateSpotAssetsSum(uid);
         return new FinancialSumDTO(totalAssetsSum);
+    }
+
+    @Override
+    public FinancialSumDTO getAssetSummeryByDateBefore(int uid, Date date) throws Exception{
+        Optional<Member> member = Optional.of(memberRepository.findByUid(uid).orElseThrow());
+        AssetSummary assetSummary = assetSummaryRepository.findFirstByUidAndUpdateDateBeforeOrderByUpdateDateDesc(member, date);
+        return new FinancialSumDTO(assetSummary.getTotalAmount());
     }
 
     // 금융 자산 목록 조회
