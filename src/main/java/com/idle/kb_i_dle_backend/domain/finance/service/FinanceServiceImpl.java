@@ -6,6 +6,8 @@ import com.idle.kb_i_dle_backend.domain.income.repository.IncomeRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.*;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import java.text.DecimalFormat;
+
+import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +36,10 @@ public class FinanceServiceImpl implements FinanceService {
 
     private final OutComeUserRepository outComeUserRepository;
 
+    private final AssetSummaryRepository assetSummaryRepository;
+
+    private final MemberService memberService;
+
     // 소수점 이하 한 자리로 포맷팅할 수 있는 DecimalFormat
     private static final DecimalFormat df = new DecimalFormat("#.#");
 
@@ -49,6 +55,13 @@ public class FinanceServiceImpl implements FinanceService {
     public FinancialSumDTO getTotalAssetsSum(int uid) {
         long totalAssetsSum = calculateFinancialAssetsSum(uid) + calculateSpotAssetsSum(uid);
         return new FinancialSumDTO(totalAssetsSum);
+    }
+
+    @Override
+    public FinancialSumDTO getAssetSummeryByDateBefore(int uid, Date date) throws Exception{
+        Member member = memberService.findMemberByUid(uid).orElseThrow();
+        AssetSummary assetSummary = assetSummaryRepository.findFirstByUidAndUpdateDateBeforeOrderByUpdateDateDesc(member, date);
+        return new FinancialSumDTO(assetSummary.getTotalAmount());
     }
 
     // 금융 자산 목록 조회

@@ -9,6 +9,8 @@ import com.idle.kb_i_dle_backend.domain.finance.dto.MonthlySavingRateDTO;
 import com.idle.kb_i_dle_backend.domain.finance.dto.StockReturnDTO;
 import com.idle.kb_i_dle_backend.domain.finance.dto.TotalChangeDTO;
 import com.idle.kb_i_dle_backend.domain.finance.dto.BondReturnDTO;
+
+import java.util.Date;
 import java.util.List;
 
 public interface FinanceService {
@@ -18,6 +20,8 @@ public interface FinanceService {
 
     // AS_2 금융 + 현물 자산 합 조회
     FinancialSumDTO getTotalAssetsSum(int uid);
+
+    FinancialSumDTO getAssetSummeryByDateBefore(int uid, Date date) throws Exception;
 
     // AS_3 금융 자산별 조회
     List<AssetDTO> getFinancialAsset(int uid);

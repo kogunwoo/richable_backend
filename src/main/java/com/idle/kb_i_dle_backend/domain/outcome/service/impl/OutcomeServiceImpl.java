@@ -12,7 +12,6 @@ import com.idle.kb_i_dle_backend.domain.outcome.repository.AverageOutcomeReposit
 import com.idle.kb_i_dle_backend.domain.outcome.repository.CategoryRepository;
 import com.idle.kb_i_dle_backend.domain.outcome.repository.OutcomeUserRepository;
 
-
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Period;

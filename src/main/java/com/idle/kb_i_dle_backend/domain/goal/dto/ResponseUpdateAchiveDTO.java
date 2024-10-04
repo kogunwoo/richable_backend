@@ -7,9 +7,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class GoalDTO {
-    private String category;
-    private String title;
-    private long amount;
+public class ResponseUpdateAchiveDTO {
+    private int index;
+    private boolean isAchive;
     private int priority;
 }
