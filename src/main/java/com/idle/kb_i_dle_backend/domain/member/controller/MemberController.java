@@ -8,7 +8,6 @@ import com.idle.kb_i_dle_backend.domain.member.dto.MemberDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberInfoDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberJoinDTO;
 import com.idle.kb_i_dle_backend.domain.member.entity.MemberAPI;
-import com.idle.kb_i_dle_backend.domain.member.repository.MemberApiRepository;
 import com.idle.kb_i_dle_backend.domain.member.service.MemberApiService;
 import com.idle.kb_i_dle_backend.domain.member.service.MemberInfoService;
 import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
@@ -27,6 +26,7 @@ import javax.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -134,10 +134,9 @@ public class MemberController {
 
     @GetMapping("/naverCallback")
     public ResponseEntity<?> naverCallback(@RequestParam(required = false) String code,
-                                           @RequestParam(required = false) String state    ) throws Exception {
+                                           @RequestParam(required = false) String state,HttpServletRequest request) throws Exception {
 
-        log.error("Received callback - code: {}, state: {}" +    code, state    );
-
+        log.info("Received callback - code: {}, state: {}", code, state);
 
         // 최종 인증 값인 접근 토큰을 발급
         String tokenUrl = "https://nid.naver.com/oauth2.0/token?grant_type=authorization_code"
@@ -145,22 +144,84 @@ public class MemberController {
                 + "&client_secret=" + clientSecret
                 + "&code=" + code
                 + "&state=" + state;
-        String authtoken = getHttpResponse(tokenUrl);
-        log.error("Token Response: {}", authtoken);
-        log.error("tokenUrl: {}", tokenUrl);
 
-        // JSON 파싱
-        JSONObject tokenJson = new JSONObject(authtoken);
-        String accessToken = tokenJson.getString("access_token");
+        String authtoken = null;
+        String accessToken = null;
+        int retryCount = 0;
+        int maxRetries = 3;
+
+        while (accessToken == null && retryCount < maxRetries) {
+            try {
+                authtoken = getHttpResponse(tokenUrl);
+                if (authtoken == null || authtoken.isEmpty()) {
+                    throw new Exception("Empty auth token received");
+                }
+
+                // JSON 파싱
+                JSONObject tokenJson = new JSONObject(authtoken);
+                accessToken = tokenJson.getString("access_token");
+
+                if (accessToken == null || accessToken.isEmpty()) {
+                    throw new Exception("Empty access token received");
+                }
+            } catch (Exception e) {
+                log.warn("Failed to get access token, attempt {} of {}", retryCount + 1, maxRetries, e);
+                retryCount++;
+                if (retryCount >= maxRetries) {
+                    log.error("Failed to get access token after {} attempts", maxRetries);
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body("Failed to authenticate with Naver");
+                }
+                // 재시도 전 잠시 대기
+                Thread.sleep(1000);
+            }
+        }
+
+        log.info("Access Token obtained successfully");
 
         // 사용자 프로필 정보 조회
         JSONObject userProfile = getUserProfile(accessToken);
         log.info("User Profile: {}", userProfile.toString());
 
         // 여기서 userProfile을 사용하여 회원가입 또는 로그인 처리
-        // 예: MemberDTO 생성 및 저장, JWT 토큰 생성 등
+        // 사용자 정보 처리 (회원가입 또는 로그인)
+        JSONObject responseObj = userProfile.getJSONObject("response");
+        String email = responseObj.getString("email");
+        String nickname = responseObj.getString("nickname");
 
-        return ResponseEntity.ok(userProfile.toString());
+        // 사용자 정보로 MemberDTO 생성 또는 조회
+        MemberDTO memberDTO = memberService.findByEmail(email);
+        if (memberDTO == null) {
+            // 새 사용자 등록 로직
+            MemberJoinDTO joinDTO = MemberJoinDTO.builder()
+                    .email(email)
+                    .nickname(nickname)
+                    // 다른 필요한 정보 설정
+                    .build();
+            memberService.MemberJoin(joinDTO);
+            memberDTO = memberService.findByEmail(email);
+        }
+
+        // JWT 토큰 생성
+        String jwtToken = jwtProcessor.generateToken(memberDTO.getId(), memberDTO.getUid(), memberDTO.getNickname(), memberDTO.getEmail());
+        // JWT 토큰을 세션에 저장
+        HttpSession session = request.getSession();
+        session.setAttribute("jwtToken", jwtToken);
+
+        // 세션에 JWT 토큰이 제대로 저장되었는지 확인
+        String storedToken = (String) session.getAttribute("jwtToken");
+        if (storedToken == null || !storedToken.equals(jwtToken)) {
+            log.error("Failed to store JWT token in session");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to complete authentication process");
+        }
+        log.error("JWT token successfully stored in session");
+
+        // 홈페이지로 리다이렉트
+        String homeUrl = "http://localhost:5173"; // 프론트엔드 홈 URL
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .header(HttpHeaders.LOCATION, homeUrl)
+                .build();
     }
 
     private String getHttpResponse(String urlString) throws Exception {
