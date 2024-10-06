@@ -7,8 +7,11 @@ import com.idle.kb_i_dle_backend.domain.goal.entity.Goal;
 import com.idle.kb_i_dle_backend.domain.goal.repository.GoalRepository;
 import com.idle.kb_i_dle_backend.domain.goal.service.GoalService;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
+import com.idle.kb_i_dle_backend.domain.member.exception.MemberException;
 import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
 import javax.transaction.Transactional;
+
+import com.idle.kb_i_dle_backend.global.codes.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

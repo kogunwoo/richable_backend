@@ -1,19 +1,16 @@
-package com.idle.kb_i_dle_backend.common;
+package com.idle.kb_i_dle_backend.global;
 
 import java.io.File;
 import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
-import java.io.File;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-
-
-import org.springframework.beans.factory.annotation.Value;
 
 
 public class FileUploadUtil {

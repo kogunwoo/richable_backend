@@ -3,8 +3,11 @@ package com.idle.kb_i_dle_backend.domain.member.service;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberJoinDTO;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
+import com.idle.kb_i_dle_backend.domain.member.exception.MemberException;
 import com.idle.kb_i_dle_backend.domain.member.repository.MemberRepository;
 import java.util.*;
+
+import com.idle.kb_i_dle_backend.global.codes.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -42,13 +45,18 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public Member getMember(String id) {
-        return memberRepository.findById(id);
+            return memberRepository.findById(id);
     }
 
 
     @Override
     public Optional<Member> findMemberByUid(int id){
-        return memberRepository.findByUid(id);
+        try{
+            return memberRepository.findByUid(id);
+        }catch (Exception e){
+            throw new MemberException(ErrorCode.INVALID_MEMEBER, e.getMessage());
+        }
+
     }
 
 

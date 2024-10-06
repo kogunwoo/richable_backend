@@ -1,11 +1,10 @@
 package com.idle.kb_i_dle_backend.domain.outcome.controller;
 
-import com.idle.kb_i_dle_backend.common.dto.ErrorResponseDTO;
-import com.idle.kb_i_dle_backend.common.dto.ResponseDTO;
+import com.idle.kb_i_dle_backend.global.dto.ErrorResponseDTO;
+import com.idle.kb_i_dle_backend.global.dto.SuccessResponseDTO;
 import com.idle.kb_i_dle_backend.domain.outcome.dto.*;
 import com.idle.kb_i_dle_backend.domain.outcome.service.OutcomeService;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -27,15 +26,15 @@ public class OutcomeController {
 
 
     @GetMapping("/simulation/{cntYear}/{cntMonth}")
-    public ResponseEntity<ResponseDTO> simulation6Month(@PathVariable int cntYear, @PathVariable int cntMonth){
+    public ResponseEntity<SuccessResponseDTO> simulation6Month(@PathVariable int cntYear, @PathVariable int cntMonth){
 
         try {
             Simulation6MonthDTO simulation6MonthDTO = outcomeService.calculate6MonthSaveOutcome(1, cntYear, cntMonth);
-            return ResponseEntity.ok(new ResponseDTO(true, simulation6MonthDTO));
+            return ResponseEntity.ok(new SuccessResponseDTO(true, simulation6MonthDTO));
         }catch (Exception e){
             e.printStackTrace();
+            return ResponseEntity.ok(new SuccessResponseDTO(false, null));
         }
-        return ResponseEntity.ok(new ResponseDTO(false, null));
     }
 
 
@@ -46,11 +45,11 @@ public class OutcomeController {
      * @return
      */
     @GetMapping("/review/sum/{cntYear}/{cntMonth}")
-    public ResponseEntity<ResponseDTO> saveOutcomeInMonth(@PathVariable int cntYear, @PathVariable int cntMonth){
+    public ResponseEntity<SuccessResponseDTO> saveOutcomeInMonth(@PathVariable int cntYear, @PathVariable int cntMonth){
         Calendar calendar = Calendar.getInstance();
         PossibleSaveOutcomeInMonthDTO possibleSaveOutcomeInMonthDTO = outcomeService.findPossibleSaveOutcome(1, cntYear, cntMonth);
-        ResponseDTO responseDTO = new ResponseDTO(true, possibleSaveOutcomeInMonthDTO);
-        return ResponseEntity.ok(responseDTO);
+        SuccessResponseDTO successResponseDTO = new SuccessResponseDTO(true, possibleSaveOutcomeInMonthDTO);
+        return ResponseEntity.ok(successResponseDTO);
     }
 
 
@@ -61,7 +60,7 @@ public class OutcomeController {
      * @return
      */
     @GetMapping("/compare/{cntYear}/{cntMonth}/{category}")
-    public ResponseEntity<ResponseDTO> compareWithAverage(@PathVariable int cntYear,  @PathVariable int cntMonth,  @PathVariable String category) {
+    public ResponseEntity<SuccessResponseDTO> compareWithAverage(@PathVariable int cntYear, @PathVariable int cntMonth, @PathVariable String category) {
         Calendar calendar = Calendar.getInstance();
 
         // 시작일 설정 (해당 연도와 월의 첫 번째 날)
@@ -75,21 +74,21 @@ public class OutcomeController {
         Date endDate = calendar.getTime();
 
         CompareAverageCategoryOutcomeDTO compareAverageCategoryOutcomeDTO = outcomeService.compareWithAverage(1,  cntYear, cntMonth , category);
-        return ResponseEntity.ok(new ResponseDTO(true, compareAverageCategoryOutcomeDTO));
+        return ResponseEntity.ok(new SuccessResponseDTO(true, compareAverageCategoryOutcomeDTO));
     }
 
 
     @GetMapping("/category/sum/{cntYear}/{cntMonth}")
-    public ResponseEntity<ResponseDTO> categorySumList(@PathVariable int cntYear, @PathVariable int cntMonth) {
+    public ResponseEntity<SuccessResponseDTO> categorySumList(@PathVariable int cntYear, @PathVariable int cntMonth) {
         ResponseCategorySumListDTO responseCategorySumListDTO = outcomeService.findCategorySum(cntYear, cntMonth);
-        return ResponseEntity.ok(new ResponseDTO(true ,responseCategorySumListDTO) );
+        return ResponseEntity.ok(new SuccessResponseDTO(true ,responseCategorySumListDTO) );
     }
 
     @GetMapping("/category/dailysum/{cntYear}/{cntMonth}")
-    public ResponseEntity<ResponseDTO> monthConsume(@PathVariable int cntYear, @PathVariable int cntMonth){
+    public ResponseEntity<SuccessResponseDTO> monthConsume(@PathVariable int cntYear, @PathVariable int cntMonth){
         System.out.println("month!!!!!!!!!!!");
         MonthOutcomeDTO monthOutcomeDTO = outcomeService.findMonthOutcome(cntYear, cntMonth);
-        return ResponseEntity.ok(new ResponseDTO(true, monthOutcomeDTO));
+        return ResponseEntity.ok(new SuccessResponseDTO(true, monthOutcomeDTO));
     }
 
     // 소비 CRUD
@@ -98,10 +97,10 @@ public class OutcomeController {
     @GetMapping("/all")
     public ResponseEntity<?> getTotalOutcomeList() {
         try {
-            ResponseDTO response = new ResponseDTO(true, outcomeService.getOutcomeList());
+            SuccessResponseDTO response = new SuccessResponseDTO(true, outcomeService.getOutcomeList());
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
+            ErrorResponseDTO response = new ErrorResponseDTO(e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
@@ -110,10 +109,10 @@ public class OutcomeController {
     @GetMapping("/detail/{index}")
     public ResponseEntity<?> getOutcomeDetail(@PathVariable("index") Integer index) {
         try {
-            ResponseDTO response = new ResponseDTO(true, outcomeService.getOutcomeByIndex(index));
+            SuccessResponseDTO response = new SuccessResponseDTO(true, outcomeService.getOutcomeByIndex(index));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
+            ErrorResponseDTO response = new ErrorResponseDTO(e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
@@ -122,10 +121,10 @@ public class OutcomeController {
     @PostMapping("/add")
     public ResponseEntity<?> addOutcome(@RequestBody OutcomeUserDTO outcomeUserDTO) {
         try {
-            ResponseDTO response = new ResponseDTO(true, outcomeService.addOutcome(outcomeUserDTO));
+            SuccessResponseDTO response = new SuccessResponseDTO(true, outcomeService.addOutcome(outcomeUserDTO));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
+            ErrorResponseDTO response = new ErrorResponseDTO(e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
@@ -134,10 +133,10 @@ public class OutcomeController {
     @PutMapping("/update")
     public ResponseEntity<?> updateOutcome(@RequestBody OutcomeUserDTO outcomeUserDTO) {
         try {
-            ResponseDTO response = new ResponseDTO(true, outcomeService.updateOutcome(outcomeUserDTO));
+            SuccessResponseDTO response = new SuccessResponseDTO(true, outcomeService.updateOutcome(outcomeUserDTO));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
+            ErrorResponseDTO response = new ErrorResponseDTO(e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
@@ -148,10 +147,10 @@ public class OutcomeController {
         try {
             Map<String, Object> indexData = new HashMap<>();
             indexData.put("index", outcomeService.deleteOutcomeByUidAndIndex(index));
-            ResponseDTO response = new ResponseDTO(true, indexData);
+            SuccessResponseDTO response = new SuccessResponseDTO(true, indexData);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
+            ErrorResponseDTO response = new ErrorResponseDTO(e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }

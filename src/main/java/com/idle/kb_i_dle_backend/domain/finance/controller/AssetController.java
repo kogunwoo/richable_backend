@@ -1,8 +1,8 @@
 package com.idle.kb_i_dle_backend.domain.finance.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.idle.kb_i_dle_backend.common.dto.ErrorResponseDTO;
-import com.idle.kb_i_dle_backend.common.dto.ResponseDTO;
+import com.idle.kb_i_dle_backend.global.dto.ErrorResponseDTO;
+import com.idle.kb_i_dle_backend.global.dto.SuccessResponseDTO;
 import com.idle.kb_i_dle_backend.domain.finance.dto.BankDTO;
 import com.idle.kb_i_dle_backend.domain.finance.dto.BondDTO;
 import com.idle.kb_i_dle_backend.domain.finance.dto.CoinDTO;
@@ -36,28 +36,28 @@ public class AssetController {
     public ResponseEntity<?> getAssetList(@PathVariable("category") String category) {
         try {
             if(category.equals("bank")) {
-                ResponseDTO response = new ResponseDTO(true, bankService.getBankList());
+                SuccessResponseDTO response = new SuccessResponseDTO(true, bankService.getBankList());
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
             else if(category.equals("bond")) {
-                ResponseDTO response = new ResponseDTO(true, bondService.getBondList());
+                SuccessResponseDTO response = new SuccessResponseDTO(true, bondService.getBondList());
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
             else if(category.equals("coin")) {
-                ResponseDTO response = new ResponseDTO(true, coinService.getCoinList());
+                SuccessResponseDTO response = new SuccessResponseDTO(true, coinService.getCoinList());
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
             else if(category.equals("stock")) {
-                ResponseDTO response = new ResponseDTO(true, stockService.getStockList());
+                SuccessResponseDTO response = new SuccessResponseDTO(true, stockService.getStockList());
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
             else {
-                ErrorResponseDTO response = new ErrorResponseDTO(false, "카테고리가 제대로 입력되지 않았습니다.");
+                ErrorResponseDTO response = new ErrorResponseDTO( "카테고리가 제대로 입력되지 않았습니다.");
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
 
         } catch (Exception e) {
-            ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
+            ErrorResponseDTO response = new ErrorResponseDTO( e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
@@ -67,30 +67,30 @@ public class AssetController {
         try {
             if(category.equals("bank")) {
                 BankDTO bankData = new ObjectMapper().readValue(reqBody, BankDTO.class);
-                ResponseDTO response = new ResponseDTO(true, bankService.addBank(bankData));
+                SuccessResponseDTO response = new SuccessResponseDTO(true, bankService.addBank(bankData));
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
             else if(category.equals("bond")) {
                 BondDTO bondData = new ObjectMapper().readValue(reqBody, BondDTO.class);
-                ResponseDTO response = new ResponseDTO(true, bondService.addBond(bondData));
+                SuccessResponseDTO response = new SuccessResponseDTO(true, bondService.addBond(bondData));
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
             else if(category.equals("coin")) {
                 CoinDTO coinData = new ObjectMapper().readValue(reqBody, CoinDTO.class);
-                ResponseDTO response = new ResponseDTO(true, coinService.addCoin(coinData));
+                SuccessResponseDTO response = new SuccessResponseDTO(true, coinService.addCoin(coinData));
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
             else if(category.equals("stock")) {
                 StockDTO stockData = new ObjectMapper().readValue(reqBody, StockDTO.class);
-                ResponseDTO response = new ResponseDTO(true, stockService.addStock(stockData));
+                SuccessResponseDTO response = new SuccessResponseDTO(true, stockService.addStock(stockData));
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
             else {
-                ErrorResponseDTO response = new ErrorResponseDTO(false, "카테고리가 제대로 입력되지 않았습니다.");
+                ErrorResponseDTO response = new ErrorResponseDTO( "카테고리가 제대로 입력되지 않았습니다.");
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
         } catch (Exception e) {
-            ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
+            ErrorResponseDTO response = new ErrorResponseDTO(e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
@@ -101,30 +101,30 @@ public class AssetController {
         try {
             if(category.equals("bank")) {
                 BankDTO bankData = new ObjectMapper().readValue(reqBody, BankDTO.class);
-                ResponseDTO response = new ResponseDTO(true, bankService.updateBank(bankData));
+                SuccessResponseDTO response = new SuccessResponseDTO(true, bankService.updateBank(bankData));
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
             else if(category.equals("bond")) {
                 BondDTO bondData = new ObjectMapper().readValue(reqBody, BondDTO.class);
-                ResponseDTO response = new ResponseDTO(true, bondService.updateBond(bondData));
+                SuccessResponseDTO response = new SuccessResponseDTO(true, bondService.updateBond(bondData));
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
             else if(category.equals("coin")) {
                 CoinDTO coinData = new ObjectMapper().readValue(reqBody, CoinDTO.class);
-                ResponseDTO response = new ResponseDTO(true, coinService.updateCoin(coinData));
+                SuccessResponseDTO response = new SuccessResponseDTO(true, coinService.updateCoin(coinData));
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
             else if(category.equals("stock")) {
                 StockDTO stockData = new ObjectMapper().readValue(reqBody, StockDTO.class);
-                ResponseDTO response = new ResponseDTO(true, stockService.updateStock(stockData));
+                SuccessResponseDTO response = new SuccessResponseDTO(true, stockService.updateStock(stockData));
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
             else {
-                ErrorResponseDTO response = new ErrorResponseDTO(false, "카테고리가 제대로 입력되지 않았습니다.");
+                ErrorResponseDTO response = new ErrorResponseDTO( "카테고리가 제대로 입력되지 않았습니다.");
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
         } catch (Exception e) {
-            ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
+            ErrorResponseDTO response = new ErrorResponseDTO(e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
@@ -136,33 +136,33 @@ public class AssetController {
             if(category.equals("bank")) {
                 Map<String, Object> indexData = new HashMap<>();
                 indexData.put("index", bankService.deleteBank(index).getIndex());
-                ResponseDTO response = new ResponseDTO(true, indexData);
+                SuccessResponseDTO response = new SuccessResponseDTO(true, indexData);
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
             else if(category.equals("bond")) {
                 Map<String, Object> indexData = new HashMap<>();
                 indexData.put("index", bondService.deleteBond(index).getIndex());
-                ResponseDTO response = new ResponseDTO(true, indexData);
+                SuccessResponseDTO response = new SuccessResponseDTO(true, indexData);
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
             else if(category.equals("coin")) {
                 Map<String, Object> indexData = new HashMap<>();
                 indexData.put("index", coinService.deleteCoin(index).getIndex());
-                ResponseDTO response = new ResponseDTO(true, indexData);
+                SuccessResponseDTO response = new SuccessResponseDTO(true, indexData);
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
             else if(category.equals("stock")) {
                 Map<String, Object> indexData = new HashMap<>();
                 indexData.put("index", stockService.deleteStock(index).getIndex());
-                ResponseDTO response = new ResponseDTO(true, indexData);
+                SuccessResponseDTO response = new SuccessResponseDTO(true, indexData);
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
             else {
-                ErrorResponseDTO response = new ErrorResponseDTO(false, "카테고리가 제대로 입력되지 않았습니다.");
+                ErrorResponseDTO response = new ErrorResponseDTO("카테고리가 제대로 입력되지 않았습니다.");
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
         } catch (Exception e) {
-            ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
+            ErrorResponseDTO response = new ErrorResponseDTO( e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
