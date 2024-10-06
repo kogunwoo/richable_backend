@@ -43,6 +43,13 @@ public interface OutcomeUserRepository extends JpaRepository<OutcomeUser, Intege
             "order by o.date")
     List<OutcomeUser> findAmountAllByUidAndYearAndMonth(@Param("uid") Member uid, @Param("year") int year , @Param("month") int month);
 
+    @Query("SELECT o " +
+            "FROM OutcomeUser o " +
+            "WHERE o.uid = :uid AND YEAR(o.date) = :year AND MONTH(o.date) = :month " +
+            "and o.category like %:category% " +
+            "order by o.date")
+    List<OutcomeUser> findAllByUidAndYearAndMonthAndCategory(@Param("uid") Member uid, @Param("year") int year , @Param("month") int month, @Param("category") String category);
+
     List<OutcomeUser> findByUidAndDateBetween(Member uid, Date start, Date end);
 
     // 소비 CRUD
@@ -51,7 +58,7 @@ public interface OutcomeUserRepository extends JpaRepository<OutcomeUser, Intege
     List<OutcomeUser> findByUid(Member uid);
 
     // 특정 index값의 소비 조회
-    Optional<OutcomeUser> findByIndex(@Param("index")Integer index);
+    Optional<OutcomeUser> findByIndex(@Param("index")Integer index);    
 
     // 특정 index값의 소비 삭제
     void deleteByIndex(@Param("index")Integer index);
