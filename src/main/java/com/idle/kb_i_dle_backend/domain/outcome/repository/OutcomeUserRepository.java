@@ -49,6 +49,13 @@ public interface OutcomeUserRepository extends JpaRepository<OutcomeUser, Intege
             "GROUP BY DATE_FORMAT(o.date, '%Y-%m')", nativeQuery = true)
     List<Object[]> findMonthlyOutcomeByUid(@Param("uid") int uid);
 
+    @Query("SELECT o " +
+            "FROM OutcomeUser o " +
+            "WHERE o.uid = :uid AND YEAR(o.date) = :year AND MONTH(o.date) = :month " +
+            "and o.category like %:category% " +
+            "order by o.date")
+    List<OutcomeUser> findAllByUidAndYearAndMonthAndCategory(@Param("uid") Member uid, @Param("year") int year , @Param("month") int month, @Param("category") String category);
+
     List<OutcomeUser> findByUidAndDateBetween(Member uid, Date start, Date end);
 
     // 소비 CRUD
