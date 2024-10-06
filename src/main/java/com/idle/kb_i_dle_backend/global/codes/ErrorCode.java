@@ -6,13 +6,8 @@ import lombok.Getter;
 public enum ErrorCode {
 
     /**
-     * ******************************* Global Error CodeList ***************************************
-     * HTTP Status Code
-     * 400 : Bad Request
-     * 401 : Unauthorized
-     * 403 : Forbidden
-     * 404 : Not Found
-     * 500 : Internal Server Error
+     * ******************************* Global Error CodeList *************************************** HTTP Status Code
+     * 400 : Bad Request 401 : Unauthorized 403 : Forbidden 404 : Not Found 500 : Internal Server Error
      * *********************************************************************************************
      */
     // 잘못된 서버 요청
@@ -54,7 +49,6 @@ public enum ErrorCode {
     // 서버가 처리 할 방법을 모르는 경우 발생
     INTERNAL_SERVER_ERROR(500, "G999", "Internal Server Error Exception"),
 
-
     /**
      * ******************************* Custom Error CodeList ***************************************
      */
@@ -67,9 +61,20 @@ public enum ErrorCode {
     // Transaction Delete Error
     DELETE_ERROR(200, "9999", "Delete Transaction Error Exception"),
 
+    //member find error
     INVALID_MEMEBER(200, "M01", "Invalid Member Id"),
 
+    //GOAL
+    //invalid index
+    INVALID_INDEX(200, "G01", "Inavlid Index"),
 
+    INVALID_PRIORITY(200, "G02", "Invalid Priority"),
+
+    INVALID_CATEGORY(200, "G03", "Invalid Category"),
+
+    INVALID_GOAL(200, "G04", "Invalid Goal"),
+
+    //INCOME
 
     ; // End
 

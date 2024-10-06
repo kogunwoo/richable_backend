@@ -1,22 +1,38 @@
 package com.idle.kb_i_dle_backend.domain.finance.service;
 
-import com.idle.kb_i_dle_backend.domain.finance.dto.*;
-import com.idle.kb_i_dle_backend.domain.finance.entity.*;
+import com.idle.kb_i_dle_backend.domain.finance.dto.AssetDTO;
+import com.idle.kb_i_dle_backend.domain.finance.dto.BondReturnDTO;
+import com.idle.kb_i_dle_backend.domain.finance.dto.CoinReturnDTO;
+import com.idle.kb_i_dle_backend.domain.finance.dto.FinancialChangeDTO;
+import com.idle.kb_i_dle_backend.domain.finance.dto.FinancialSumDTO;
+import com.idle.kb_i_dle_backend.domain.finance.dto.MonthlySavingRateDTO;
+import com.idle.kb_i_dle_backend.domain.finance.dto.StockReturnDTO;
+import com.idle.kb_i_dle_backend.domain.finance.dto.TotalChangeDTO;
+import com.idle.kb_i_dle_backend.domain.finance.entity.AssetSummary;
+import com.idle.kb_i_dle_backend.domain.finance.entity.Bank;
+import com.idle.kb_i_dle_backend.domain.finance.entity.Bond;
+import com.idle.kb_i_dle_backend.domain.finance.entity.Coin;
+import com.idle.kb_i_dle_backend.domain.finance.entity.Spot;
+import com.idle.kb_i_dle_backend.domain.finance.entity.Stock;
+import com.idle.kb_i_dle_backend.domain.finance.repository.AssetSummaryRepository;
+import com.idle.kb_i_dle_backend.domain.finance.repository.BankRepository;
+import com.idle.kb_i_dle_backend.domain.finance.repository.BondRepository;
+import com.idle.kb_i_dle_backend.domain.finance.repository.CoinRepository;
+import com.idle.kb_i_dle_backend.domain.finance.repository.OutComeUserRepository;
+import com.idle.kb_i_dle_backend.domain.finance.repository.SpotRepository;
+import com.idle.kb_i_dle_backend.domain.finance.repository.StockRepository;
 import com.idle.kb_i_dle_backend.domain.income.repository.IncomeRepository;
-import com.idle.kb_i_dle_backend.domain.finance.repository.*;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
-import java.text.DecimalFormat;
-
 import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -58,9 +74,10 @@ public class FinanceServiceImpl implements FinanceService {
     }
 
     @Override
-    public FinancialSumDTO getAssetSummeryByDateBefore(int uid, Date date) throws Exception{
-        Member member = memberService.findMemberByUid(uid).orElseThrow();
-        AssetSummary assetSummary = assetSummaryRepository.findFirstByUidAndUpdateDateBeforeOrderByUpdateDateDesc(member, date);
+    public FinancialSumDTO getAssetSummeryByDateBefore(int uid, Date date) {
+        Member member = memberService.findMemberByUid(uid);
+        AssetSummary assetSummary = assetSummaryRepository.findFirstByUidAndUpdateDateBeforeOrderByUpdateDateDesc(
+                member, date);
         return new FinancialSumDTO(assetSummary.getTotalAmount());
     }
 
@@ -94,7 +111,7 @@ public class FinanceServiceImpl implements FinanceService {
         List<TotalChangeDTO> totalChanges = new ArrayList<>();
         for (int i = 0; i < 6; i++) {
             long monthlySum = (i == 0) ? (calculateFinancialAssetsSum(uid) + calculateSpotAssetsSum(uid))
-                    : calculateMonthlyAssetsSum(uid, i)+ calculateSpotAssetsSumBefore(uid,i);
+                    : calculateMonthlyAssetsSum(uid, i) + calculateSpotAssetsSumBefore(uid, i);
             totalChanges.add(new TotalChangeDTO(i, monthlySum));
         }
         return totalChanges;
@@ -204,7 +221,6 @@ public class FinanceServiceImpl implements FinanceService {
             double totalCoinReturn = 0;
             int coinCount = 0;
 
-
             for (Coin coin : coins) {
                 Date purchaseDateAsDate = coin.getAddDate();
                 LocalDate purchaseDate = purchaseDateAsDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
@@ -225,7 +241,8 @@ public class FinanceServiceImpl implements FinanceService {
                     }
 
                     double coinReturn = ((closingPrice / purchasePrice) * 100) - 100;
-                    System.out.println(coin.getCurrency() + "+ Month: " + i + ", closing_price: " + closingPrice + ", Purchase Price: " + purchasePrice + "coinReturn: " + coinReturn);
+                    System.out.println(coin.getCurrency() + "+ Month: " + i + ", closing_price: " + closingPrice
+                            + ", Purchase Price: " + purchasePrice + "coinReturn: " + coinReturn);
                     totalCoinReturn += coinReturn;
                     coinCount++;
 
@@ -237,14 +254,17 @@ public class FinanceServiceImpl implements FinanceService {
                             continue; // purchasePrice가 0인 경우 계산에서 제외
                         }
 
-                        Double currentMonthPrice = coinRepository.getCoinPriceForMonth(coin.getCurrency(), endDate,i); // 특정 달의 가격
+                        Double currentMonthPrice = coinRepository.getCoinPriceForMonth(coin.getCurrency(), endDate,
+                                i); // 특정 달의 가격
                         if (currentMonthPrice == null || currentMonthPrice == 0.0) {
                             continue; // currentMonthPrice가 0이거나 null인 경우 계산에서 제외
                         }
 
                         if (purchasePrice > 0) {
                             double stockReturn = ((currentMonthPrice / purchasePrice) * 100) - 100;
-                            System.out.println("Month: " + i + ", Current Month Price: " + currentMonthPrice + ", Purchase Price: " + purchasePrice + ", Stock Return: " + stockReturn);
+                            System.out.println(
+                                    "Month: " + i + ", Current Month Price: " + currentMonthPrice + ", Purchase Price: "
+                                            + purchasePrice + ", Stock Return: " + stockReturn);
                             totalCoinReturn += stockReturn;
                             coinCount++;
                         }
@@ -281,22 +301,24 @@ public class FinanceServiceImpl implements FinanceService {
                         .atStartOfDay(ZoneId.systemDefault()).toInstant());
 
                 if (i == 0) {
-                        double currentPrice = 40;
-                        double purchasePrice = bond.getPrice();
-                        System.out.println("Current Bond Price: " + currentPrice + ", Purchase Price: " + purchasePrice);
+                    double currentPrice = 40;
+                    double purchasePrice = bond.getPrice();
+                    System.out.println("Current Bond Price: " + currentPrice + ", Purchase Price: " + purchasePrice);
 
-                        if (purchasePrice > 0) {
-                            double bondReturn = ((currentPrice / purchasePrice) * 100) - 100;
-                            totalBondReturn += bondReturn;
-                            System.out.println("Bond Return: " + bondReturn);
-                            bondCount++;
-                        }
+                    if (purchasePrice > 0) {
+                        double bondReturn = ((currentPrice / purchasePrice) * 100) - 100;
+                        totalBondReturn += bondReturn;
+                        System.out.println("Bond Return: " + bondReturn);
+                        bondCount++;
+                    }
 
                 } else {
                     if (!purchaseDate.isAfter(currentMonthDate)) {
                         double purchasePrice = bond.getPrice();
-                        Double currentMonthPrice = bondRepository.getBondPriceForMonth(bond.getName(), endDate,i);
-                        System.out.println("Month: " + i + ", Current Month Price: " + currentMonthPrice + ", Purchase Price: " + purchasePrice);
+                        Double currentMonthPrice = bondRepository.getBondPriceForMonth(bond.getName(), endDate, i);
+                        System.out.println(
+                                "Month: " + i + ", Current Month Price: " + currentMonthPrice + ", Purchase Price: "
+                                        + purchasePrice);
 
                         if (currentMonthPrice != null && purchasePrice > 0) {
                             double bondReturn = ((currentMonthPrice / purchasePrice) * 100) - 100;
@@ -318,7 +340,6 @@ public class FinanceServiceImpl implements FinanceService {
 
         return bondReturns;
     }
-
 
 
     // Helper 메서드: 다양한 타입을 double로 변환
@@ -369,7 +390,6 @@ public class FinanceServiceImpl implements FinanceService {
     // 월별 금융 자산 합산 메서드
     private long calculateMonthlyAssetsSum(int uid, int monthsAgo) {
 
-
         LocalDateTime endOfMonthLDT = LocalDate.now().minusMonths(monthsAgo).withDayOfMonth(1).atStartOfDay();
         Date endOfMonth = Date.from(endOfMonthLDT.atZone(ZoneId.systemDefault()).toInstant());
 
@@ -380,7 +400,7 @@ public class FinanceServiceImpl implements FinanceService {
         monthlySum += bankAssets.stream().mapToLong(Bank::getBalanceAmt).sum();
 
         // 채권 자산 합산
-        List<Bond> bondAssets = bondRepository.findAllByUidAndAddDateBefore(uid, endOfMonth,monthsAgo);
+        List<Bond> bondAssets = bondRepository.findAllByUidAndAddDateBefore(uid, endOfMonth, monthsAgo);
         monthlySum += bondAssets.stream().mapToLong(Bond -> (long) Bond.getPrice() * Bond.getCnt()).sum();
 
         // 가상화폐 자산 합산

@@ -10,7 +10,7 @@ public interface MemberService {
 
     Member getMember(String id);
 
-    Optional<Member> findMemberByUid(int id);
+    Member findMemberByUid(int id);
 
 
     void MemberJoin(MemberJoinDTO memberjoindto);

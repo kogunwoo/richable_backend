@@ -50,7 +50,7 @@ public class MemberServiceImpl implements MemberService {
 
 
     @Override
-    public Optional<Member> findMemberByUid(int id){
+    public Member findMemberByUid(int id){
         try{
             return memberRepository.findByUid(id);
         }catch (Exception e){
