@@ -74,5 +74,10 @@ public interface CoinRepository extends JpaRepository<Coin, Long> {
 
     // 특정 index값의 정보 조회
     Optional<Coin> findByIndexAndDeleteDateIsNull(@Param("index") Integer index);
+
+    @Query(value = "SELECT month(c.add_date) as month, c.prod_category as category, SUM(c.avg_buy_price * c.balance) as totalAmount " +
+            "FROM asset.coin c WHERE c.uid = :uid " +
+            "GROUP BY month(c.add_date), c.prod_category", nativeQuery = true)
+    List<Object[]> findMonthlyCoinAssets(@Param("uid") Member uid);
 }
 

@@ -58,5 +58,10 @@ public interface BondRepository extends JpaRepository<Bond, Integer> {
     // 특정 index값의 정보 조회
     Optional<Bond> findByIndexAndDeleteDateIsNull(@Param("index")Integer index);
 
+    @Query(value = "SELECT month(b.add_date) as month, b.prod_category as category, SUM(b.per_price * b.cnt) as totalAmount " +
+            "FROM asset.bond b WHERE b.uid = :uid " +
+            "GROUP BY month(b.add_date), b.prod_category", nativeQuery = true)
+    List<Object[]> findMonthlyBondAssets(@Param("uid") Member uid);
+
 
 }

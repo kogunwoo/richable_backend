@@ -27,20 +27,11 @@ public class FinanceController {
     private final FinanceService financeService;
 
 
-    private final JwtProcessor jwtProcessor;
-
-    // 공통 메서드로 UID 가져오기
-    private Integer getUidFromSession(HttpServletRequest request) {
-        String token = request.getHeader("Authorization").replace("Bearer ", "");
-        Integer uid = jwtProcessor.getUid(token);
-        return uid;
-    }
-
     // AS_1 금융 자산 합 조회
     // // 토큰 값 불러오는 방식 구현 완료
     @GetMapping("/fin/sum")
     public ResponseEntity<ResponseDTO> getFinancialAssetsSum(HttpServletRequest request) {
-        Integer uid = getUidFromSession(request);
+        Integer uid = (Integer) request.getAttribute("uid");
 
         if (uid == null) {
             throw new IllegalArgumentException("UID is missing==============================================");
@@ -56,10 +47,10 @@ public class FinanceController {
     }
 
 
-    // AS_2 금융 +현물 자산 합 조회
+    // AS_
     @GetMapping("/fin")
     public ResponseEntity<?> getTotalAsset(HttpServletRequest request) {
-        Integer uid = getUidFromSession(request);
+        Integer uid = (Integer) request.getAttribute("uid");
 
         List<AssetDTO> totalPrice = financeService.getFinancialAsset(uid);
 
@@ -74,7 +65,7 @@ public class FinanceController {
     // AS_2 금융 +현물 자산 합 조회
     @GetMapping("/total/sum")
     public ResponseEntity<?> getTotalAssetsSum(HttpServletRequest request) {
-        Integer uid = getUidFromSession(request);
+        Integer uid = (Integer) request.getAttribute("uid");
 
         FinancialSumDTO totalPrice = financeService.getTotalAssetsSum(uid);
 
@@ -90,14 +81,11 @@ public class FinanceController {
     // AS_5 6개월간 금융 자산 변화 추이
     @GetMapping("/changed/fin")
     public ResponseEntity<?> getSixMonthFinancialChanges(HttpServletRequest request) {
-        Integer uid = getUidFromSession(request);
+        Integer uid = (Integer) request.getAttribute("uid");
 
         List<FinancialChangeDTO> result = financeService.getSixMonthFinancialChanges(uid);
 
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("data", result);
-
-        ResponseDTO successResponse = new ResponseDTO(true, responseData);
+        ResponseDTO successResponse = new ResponseDTO(true, result);
 
         return ResponseEntity.ok(successResponse);
     }
@@ -105,7 +93,7 @@ public class FinanceController {
     // AS_6 6개월간 금융 자산 + 현물량 변화 추이
     @GetMapping("/changed/spot")
     public ResponseEntity<?> getSixMonthTotalChanges(HttpServletRequest request) {
-        Integer uid = getUidFromSession(request);
+        Integer uid = (Integer) request.getAttribute("uid");
 
         List<TotalChangeDTO> result = financeService.getSixMonthTotalChanges(uid);
 
@@ -117,7 +105,7 @@ public class FinanceController {
     // AS_7 달별 저축률 추이
     @GetMapping("/return/income")
     public ResponseEntity<?> getMonthlySavingRateTrend(HttpServletRequest request) {
-        Integer uid = getUidFromSession(request);
+        Integer uid = (Integer) request.getAttribute("uid");
         List<MonthlyBalanceDTO> totalPrice = financeService.getMonthlyIncomeOutcomeBalance(uid);
 
         ResponseDTO successResponse = new ResponseDTO(true, totalPrice);
@@ -128,7 +116,7 @@ public class FinanceController {
     // AS_8 달별 주식 수익률
     @GetMapping("/return/stock")
     public ResponseEntity<?> getStockReturnTrend(HttpServletRequest request) {
-        Integer uid = getUidFromSession(request);
+        Integer uid = (Integer) request.getAttribute("uid");
         List<StockReturnDTO> stockReturn = financeService.getStockReturnTrend(uid);
 
         ResponseDTO successResponse = new ResponseDTO(true, stockReturn);
@@ -139,7 +127,7 @@ public class FinanceController {
     // AS_9 달별 가상화폐 수익률
     @GetMapping("/return/coin")
     public ResponseEntity<?> getCoinReturnTrend(HttpServletRequest request) {
-        Integer uid = getUidFromSession(request);
+        Integer uid = (Integer) request.getAttribute("uid");
         List<CoinReturnDTO> coinReturn = financeService.getCoinReturnTrend(uid);
 
         ResponseDTO successResponse = new ResponseDTO(true, coinReturn);
@@ -150,7 +138,7 @@ public class FinanceController {
     // AS_10 달별 채권 수익률
     @GetMapping("/return/bond")
     public ResponseEntity<?> getBondReturnTrend(HttpServletRequest request) {
-        Integer uid = getUidFromSession(request);
+        Integer uid = (Integer) request.getAttribute("uid");
         List<BondReturnDTO> bondReturn = financeService.getBondReturnTrend(uid);
 
         ResponseDTO successResponse = new ResponseDTO(true, bondReturn);
@@ -161,7 +149,7 @@ public class FinanceController {
     // AS_11
     @GetMapping("/peer")
     public ResponseEntity<ResponseDTO> compareAssetsWithAgeGroup(HttpServletRequest request) {
-        Integer uid = getUidFromSession(request);
+        Integer uid = (Integer) request.getAttribute("uid");
         Map<String, Object> response = financeService.compareAssetsWithAgeGroup(uid);
         ResponseDTO Response = new ResponseDTO(true, response);
 
@@ -170,15 +158,13 @@ public class FinanceController {
 
     @GetMapping("/peer/finance")
     public ResponseEntity<ResponseDTO> compareAssetsByCategoryWithAgeGroup(HttpServletRequest request) {
-
-        Integer uid = getUidFromSession(request);
-        Map<String, Object> response = financeService.compareAssetsByCategoryWithAgeGroup(uid);
+        Integer uid = (Integer) request.getAttribute("uid");
+        List<Map<String, Object>> response = financeService.compareAssetsByCategoryWithAgeGroup(uid);
         ResponseDTO Response = new ResponseDTO(true, response);
 
         return ResponseEntity.ok(Response);
 
     }
-
 
 
 }

@@ -23,19 +23,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class InvestController {
 
     private final InvestService investService;
-    private final JwtProcessor jwtProcessor;
-
-    // 공통 메서드로 UID 가져오기
-    private Integer getUidFromSession(HttpServletRequest request) {
-        String token = request.getHeader("Authorization").replace("Bearer ", "");
-        Integer uid = jwtProcessor.getUid(token);
-        return uid;
-    }
 
     // 투자 여유 자산 조회
     @GetMapping("/available")
     public ResponseEntity<?> getAvailableAsset(HttpServletRequest request) {
-        Integer uid = getUidFromSession(request);
+        Integer uid = (Integer) request.getAttribute("uid");
+        log.error("check uid in invest" + uid);
         try {
             AvailableCashDTO availableCashDTO = investService.getAvailableCash(uid);
             ResponseDTO response = new ResponseDTO(true, availableCashDTO);
@@ -51,7 +44,7 @@ public class InvestController {
     // 성향 조회
     @GetMapping("/tendency")
     public ResponseEntity<?> getMaxPercentageCategory(HttpServletRequest request) {
-        Integer uid = getUidFromSession(request);
+        Integer uid = (Integer) request.getAttribute("uid");
         try {
             MaxPercentageCategoryDTO maxPercentageCategory = investService.getMaxPercentageCategory(uid);
             ResponseDTO response = new ResponseDTO(true, maxPercentageCategory);
@@ -66,7 +59,7 @@ public class InvestController {
 
     @GetMapping("/recommended")
     public ResponseEntity<?> getRecommendedProducts(HttpServletRequest request) {
-        Integer uid = getUidFromSession(request);
+        Integer uid = (Integer) request.getAttribute("uid");
         try {
             List<RecommendedProductDTO> recommendedProducts = investService.getRecommendedProducts(uid);
             ResponseDTO response = new ResponseDTO(true, recommendedProducts);
@@ -81,7 +74,7 @@ public class InvestController {
 
     @GetMapping("/highreturn/stock")
     public ResponseEntity<?> getHighReturnStock(HttpServletRequest request) {
-        Integer uid = getUidFromSession(request);
+        Integer uid = (Integer) request.getAttribute("uid");
         try {
             List<HighReturnProductDTO> highReturnProductDTOS = investService.getHighReturnStock(uid);
             ResponseDTO response = new ResponseDTO(true, highReturnProductDTOS);
@@ -97,7 +90,7 @@ public class InvestController {
 
     @GetMapping("/highreturn/coin")
     public ResponseEntity<?> getHighReturnCoin(HttpServletRequest request) {
-        Integer uid = getUidFromSession(request);
+        Integer uid = (Integer) request.getAttribute("uid");
         try {
             List<HighReturnProductDTO> highReturnCoins = investService.getHighReturnCoin(uid);
             ResponseDTO response = new ResponseDTO(true, highReturnCoins);
@@ -112,7 +105,7 @@ public class InvestController {
 
     @GetMapping("/highreturn")
     public ResponseEntity<?> getHighReturnProducts(HttpServletRequest request) {
-        Integer uid = getUidFromSession(request);
+        Integer uid = (Integer) request.getAttribute("uid");
         try {
             HighReturnProductsDTO highReturnProducts = investService.getHighReturnProducts(uid);
             ResponseDTO response = new ResponseDTO(true, highReturnProducts.getProducts());

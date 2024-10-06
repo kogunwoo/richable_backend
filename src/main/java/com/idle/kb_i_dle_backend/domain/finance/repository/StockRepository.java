@@ -77,4 +77,9 @@ public interface StockRepository extends JpaRepository<Stock,Integer> {
     List<Stock> findByUidAndDeleteDateIsNull(Member tempUser);
 
     Optional<Object> findByIndexAndDeleteDateIsNull(Integer index);
+
+    @Query(value = "SELECT month(s.add_date) as month, s.prod_category as category, SUM(s.avg_buy_price * s.hldg_qty) as totalAmount " +
+            "FROM asset.stock s WHERE s.uid = :uid " +
+            "GROUP BY month(s.add_date), s.prod_category", nativeQuery = true)
+    List<Object[]> findMonthlyStockAssets(@Param("uid") Member uid);
 }

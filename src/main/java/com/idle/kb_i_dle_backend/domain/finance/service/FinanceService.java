@@ -43,7 +43,7 @@ public interface FinanceService {
 
     Map<String, Object> compareAssetsWithAgeGroup(int uid);
 
-    Map<String, Object> compareAssetsByCategoryWithAgeGroup(int uid);
+    List<Map<String, Object>> compareAssetsByCategoryWithAgeGroup(int uid);
 
 
 }
