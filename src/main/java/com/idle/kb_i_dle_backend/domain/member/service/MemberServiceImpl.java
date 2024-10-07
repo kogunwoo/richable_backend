@@ -16,6 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityNotFoundException;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -135,14 +137,17 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public boolean checkAgree(boolean info, boolean finance, String id) {
-        Optional<Member> user = memberRepository.findById(id);
-        if (user.isPresent()) {
-            user.get().setAgreementInfo(info);
-            user.get().setAgreementFinance(finance);
-            memberRepository.save(user); // Save updated user
-            return true;
-        }
-        return false; // User not found
+        Optional<Member> userOptional = memberRepository.findById(id);
+        // Optional에서 실제 Member 객체를 추출
+        Member member = userOptional.orElseThrow(() -> new EntityNotFoundException("Member not found with id: " + id));
+
+        // 추출된 Member 객체에 정보를 업데이트
+        member.setAgreementInfo(info);
+        member.setAgreementFinance(finance);
+
+        // 업데이트된 객체를 저장
+        memberRepository.save(member);
+        return true;
     }
 
     @Override
@@ -181,23 +186,27 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public boolean resetPassword(String id, String newPassword) {
-        Optional<Member> user = memberRepository.findById(id);
-        if (user.isPresent()) {
-            String encodedPassword = passwordEncoder.encode(newPassword);
-            user.get().setPassword(encodedPassword); // Update password
-            memberRepository.save(user); // Save updated user
-            return true;
-        }
-        return false; // User not found
+        Optional<Member> userOptional = memberRepository.findById(id);
+        // Optional에서 실제 Member 객체를 추출
+        Member member = userOptional.orElseThrow(() -> new EntityNotFoundException("Member not found with id: " + id));
+
+        // 비밀번호 암호화 후 업데이트
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        member.setPassword(encodedPassword);
+
+        // 업데이트된 객체를 저장
+        memberRepository.save(member);
+        return true;
     }
 
     @Override
     public boolean deleteMemberById(String id) {
-        // ID로 회원 조회 후 삭제
-        Optional<Member> member = memberRepository.findById(id);
+        Optional<Member> memberOptional = memberRepository.findById(id);
+        // Optional에서 실제 Member 객체를 추출
+        Member member = memberOptional.orElseThrow(() -> new EntityNotFoundException("Member not found with id: " + id));
 
-        // 회원 삭제
-        memberRepository.deleteMemberById(member);
+        // 추출된 Member 객체를 삭제
+        memberRepository.delete(member);
         return true;
     }
 
