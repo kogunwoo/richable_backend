@@ -19,13 +19,14 @@ public final class JwtProcessor {
     private Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
 
     // JWT generation
-    public String generateToken(String subject, Integer uid,String nickname) {
+    public String generateToken(String subject, Integer uid,String nickname,String email) {
         String encryptedUid = AESUtil.encrypt(uid.toString(), ENCRYPTION_SECRET);
 
         return Jwts.builder()
                 .setSubject(subject)
                 .claim("uid", encryptedUid)
                 .claim("nickname", nickname)
+                .claim("email", email)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + TOKEN_VALID_MILISECOND))
                 .signWith(key)
