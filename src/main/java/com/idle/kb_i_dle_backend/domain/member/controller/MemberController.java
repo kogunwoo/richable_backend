@@ -76,6 +76,7 @@ public class MemberController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             // Assuming you have a method to fetch UserInfoDTO (e.g., from the authenticated user details)
             MemberInfoDTO userInfo = getUserInfoFromAuthentication(authentication);
+            log.error("userInfo 확인"+userInfo);
             // Generate JWT token with uid
             String jwtToken = jwtProcessor.generateToken(userInfo.getId(), userInfo.getUid(), userInfo.getNickname(),userInfo.getEmail());
             log.error("jwtProcessor 값 확인 : "+userInfo.getId()+" / "+userInfo.getUid()+" / "+ userInfo.getNickname());
@@ -92,9 +93,8 @@ public class MemberController {
     private MemberInfoDTO getUserInfoFromAuthentication(Authentication authentication) {
         CustomUser customUser = (CustomUser) authentication.getPrincipal();
         MemberDTO member = customUser.getMember();  // Retrieve the MemberDTO object
-        log.error("memberDTO 확인 : "+ member.getNickname()+" / "+member.getEmail());
-        return new MemberInfoDTO(member.getUid(), member.getId(), member.getNickname(), member.getAuth().toString(),
-                member.getEmail());
+        log.error("memberDTO 확인 : "+member.getUid()+" / "+member.getId()+" / "+member.getEmail()+" / "+member.getNickname()+" / "+member.getAuth().toString());
+        return new MemberInfoDTO(member.getUid(), member.getId(),member.getEmail(), member.getNickname(), member.getAuth().toString());
     }
 
     @Value("${naver.client.id}")
@@ -376,6 +376,7 @@ public class MemberController {
 
         // 사용자 정보 가져오기
         MemberInfoDTO memberInfoDTO = memberInfoService.getUserInfoByNickname(nickname);
+        log.error("memberInfoDTO 확인 " +memberInfoDTO);
 
         // 사용자 정보가 없으면 404 반환
         if (memberInfoDTO == null) {
@@ -422,6 +423,7 @@ public class MemberController {
             response.put("data", data);
 
             ResponseDTO successResponse = new ResponseDTO(true, response);
+            log.error("response check"+response);
             return ResponseEntity.ok(successResponse);
 //        } else {
             // 본인이 아닌 경우 제한된 정보만 반환
