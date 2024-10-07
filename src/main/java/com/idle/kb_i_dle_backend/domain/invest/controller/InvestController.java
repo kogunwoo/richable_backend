@@ -1,7 +1,7 @@
 package com.idle.kb_i_dle_backend.domain.invest.controller;
 
-import com.idle.kb_i_dle_backend.common.dto.ErrorResponseDTO;
-import com.idle.kb_i_dle_backend.common.dto.ResponseDTO;
+import com.idle.kb_i_dle_backend.global.dto.ErrorResponseDTO;
+import com.idle.kb_i_dle_backend.global.dto.SuccessResponseDTO;
 import com.idle.kb_i_dle_backend.domain.invest.dto.*;
 import com.idle.kb_i_dle_backend.domain.invest.service.InvestService;
 import com.idle.kb_i_dle_backend.domain.member.util.JwtProcessor;
@@ -28,14 +28,14 @@ public class InvestController {
     @GetMapping("/available")
     public ResponseEntity<?> getAvailableAsset(HttpServletRequest request) {
         Integer uid = (Integer) request.getAttribute("uid");
-        log.error("check uid in invest" + uid);
+        log.info("check uid in invest" + uid);
         try {
             AvailableCashDTO availableCashDTO = investService.getAvailableCash(uid);
-            ResponseDTO response = new ResponseDTO(true, availableCashDTO);
+            SuccessResponseDTO response = new SuccessResponseDTO(true, availableCashDTO);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error in getAvailableAsset: ", e);
-            ErrorResponseDTO response = new ErrorResponseDTO(false,
+            ErrorResponseDTO response = new ErrorResponseDTO(
                     "Failed to retrieve available assets: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
@@ -47,11 +47,11 @@ public class InvestController {
         Integer uid = (Integer) request.getAttribute("uid");
         try {
             MaxPercentageCategoryDTO maxPercentageCategory = investService.getMaxPercentageCategory(uid);
-            ResponseDTO response = new ResponseDTO(true, maxPercentageCategory);
+            SuccessResponseDTO response = new SuccessResponseDTO(true, maxPercentageCategory);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error in getMaxPercentageCategory: ", e);
-            ErrorResponseDTO response = new ErrorResponseDTO(false,
+            ErrorResponseDTO response = new ErrorResponseDTO(
                     "Failed to retrieve max percentage category: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
@@ -62,11 +62,11 @@ public class InvestController {
         Integer uid = (Integer) request.getAttribute("uid");
         try {
             List<RecommendedProductDTO> recommendedProducts = investService.getRecommendedProducts(uid);
-            ResponseDTO response = new ResponseDTO(true, recommendedProducts);
+            SuccessResponseDTO response = new SuccessResponseDTO(true, recommendedProducts);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error in getRecommendedProducts: ", e);
-            ErrorResponseDTO response = new ErrorResponseDTO(false,
+            ErrorResponseDTO response = new ErrorResponseDTO(
                     "Failed to retrieve recommended products: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
@@ -77,12 +77,12 @@ public class InvestController {
         Integer uid = (Integer) request.getAttribute("uid");
         try {
             List<HighReturnProductDTO> highReturnProductDTOS = investService.getHighReturnStock(uid);
-            ResponseDTO response = new ResponseDTO(true, highReturnProductDTOS);
+            SuccessResponseDTO response = new SuccessResponseDTO(true, highReturnProductDTOS);
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             log.error("Error in getHighReturnProduct: ", e);
-            ErrorResponseDTO response = new ErrorResponseDTO(false,
+            ErrorResponseDTO response = new ErrorResponseDTO(
                     "Failed to retrieve high return products: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
@@ -93,11 +93,11 @@ public class InvestController {
         Integer uid = (Integer) request.getAttribute("uid");
         try {
             List<HighReturnProductDTO> highReturnCoins = investService.getHighReturnCoin(uid);
-            ResponseDTO response = new ResponseDTO(true, highReturnCoins);
+            SuccessResponseDTO response = new SuccessResponseDTO(true, highReturnCoins);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error in getHighReturnCoin: ", e);
-            ErrorResponseDTO response = new ErrorResponseDTO(false,
+            ErrorResponseDTO response = new ErrorResponseDTO(
                     "Failed to retrieve high return coins: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
@@ -108,11 +108,11 @@ public class InvestController {
         Integer uid = (Integer) request.getAttribute("uid");
         try {
             HighReturnProductsDTO highReturnProducts = investService.getHighReturnProducts(uid);
-            ResponseDTO response = new ResponseDTO(true, highReturnProducts.getProducts());
+            SuccessResponseDTO response = new SuccessResponseDTO(true, highReturnProducts.getProducts());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error in getHighReturnProducts: ", e);
-            ErrorResponseDTO response = new ErrorResponseDTO(false,
+            ErrorResponseDTO response = new ErrorResponseDTO(
                     "Failed to retrieve high return products: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }

@@ -1,7 +1,5 @@
-package com.idle.kb_i_dle_backend.common;
+package com.idle.kb_i_dle_backend.global;
 
-import java.io.IOException;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;

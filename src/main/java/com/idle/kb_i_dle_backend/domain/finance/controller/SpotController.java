@@ -1,8 +1,7 @@
 package com.idle.kb_i_dle_backend.domain.finance.controller;
 
-import com.idle.kb_i_dle_backend.common.dto.DataDTO;
-import com.idle.kb_i_dle_backend.common.dto.ErrorResponseDTO;
-import com.idle.kb_i_dle_backend.common.dto.ResponseDTO;
+import com.idle.kb_i_dle_backend.global.dto.ErrorResponseDTO;
+import com.idle.kb_i_dle_backend.global.dto.SuccessResponseDTO;
 import com.idle.kb_i_dle_backend.domain.finance.dto.SpotDTO;
 import com.idle.kb_i_dle_backend.domain.finance.service.SpotService;
 import lombok.RequiredArgsConstructor;
@@ -29,10 +28,10 @@ public class SpotController {
     @GetMapping("/spot/{category}/sum")
     public ResponseEntity<?> getTotalPriceByCategory(@PathVariable("category") String category) {
         try {
-            ResponseDTO response = new ResponseDTO(true, spotService.getTotalPriceByCategory(category));
+            SuccessResponseDTO response = new SuccessResponseDTO(true, spotService.getTotalPriceByCategory(category));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
+            ErrorResponseDTO response = new ErrorResponseDTO(e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
@@ -43,10 +42,10 @@ public class SpotController {
     @GetMapping("/spot/sum")
     public ResponseEntity<?> getTotalPriceByCategory(){
         try {
-            ResponseDTO response = new ResponseDTO(true, spotService.getTotalPrice());
+            SuccessResponseDTO response = new SuccessResponseDTO(true, spotService.getTotalPrice());
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
+            ErrorResponseDTO response = new ErrorResponseDTO( e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
@@ -55,10 +54,10 @@ public class SpotController {
     @GetMapping("/spot/all")
     public ResponseEntity<?> getTotalSpotList() {
         try {
-            ResponseDTO response = new ResponseDTO(true, spotService.getSpotList());
+            SuccessResponseDTO response = new SuccessResponseDTO(true, spotService.getSpotList());
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
+            ErrorResponseDTO response = new ErrorResponseDTO( e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
@@ -67,10 +66,10 @@ public class SpotController {
     @PostMapping("/spot/add")
     public ResponseEntity<?> addSpot(@RequestBody SpotDTO spotDTO) {
         try {
-            ResponseDTO response = new ResponseDTO(true, spotService.addSpot(spotDTO));
+            SuccessResponseDTO response = new SuccessResponseDTO(true, spotService.addSpot(spotDTO));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
+            ErrorResponseDTO response = new ErrorResponseDTO( e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
@@ -79,10 +78,10 @@ public class SpotController {
     @PutMapping("/spot/update")
     public ResponseEntity<?> updateSpot(@RequestBody SpotDTO spotDTO) {
         try {
-            ResponseDTO response = new ResponseDTO(true, spotService.updateSpot(spotDTO));
+            SuccessResponseDTO response = new SuccessResponseDTO(true, spotService.updateSpot(spotDTO));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
+            ErrorResponseDTO response = new ErrorResponseDTO( e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
@@ -93,10 +92,10 @@ public class SpotController {
         try {
             Map<String, Object> indexData = new HashMap<>();
             indexData.put("index", spotService.deleteSpot(index).getIndex());
-            ResponseDTO response = new ResponseDTO(true, indexData);
+            SuccessResponseDTO response = new SuccessResponseDTO(true, indexData);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
+            ErrorResponseDTO response = new ErrorResponseDTO(e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }

@@ -13,13 +13,13 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CoinRepository extends JpaRepository<Coin, Long> {
-    List<Coin> findAllByUidAndDeleteDateIsNull(Optional<Member> uid);
+    List<Coin> findAllByUidAndDeleteDateIsNull(Member uid);
 
     @Query(value = "SELECT a.balance, b.closing_price " +
             "FROM asset.coin a " +
             "JOIN product.coin_list b ON a.currency = b.coin_name " +
             "WHERE a.uid = :uid", nativeQuery = true)
-    List<Object[]> findCoinBalanceAndPriceByUid(@Param("uid") Optional<Member> uid);
+    List<Object[]> findCoinBalanceAndPriceByUid(@Param("uid") Member uid);
 
 
     @Query(value = "SELECT b.closing_price " +
@@ -63,7 +63,7 @@ public interface CoinRepository extends JpaRepository<Coin, Long> {
             "WHERE cl.coin_name = :coinName ", nativeQuery = true)
     Double getCoinPriceForMonth(@Param("coinName") String coinName, @Param("monthsAgo") int monthsAgo);
 
-    List<Coin> findByUid(Optional<Member> uid);
+    List<Coin> findByUid(Member uid);
 
     @Query("SELECT cl FROM CoinProduct cl ORDER BY CAST(cl.closingPrice AS double) DESC")
     List<CoinProduct> findTop5ByOrderByClosingPriceDesc();
@@ -75,9 +75,11 @@ public interface CoinRepository extends JpaRepository<Coin, Long> {
     // 특정 index값의 정보 조회
     Optional<Coin> findByIndexAndDeleteDateIsNull(@Param("index") Integer index);
 
-    @Query(value = "SELECT month(c.add_date) as month, c.prod_category as category, SUM(c.avg_buy_price * c.balance) as totalAmount " +
-            "FROM asset.coin c WHERE c.uid = :uid " +
-            "GROUP BY month(c.add_date), c.prod_category", nativeQuery = true)
+    @Query(value =
+            "SELECT month(c.add_date) as month, c.prod_category as category, SUM(c.avg_buy_price * c.balance) as totalAmount "
+                    +
+                    "FROM asset.coin c WHERE c.uid = :uid " +
+                    "GROUP BY month(c.add_date), c.prod_category", nativeQuery = true)
     List<Object[]> findMonthlyCoinAssets(@Param("uid") Member uid);
 }
 

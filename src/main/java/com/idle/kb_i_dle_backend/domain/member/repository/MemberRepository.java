@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Integer> {
-    Optional<Member> findByUid(int uid);
+    Member findByUid(Integer uid);
 
     Optional<Member> findById(String id);
 

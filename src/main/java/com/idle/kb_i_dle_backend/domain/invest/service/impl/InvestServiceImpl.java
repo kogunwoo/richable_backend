@@ -1,6 +1,12 @@
 package com.idle.kb_i_dle_backend.domain.invest.service.impl;
 
-import com.idle.kb_i_dle_backend.domain.finance.entity.*;
+import com.idle.kb_i_dle_backend.domain.finance.entity.Bank;
+import com.idle.kb_i_dle_backend.domain.finance.entity.Bond;
+import com.idle.kb_i_dle_backend.domain.finance.entity.BondProduct;
+import com.idle.kb_i_dle_backend.domain.finance.entity.Coin;
+import com.idle.kb_i_dle_backend.domain.finance.entity.CoinProduct;
+import com.idle.kb_i_dle_backend.domain.finance.entity.Stock;
+import com.idle.kb_i_dle_backend.domain.finance.entity.StockProduct;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BankRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BondProductRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BondRepository;
@@ -8,21 +14,30 @@ import com.idle.kb_i_dle_backend.domain.finance.repository.CoinPriceRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.CoinRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.StockPriceRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.StockRepository;
-import com.idle.kb_i_dle_backend.domain.invest.dto.*;
+import com.idle.kb_i_dle_backend.domain.invest.dto.AvailableCashDTO;
+import com.idle.kb_i_dle_backend.domain.invest.dto.CategorySumDTO;
+import com.idle.kb_i_dle_backend.domain.invest.dto.HighReturnProductDTO;
+import com.idle.kb_i_dle_backend.domain.invest.dto.HighReturnProductsDTO;
+import com.idle.kb_i_dle_backend.domain.invest.dto.InvestDTO;
+import com.idle.kb_i_dle_backend.domain.invest.dto.MaxPercentageCategoryDTO;
+import com.idle.kb_i_dle_backend.domain.invest.dto.RecommendedProductDTO;
 import com.idle.kb_i_dle_backend.domain.invest.service.InvestService;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
-import com.idle.kb_i_dle_backend.domain.member.repository.MemberRepository;
-
-import java.util.*;
+import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class InvestServiceImpl implements InvestService {
-    private final MemberRepository memberRepository;
     private final BankRepository bankRepository;
     private final BondRepository bondRepository;
     private final CoinRepository coinRepository;
@@ -30,24 +45,12 @@ public class InvestServiceImpl implements InvestService {
     private final BondProductRepository bondProductRepository;
     private final StockPriceRepository stockPriceRepository;
     private final CoinPriceRepository coinPriceRepository;
+    private final MemberService memberService;
 
-    public InvestServiceImpl(BankRepository bankRepository, MemberRepository memberRepository,
-                             BondRepository bondRepository, CoinRepository coinRepository,
-                             StockRepository stockRepository, BondProductRepository bondProductRepository,
-                             StockPriceRepository stockPriceRepository,CoinPriceRepository coinPriceRepository) {
-        this.memberRepository = memberRepository;
-        this.bankRepository = bankRepository;
-        this.bondRepository = bondRepository;
-        this.coinRepository = coinRepository;
-        this.stockRepository = stockRepository;
-        this.bondProductRepository = bondProductRepository;
-        this.stockPriceRepository = stockPriceRepository;
-        this.coinPriceRepository = coinPriceRepository;
-    }
 
     @Override
     public List<InvestDTO> getInvestList(int uid) throws Exception {
-        Optional<Member> member = memberRepository.findByUid(uid);
+        Member member = memberService.findMemberByUid(uid);
         List<Bank> banks = bankRepository.findByUid(member);
         List<Bond> bonds = bondRepository.findByUid(member);
         List<Coin> coins = coinRepository.findByUid(member);
@@ -64,7 +67,7 @@ public class InvestServiceImpl implements InvestService {
 
     @Override
     public long totalAsset(int uid) throws Exception {
-        Optional<Member> member = memberRepository.findByUid(uid);
+        Member member = memberService.findMemberByUid(uid);
         List<InvestDTO> investDTOs = getInvestList(uid);
 
         return investDTOs.stream()
@@ -74,7 +77,7 @@ public class InvestServiceImpl implements InvestService {
 
     @Override
     public MaxPercentageCategoryDTO getMaxPercentageCategory(int uid) throws Exception {
-        Optional<Member> member = memberRepository.findByUid(uid);
+        Member member = memberService.findMemberByUid(uid);
         List<CategorySumDTO> categorySums = getInvestmentTendency(uid);
 
         return categorySums.stream()
@@ -88,7 +91,7 @@ public class InvestServiceImpl implements InvestService {
 
     @Override
     public AvailableCashDTO getAvailableCash(int uid) throws Exception {
-        Optional<Member> member = memberRepository.findByUid(uid);
+        Member member = memberService.findMemberByUid(uid);
         List<Bank> banks = bankRepository.findByUidAndSpecificCategoriesAndDeleteDateIsNull(member);
 
         Long totalAvailableCash = banks.stream()
@@ -102,7 +105,7 @@ public class InvestServiceImpl implements InvestService {
 
     @Override
     public List<CategorySumDTO> getInvestmentTendency(int uid) throws Exception {
-        Optional<Member> member = memberRepository.findByUid(uid);
+        Member member = memberService.findMemberByUid(uid);
         List<InvestDTO> investDTOs = getInvestList(uid);
 
         Map<String, Long> categorySums = investDTOs.stream()

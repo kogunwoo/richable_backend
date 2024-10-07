@@ -3,35 +3,31 @@ package com.idle.kb_i_dle_backend.domain.member.service;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberJoinDTO;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
+import com.idle.kb_i_dle_backend.domain.member.exception.MemberException;
 import com.idle.kb_i_dle_backend.domain.member.repository.MemberRepository;
-
-import java.util.*;
-
+import com.idle.kb_i_dle_backend.global.codes.ErrorCode;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private EmailService emailService;
+    private final EmailService emailService;
 
     // 임시로 인증 코드를 저장할 Map (실제 구현에서는 데이터베이스나 캐시를 사용해야 함)
     private Map<String, String> verificationCodes = new HashMap<>();
 
-    @Autowired
-    public MemberServiceImpl(MemberRepository memberRepository, @Lazy PasswordEncoder passwordEncoder) {
-        this.memberRepository = memberRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @Override
     public boolean checkDupl(String id) {
@@ -40,15 +36,16 @@ public class MemberServiceImpl implements MemberService {
 
 
     @Override
-    @Transactional
-    public Optional<Member> getMember(String id) {
-        return memberRepository.findById(id);
-    }
-
-
-    @Override
-    public Optional<Member> findMemberByUid(int id) {
-        return memberRepository.findByUid(id);
+    public Member findMemberByUid(int id) {
+        try {
+            Member member = memberRepository.findByUid(id);
+            if (member == null) {
+                throw new MemberException(ErrorCode.INVALID_MEMEBER);
+            }
+            return member;
+        } catch (Exception e) {
+            throw new MemberException(ErrorCode.INVALID_MEMEBER, e.getMessage());
+        }
     }
 
 

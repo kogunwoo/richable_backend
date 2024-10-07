@@ -1,4 +1,4 @@
-package com.idle.kb_i_dle_backend.common.entity;
+package com.idle.kb_i_dle_backend.global.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

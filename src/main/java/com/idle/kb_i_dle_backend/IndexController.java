@@ -1,7 +1,6 @@
 package com.idle.kb_i_dle_backend;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class IndexController {
@@ -12,8 +11,8 @@ public class IndexController {
      *
      * @return
      */
-    @GetMapping("/")
-    public String index() {
-        return "index";
-    }
+//    @GetMapping("/")
+//    public String index() {
+//        return "index";
+//    }
 }

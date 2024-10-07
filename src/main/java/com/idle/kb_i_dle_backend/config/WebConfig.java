@@ -1,21 +1,31 @@
 package com.idle.kb_i_dle_backend.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.idle.kb_i_dle_backend.domain.member.util.JwtInterceptor;
 import com.idle.kb_i_dle_backend.domain.member.util.JwtProcessor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.*;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.filter.CharacterEncodingFilter;
-import org.springframework.web.multipart.commons.CommonsMultipartResolver;
-import org.springframework.web.servlet.config.annotation.*;
-import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
-import org.springframework.web.servlet.view.InternalResourceViewResolver;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.filter.CharacterEncodingFilter;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
+import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 @Configuration
 @EnableWebMvc
