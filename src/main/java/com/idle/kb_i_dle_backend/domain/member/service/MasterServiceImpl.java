@@ -3,6 +3,7 @@ package com.idle.kb_i_dle_backend.domain.member.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.idle.kb_i_dle_backend.domain.finance.entity.StockPrice;
+import com.idle.kb_i_dle_backend.domain.finance.repository.CoinPriceRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.StockPriceRepository;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -17,15 +18,23 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
+import org.springframework.web.client.RestTemplate;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MasterServiceImpl implements MasterService {
+
     private final StockPriceRepository stockPriceRepository;
+    private final CoinPriceRepository coinPriceRepository;
+    private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
 
     @Value("${stock.url}")
     private String apiUrl;
@@ -40,7 +49,7 @@ public class MasterServiceImpl implements MasterService {
         ExecutorService executorService = Executors.newFixedThreadPool(20);
 
         // 현재 날짜를 "yyyyMMdd" 형식의 문자열로 변환
-        String currentDate = "20241004";
+        String currentDate = "20241002";
 //                LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
 
@@ -57,10 +66,12 @@ public class MasterServiceImpl implements MasterService {
 
                     try (BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
                         StringBuilder response = new StringBuilder();
+
                         String line;
                         while ((line = rd.readLine()) != null) {
                             response.append(line);
                         }
+                        log.error("API Response: {}", response.toString());
 
                         ObjectMapper objectMapper = new ObjectMapper();
                         JsonNode rootNode = objectMapper.readTree(response.toString());
@@ -71,11 +82,11 @@ public class MasterServiceImpl implements MasterService {
                             // 현재 날짜를 java.util.Date 객체로 변환
                             Date date = java.sql.Date.valueOf(LocalDate.parse(currentDate, DateTimeFormatter.ofPattern("yyyyMMdd")));
                             int price = item.path("clpr").asInt();
-                            stockPriceRepository.updateStockPrice(price, standardCode, date);
+                            stockPriceRepository.insertStockPrice(price, standardCode, date);
                         }
                     }
                 } catch (Exception e) {
-                    // 로그 처리
+                    log.error("Error updating stock prices", e);
                 }
                 return null;
             }).collect(Collectors.toList());
@@ -85,11 +96,41 @@ public class MasterServiceImpl implements MasterService {
                 future.get();
             }
         } catch (Exception e) {
-            // 예외 처리
+            log.error("Error updating stock prices", e);
         } finally {
             executorService.shutdown();
         }
     }
 
+    @Value("${coin_market.url}")
+    private String coinMarketUrl;
 
-}
+    @Override
+    @Transactional
+    public void updateCoinPrices() {
+        String response = restTemplate.getForObject(coinMarketUrl, String.class);
+
+        try {
+            JsonNode jsonNode = objectMapper.readTree(response);
+            JsonNode dataNode = jsonNode.get("data");
+
+            if (dataNode != null && dataNode.isObject()) {
+                Date currentDate = new Date();
+
+                dataNode.fields().forEachRemaining(entry -> {
+                    String coinName = entry.getKey();
+                    JsonNode coinData = entry.getValue();
+                    JsonNode closingPriceNode = coinData.get("closing_price");
+
+                    if (closingPriceNode != null) {
+                        double closingPrice = closingPriceNode.asDouble();
+                        coinPriceRepository.updateCoinPrice(coinName, closingPrice, currentDate);
+                    }
+                });
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error updating coin prices", e);
+        }
+    }
+
+    }

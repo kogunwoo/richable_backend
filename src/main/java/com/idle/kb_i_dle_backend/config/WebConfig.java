@@ -1,10 +1,12 @@
 package com.idle.kb_i_dle_backend.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.idle.kb_i_dle_backend.domain.member.util.JwtInterceptor;
 import com.idle.kb_i_dle_backend.domain.member.util.JwtProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.config.annotation.*;
@@ -42,7 +44,20 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         // jwtInterceptor() 메서드를 호출하여 빈을 주입
         registry.addInterceptor(jwtInterceptor)
-                .addPathPatterns("/*/**"); // 특정 URL 패턴에 대해 인터셉터 적용
+                .addPathPatterns("/finance/**")
+                .addPathPatterns("/goal/**")
+                .addPathPatterns("/income/**")
+                .addPathPatterns("/outcome/**")
+                .addPathPatterns("/invest/**"); // 특정 URL 패턴에 대해 인터셉터 적용
+    }
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
     }
 
     @Bean

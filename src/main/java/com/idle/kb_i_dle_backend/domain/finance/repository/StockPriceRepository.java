@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface StockPriceRepository extends JpaRepository<StockPrice, Long> {
@@ -43,10 +44,31 @@ public interface StockPriceRepository extends JpaRepository<StockPrice, Long> {
     @Query("SELECT s FROM StockPrice s WHERE s.date = (SELECT MAX(sp.date) FROM StockPrice sp)")
     List<StockPrice> findAllLatestStockInfo();
 
-    // 특정 주식의 가격 업데이트
     @Modifying
     @Query("UPDATE StockPrice s SET s.price = :price WHERE s.standard_code = :standardCode AND s.date = :date")
     void updateStockPrice(@Param("price") Integer price, @Param("standardCode") String standardCode, @Param("date") Date date);
 
+    @Modifying
+    @Transactional
+    @Query(value = "INSERT INTO product.stock_price (standard_code, date, price) " +
+            "VALUES (:standardCode, :date, :price)", nativeQuery = true)
+    void insertStockPrice(@Param("price") Integer price, @Param("standardCode") String standardCode, @Param("date") Date date);
+
+// insertStockPrice에서 stock_nm 업데이트
+//    use product;
+//-- 임시 테이블 생성
+//    CREATE TEMPORARY TABLE temp_stock_names AS
+//    SELECT sp2.standard_code, sp2.stock_nm
+//    FROM product.stock_price AS sp2
+//    WHERE sp2.stock_nm IS NOT NULL;
+//
+//-- NULL인 stock_nm을 업데이트
+//    UPDATE product.stock_price AS sp
+//    JOIN temp_stock_names AS temp ON sp.standard_code = temp.standard_code
+//    SET sp.stock_nm = temp.stock_nm
+//    WHERE sp.stock_nm IS NULL;
+//
+//-- 임시 테이블 삭제 (선택적)
+//    DROP TEMPORARY TABLE temp_stock_names;
 
 }

@@ -31,7 +31,7 @@ public class MasterControrller {
 
         try {
             masterService.updateStockPrices();
-            ResponseDTO response = new ResponseDTO(true, "temp");
+            ResponseDTO response = new ResponseDTO(true, "stock price update complete");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error in getAvailableAsset: ", e);
@@ -46,7 +46,8 @@ public class MasterControrller {
     public ResponseEntity<?> updateCoinPrice(HttpServletRequest request) {
 
         try {
-            ResponseDTO response = new ResponseDTO(true, "temp");
+            masterService.updateCoinPrices();
+            ResponseDTO response = new ResponseDTO(true, "coin price update complete");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error in getAvailableAsset: ", e);
