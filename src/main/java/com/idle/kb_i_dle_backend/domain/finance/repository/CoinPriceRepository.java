@@ -1,9 +1,12 @@
 package com.idle.kb_i_dle_backend.domain.finance.repository;
 
 import com.idle.kb_i_dle_backend.domain.finance.entity.CoinPrice;
+import java.util.Date;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -35,4 +38,9 @@ public interface CoinPriceRepository extends JpaRepository<CoinPrice, Long> {
             "ORDER BY price_difference DESC",
             nativeQuery = true)
     List<Object[]> findPriceDifferenceBetweenLastTwoDates();
+
+    @Modifying
+    @Query(value = "INSERT INTO product.coin_price (coin_name, price, date) " +
+            "VALUES (:coinName, :price, :date) " , nativeQuery = true)
+    void updateCoinPrice(@Param("coinName") String coinName, @Param("price") Double price, @Param("date") Date date);
 }

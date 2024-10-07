@@ -11,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class MonthlyBalanceDTO {
     private String month;
-    private long totalIncome;
-    private long totalOutcome;
-    private long balance;
+    private Long totalIncome;
+    private Long totalOutcome;
+    private Long balance;
 }

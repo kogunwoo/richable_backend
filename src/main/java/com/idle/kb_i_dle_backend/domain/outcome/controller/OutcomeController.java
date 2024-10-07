@@ -39,7 +39,7 @@ public class OutcomeController {
     @GetMapping("/simulation/{cntYear}/{cntMonth}")
     public ResponseEntity<SuccessResponseDTO> simulation6Month(@PathVariable int cntYear, @PathVariable int cntMonth)
             throws ParseException {
-        Simulation6MonthDTO simulation6MonthDTO = outcomeService.calculate6MonthSaveOutcome(100, cntYear, cntMonth);
+        Simulation6MonthDTO simulation6MonthDTO = outcomeService.calculate6MonthSaveOutcome(1, cntYear, cntMonth);
         return ResponseEntity.ok(new SuccessResponseDTO(true, simulation6MonthDTO));
     }
 

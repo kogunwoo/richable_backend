@@ -6,9 +6,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class FinancialSumDTO {
-    private long amount;  // 금융 자산 합계
+    private Long amount;  // 금융 자산 합계
 
-    public FinancialSumDTO(long amount) {
+    public FinancialSumDTO(Long amount) {
         this.amount = amount;
     }
 }
