@@ -12,7 +12,6 @@ public interface MemberService {
 
     Optional<Member> findMemberByUid(int id);
 
-
     void MemberJoin(MemberJoinDTO memberjoindto);
 
     // Add this method if it doesn't exist
@@ -31,4 +30,6 @@ public interface MemberService {
     boolean resetPassword(String id, String newPassword);
 
     boolean deleteMemberById(String id);
+
+    MemberDTO findByEmail(String email);
 }

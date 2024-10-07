@@ -4,7 +4,9 @@ import com.idle.kb_i_dle_backend.domain.member.dto.MemberDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberJoinDTO;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import com.idle.kb_i_dle_backend.domain.member.repository.MemberRepository;
+
 import java.util.*;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -45,10 +47,9 @@ public class MemberServiceImpl implements MemberService {
 
 
     @Override
-    public Optional<Member> findMemberByUid(int id){
+    public Optional<Member> findMemberByUid(int id) {
         return memberRepository.findByUid(id);
     }
-
 
 
     @Override
@@ -171,6 +172,7 @@ public class MemberServiceImpl implements MemberService {
         String savedCode = verificationCodes.get(email);
         return savedCode != null && savedCode.equals(code);
     }
+
     private String generateRandomCode() {
         // 6자리 랜덤 숫자 생성 로직
         return String.format("%06d", new Random().nextInt(1000000));
@@ -200,5 +202,28 @@ public class MemberServiceImpl implements MemberService {
         // 회원 삭제
         memberRepository.deleteMemberById(member);
         return true;
+    }
+
+    @Override
+    public MemberDTO findByEmail(String email) {
+        Member member = memberRepository.findByEmail(email);
+        if (member == null) {
+            return null;
+        }
+
+        return MemberDTO.builder()
+                .uid(member.getUid())
+                .id(member.getId())
+                .email(member.getEmail())
+                .nickname(member.getNickname())
+                .gender(member.getGender().charAt(0))
+                .birth_year(String.valueOf(member.getBirth_year()))
+                .profile(member.getProfile())
+                .agreement_info(member.getAgreementInfo())
+                .agreement_finance(member.getAgreementFinance())
+                .is_mentor(member.getIsMentor())
+                .is_certification(member.getIsCertification())
+                .auth(member.getAuth())
+                .build();
     }
 }

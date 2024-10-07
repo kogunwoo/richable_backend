@@ -222,11 +222,13 @@ public class OutcomeServiceImpl implements OutcomeService {
      * @return
      */
     public CompareAverageCategoryOutcomeDTO getCompareAverageCategoryOutcomeDTO(Member user, int year, int month, String category, String ageRange, CompareAverageCategoryOutcomeDTO compareAverageCategoryOutcomeDTO){
-        //사용자의 한달 동안 소비 조회
-        List<OutcomeUser> outcomeUsers = outcomeUserRepository.findAmountAllByUidAndYearAndMonth(user, year, month);
+
 
         //카테고리 조회
         OutcomeCategory outcomeCategory = categoryRepository.findByCategoryNameStartingWith(category);
+
+        //사용자의 한달 동안 소비 조회
+        List<OutcomeUser> outcomeUsers = outcomeUserRepository.findAllByUidAndYearAndMonthAndCategory(user, year, month, outcomeCategory.getCategoryName());
 
         //date를 분기로 변경
         //사용자 나이대의 카테고리의 소비를 조회
