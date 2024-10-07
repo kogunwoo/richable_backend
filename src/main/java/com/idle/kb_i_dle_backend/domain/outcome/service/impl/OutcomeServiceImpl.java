@@ -157,7 +157,7 @@ public class OutcomeServiceImpl implements OutcomeService {
     }
 
     @Override
-    public Simulation6MonthDTO calculate6MonthSaveOutcome(Integer uid, int year, int month) throws Exception {
+    public Simulation6MonthDTO calculate6MonthSaveOutcome(Integer uid, int year, int month) throws ParseException {
         Simulation6MonthDTO simulation6MonthDTO = new Simulation6MonthDTO();
         //이번달 소득에서 소비 빼서 적축 량을 알아냄
         int monthPeriod = 6;

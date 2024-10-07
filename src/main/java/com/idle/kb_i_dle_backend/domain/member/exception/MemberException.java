@@ -9,4 +9,8 @@ public class MemberException extends CustomException {
         super(errorCode, message);
     }
 
+    public MemberException(ErrorCode errorCode) {
+        super(errorCode);
+    }
+
 }

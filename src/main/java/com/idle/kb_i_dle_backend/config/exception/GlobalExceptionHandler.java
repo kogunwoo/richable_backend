@@ -6,6 +6,7 @@ import com.idle.kb_i_dle_backend.global.codes.ErrorCode;
 import com.idle.kb_i_dle_backend.global.dto.ErrorResponseDTO;
 import com.idle.kb_i_dle_backend.global.response.ErrorResponse;
 import java.io.IOException;
+import java.text.ParseException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -120,10 +122,16 @@ public class GlobalExceptionHandler {
         log.error("handleNoHandlerFoundExceptionException", e);
         final ErrorResponse errorResponse = ErrorResponse.of(ErrorCode.NOT_FOUND_ERROR, e.getMessage());
         final ErrorResponseDTO response = new ErrorResponseDTO(errorResponse);
-
         return new ResponseEntity<>(response, HTTP_STATUS_OK);
     }
 
+    @ExceptionHandler(MissingPathVariableException.class)
+    public ResponseEntity<ErrorResponseDTO> handleMissingPathVariableException(MissingPathVariableException e) {
+        log.error("handleMissingPathVariableException", e);
+        final ErrorResponse errorResponse = ErrorResponse.of(ErrorCode.MISSING_REQUEST_PARAMETER_ERROR, e.getMessage());
+        final ErrorResponseDTO response = new ErrorResponseDTO(errorResponse);
+        return new ResponseEntity<>(response, HTTP_STATUS_OK);
+    }
 
     /**
      * [Exception] NULL 값이 발생한 경우
@@ -181,6 +189,14 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<ErrorResponseDTO> handleJsonProcessingException(JsonProcessingException ex) {
         log.error("handleJsonProcessingException", ex);
         final ErrorResponse errorResponse = ErrorResponse.of(ErrorCode.REQUEST_BODY_MISSING_ERROR, ex.getMessage());
+        ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO(errorResponse);
+        return new ResponseEntity<>(errorResponseDTO, HTTP_STATUS_OK);
+    }
+
+    @ExceptionHandler(ParseException.class)
+    protected ResponseEntity<ErrorResponseDTO> hadleParseException(ParseException ex) {
+        log.error("hadleParseException", ex);
+        final ErrorResponse errorResponse = ErrorResponse.of(ErrorCode.BAD_REQUEST_ERROR, ex.getMessage());
         ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO(errorResponse);
         return new ResponseEntity<>(errorResponseDTO, HTTP_STATUS_OK);
     }

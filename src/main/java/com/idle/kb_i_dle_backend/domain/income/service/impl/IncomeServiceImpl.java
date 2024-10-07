@@ -42,7 +42,7 @@ public class IncomeServiceImpl implements IncomeService {
     }
 
     @Override
-    public long getIncomeSumInMonth(int uid, int year, int month) throws Exception {
+    public long getIncomeSumInMonth(int uid, int year, int month) {
         Member tempUser = memberService.findMemberByUid(uid);
         List<Income> incomes = incomeRepository.findByUidAndYearAndMonth(tempUser, year, month);
         Long sumOfIncomes = incomes.stream().mapToLong(Income::getAmount).sum();
@@ -52,7 +52,7 @@ public class IncomeServiceImpl implements IncomeService {
 
 
     @Override
-    public IncomeDTO getIncomeByIndex(Integer index) throws Exception {
+    public IncomeDTO getIncomeByIndex(Integer index) {
         Member tempMember = memberService.findMemberByUid(1);
         Income isIncome = incomeRepository.findByIndex(index)
                 .orElseThrow(

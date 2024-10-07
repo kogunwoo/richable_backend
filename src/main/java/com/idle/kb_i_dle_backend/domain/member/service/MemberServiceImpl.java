@@ -38,11 +38,14 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public Member findMemberByUid(int id) {
         try {
-            return memberRepository.findByUid(id);
+            Member member = memberRepository.findByUid(id);
+            if (member == null) {
+                throw new MemberException(ErrorCode.INVALID_MEMEBER);
+            }
+            return member;
         } catch (Exception e) {
             throw new MemberException(ErrorCode.INVALID_MEMEBER, e.getMessage());
         }
-
     }
 
 
