@@ -20,27 +20,28 @@ public class Member {
     private Integer uid;
 
     @NotNull
-    @Column(length = 50)
+    @Column(name = "id",length = 50)
     private String id;
 
     @NotNull
-    @Column(length = 100)
+    @Column(name = "password",length = 100)
     private String password;
 
     @NotNull
-    @Column(length = 100)
+    @Column(name = "email",length = 100)
     private String email;
 
-    @Column(length = 10)
+    @Column(name = "social",length = 10)
     private String social;
 
     @NotNull
+    @Column(name = "birth_year")
     private Integer birth_year;
 
-    @Column(length = 10)
+    @Column(name = "gender",length = 10)
     private String gender;
 
-    @Column(length = 255)
+    @Column(name = "profile",length = 255)
     private String profile;
 
     @Column(name = "agreement_info")
@@ -57,14 +58,17 @@ public class Member {
     @Builder.Default
     private Boolean isCertification=false;
 
-    @Column(length = 100)
+    @Column(name = "nickname",length = 100)
     private String nickname;
 
-    @Column(length = 20)
+    @Column(name = "auth",length = 20)
     private String auth;
 
     // User와 Spot의 양방향 관계 설정
     @OneToMany(mappedBy = "uid", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Spot> spots;
+    // User와 UserApi의 관계 설정
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private MemberAPI memberAPI;
 
 }

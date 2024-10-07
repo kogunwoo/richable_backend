@@ -5,36 +5,29 @@ import com.idle.kb_i_dle_backend.domain.member.dto.MemberJoinDTO;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import com.idle.kb_i_dle_backend.domain.member.exception.MemberException;
 import com.idle.kb_i_dle_backend.domain.member.repository.MemberRepository;
-import java.util.*;
-
 import com.idle.kb_i_dle_backend.global.codes.ErrorCode;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class MemberServiceImpl implements MemberService {
 
-//    private final MemberMapper memberMapper;
-
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private EmailService emailService;
+    private final EmailService emailService;
 
     // 임시로 인증 코드를 저장할 Map (실제 구현에서는 데이터베이스나 캐시를 사용해야 함)
     private Map<String, String> verificationCodes = new HashMap<>();
 
-    @Autowired
-    public MemberServiceImpl(MemberRepository memberRepository, @Lazy PasswordEncoder passwordEncoder) {
-        this.memberRepository = memberRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @Override
     public boolean checkDupl(String id) {
@@ -43,22 +36,14 @@ public class MemberServiceImpl implements MemberService {
 
 
     @Override
-    @Transactional
-    public Member getMember(String id) {
-            return memberRepository.findById(id);
-    }
-
-
-    @Override
-    public Member findMemberByUid(int id){
-        try{
+    public Member findMemberByUid(int id) {
+        try {
             return memberRepository.findByUid(id);
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new MemberException(ErrorCode.INVALID_MEMEBER, e.getMessage());
         }
 
     }
-
 
 
     @Override
@@ -98,6 +83,11 @@ public class MemberServiceImpl implements MemberService {
                     .email(memberjoindto.getEmail())
                     .birth_year(memberjoindto.getBirth_year())
                     .auth(memberjoindto.getAuth())
+                    .agreementInfo(false)
+                    .agreementFinance(false)
+                    .isCertification(false)
+                    .isMentor(false)
+                    .social("NONE")
                     .build();
 
             log.debug("Saving new user: {}", newUser);
@@ -111,24 +101,26 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public MemberDTO findById(String id) {
-        Member user = memberRepository.findById(id);
-        if (user != null) {
-            return new MemberDTO(
-                    user.getUid(),
-                    user.getId(),
-                    user.getPassword(),
-                    user.getEmail(),
-                    user.getSocial(),
-                    user.getBirth_year(),
-                    user.getGender().charAt(0), // Assuming gender is stored as a String
-                    user.getProfile(),
-                    user.getAgreementInfo(),
-                    user.getAgreementFinance(),
-                    user.getIsMentor(),
-                    user.getIsCertification(),
-                    user.getNickname(),
-                    user.getAuth()
-            );
+        Optional<Member> user = memberRepository.findById(id);
+        if (user.isPresent()) {
+            Member member = user.get();
+
+            // MemberDTO를 builder를 사용하여 생성
+            return MemberDTO.builder()
+                    .uid(member.getUid())
+                    .id(member.getId())
+                    .password(member.getPassword())
+                    .email(member.getEmail())
+                    .gender(member.getGender().charAt(0))  // gender가 String일 경우
+                    .birth_year(String.valueOf(member.getBirth_year()))
+                    .profile(member.getProfile())
+                    .agreement_info(member.getAgreementInfo())
+                    .agreement_finance(member.getAgreementFinance())
+                    .is_mentor(member.getIsMentor())
+                    .is_certification(member.getIsCertification())
+                    .nickname(member.getNickname())
+                    .auth(member.getAuth())
+                    .build();
         }
         return null; // Or handle user not found as needed
     }
@@ -140,10 +132,10 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public boolean checkAgree(boolean info, boolean finance, String id) {
-        Member user = memberRepository.findById(id);
-        if (user != null) {
-            user.setAgreementInfo(info);
-            user.setAgreementFinance(finance);
+        Optional<Member> user = memberRepository.findById(id);
+        if (user.isPresent()) {
+            user.get().setAgreementInfo(info);
+            user.get().setAgreementFinance(finance);
             memberRepository.save(user); // Save updated user
             return true;
         }
@@ -174,6 +166,7 @@ public class MemberServiceImpl implements MemberService {
         String savedCode = verificationCodes.get(email);
         return savedCode != null && savedCode.equals(code);
     }
+
     private String generateRandomCode() {
         // 6자리 랜덤 숫자 생성 로직
         return String.format("%06d", new Random().nextInt(1000000));
@@ -185,14 +178,46 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public boolean resetPassword(String id, String newPassword) {
-        Member user = memberRepository.findById(id);
-        if (user != null) {
+        Optional<Member> user = memberRepository.findById(id);
+        if (user.isPresent()) {
             String encodedPassword = passwordEncoder.encode(newPassword);
-            user.setPassword(encodedPassword); // Update password
+            user.get().setPassword(encodedPassword); // Update password
             memberRepository.save(user); // Save updated user
             return true;
         }
         return false; // User not found
     }
 
+    @Override
+    public boolean deleteMemberById(String id) {
+        // ID로 회원 조회 후 삭제
+        Optional<Member> member = memberRepository.findById(id);
+
+        // 회원 삭제
+        memberRepository.deleteMemberById(member);
+        return true;
+    }
+
+    @Override
+    public MemberDTO findByEmail(String email) {
+        Member member = memberRepository.findByEmail(email);
+        if (member == null) {
+            return null;
+        }
+
+        return MemberDTO.builder()
+                .uid(member.getUid())
+                .id(member.getId())
+                .email(member.getEmail())
+                .nickname(member.getNickname())
+                .gender(member.getGender().charAt(0))
+                .birth_year(String.valueOf(member.getBirth_year()))
+                .profile(member.getProfile())
+                .agreement_info(member.getAgreementInfo())
+                .agreement_finance(member.getAgreementFinance())
+                .is_mentor(member.getIsMentor())
+                .is_certification(member.getIsCertification())
+                .auth(member.getAuth())
+                .build();
+    }
 }

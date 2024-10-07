@@ -1,18 +1,18 @@
 package com.idle.kb_i_dle_backend.domain.income.service.impl;
 
-import com.idle.kb_i_dle_backend.domain.income.IncomeException;
+import com.idle.kb_i_dle_backend.config.exception.CustomException;
 import com.idle.kb_i_dle_backend.domain.income.dto.IncomeDTO;
 import com.idle.kb_i_dle_backend.domain.income.entity.Income;
 import com.idle.kb_i_dle_backend.domain.income.repository.IncomeRepository;
 import com.idle.kb_i_dle_backend.domain.income.service.IncomeService;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
+import com.idle.kb_i_dle_backend.global.codes.ErrorCode;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.apache.ibatis.javassist.NotFoundException;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,11 +25,11 @@ public class IncomeServiceImpl implements IncomeService {
 
     @Override
     public List<IncomeDTO> getIncomeList() throws Exception {
-        Member member = memberService.findMemberByUid(1);
-        List<Income> incomes = incomeRepository.findByUid(member);
+        Member tempMember = memberService.findMemberByUid(1);
+        List<Income> incomes = incomeRepository.findByUid(tempMember);
 
         if (incomes.isEmpty()) {
-            throw new NotFoundException("");
+            throw new CustomException(ErrorCode.INVALID_INCOME);
         }
 
         List<IncomeDTO> incomeList = new ArrayList<>();
@@ -43,8 +43,8 @@ public class IncomeServiceImpl implements IncomeService {
 
     @Override
     public long getIncomeSumInMonth(int uid, int year, int month) throws Exception {
-        Member member = memberService.findMemberByUid(1);
-        List<Income> incomes = incomeRepository.findByUidAndYearAndMonth(member, year, month);
+        Member tempUser = memberService.findMemberByUid(uid);
+        List<Income> incomes = incomeRepository.findByUidAndYearAndMonth(tempUser, year, month);
         Long sumOfIncomes = incomes.stream().mapToLong(Income::getAmount).sum();
 
         return sumOfIncomes;
@@ -53,16 +53,14 @@ public class IncomeServiceImpl implements IncomeService {
 
     @Override
     public IncomeDTO getIncomeByIndex(Integer index) throws Exception {
-        Member member = memberService.findMemberByUid(1);
-        try {
-            Income isIncome = incomeRepository.findByIndex(index);
-        } catch (Exception e) {
-            throw IncomeException.InvalidIndexException();
-        }
+        Member tempMember = memberService.findMemberByUid(1);
+        Income isIncome = incomeRepository.findByIndex(index)
+                .orElseThrow(
+                        () -> new CustomException(ErrorCode.INVALID_INCOME, "Income not found with index: " + index));
 
         // 유저가 소유한 income인지 확인
-        if (!isIncome.getUid().getUid().equals(member.getUid())) {
-            throw new AccessDeniedException("You do not have permission to delete this income.");
+        if (!isIncome.getUid().getUid().equals(tempMember.getUid())) {
+            throw new CustomException(ErrorCode.INVALID_OWNER, "You do not have permission to delete this income.");
         }
 
         return IncomeDTO.convertToDTO(isIncome);
@@ -70,7 +68,7 @@ public class IncomeServiceImpl implements IncomeService {
 
     @Override
     public IncomeDTO addIncome(IncomeDTO incomeDTO) throws ParseException {
-        Member tempMember = memberRepository.findByUid(1);
+        Member tempMember = memberService.findMemberByUid(1);
         Income savedIncome = incomeRepository.save(IncomeDTO.convertToEntity(tempMember, incomeDTO));
 
         return IncomeDTO.convertToDTO(savedIncome);
@@ -79,21 +77,22 @@ public class IncomeServiceImpl implements IncomeService {
     @Transactional
     @Override
     public IncomeDTO updateIncome(IncomeDTO incomeDTO) throws ParseException {
-        Member tempMember = memberRepository.findByUid(1);
+        Member member = memberService.findMemberByUid(1);
 
         // Income 조회
         Income isIncome = incomeRepository.findByIndex(incomeDTO.getIncomeId())
-                .orElseThrow(IncomeException.InvalidIndexException());
-
-        // User 조회 (User 객체가 없을 경우 예외 처리)
-        Member isUser = memberRepository.findByUid(tempMember.getUid());
+                .orElseThrow(
+                        () -> new CustomException(ErrorCode.INVALID_INCOME,
+                                "Income not found with id: " + incomeDTO.getIncomeId()));
 
         // income의 소유자가 해당 User인지 확인
-        if (!isIncome.getUid().equals(isUser)) {
-            throw new AccessDeniedException("You do not have permission to modify this income.");
+        if (!isIncome.getUid().equals(member)) {
+            throw new CustomException(ErrorCode.INVALID_OWNER, "You do not have permission to modify this income.");
         }
 
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         isIncome.setType(incomeDTO.getType());
+        isIncome.setDate(dateFormat.parse(incomeDTO.getIncomeDate()));
         isIncome.setAmount(incomeDTO.getPrice());
         isIncome.setDescript(incomeDTO.getContents());
         isIncome.setMemo(incomeDTO.getMemo());
@@ -106,13 +105,14 @@ public class IncomeServiceImpl implements IncomeService {
     @Transactional
     @Override
     public Integer deleteIncomeByUidAndIndex(Integer index) {
-        Member tempMember = memberRepository.findByUid(1);
+        Member tempMember = memberService.findMemberByUid(1);
         Income isIncome = incomeRepository.findByIndex(index)
-                .orElseThrow(() -> new IllegalArgumentException("Income not found with index: " + index));
+                .orElseThrow(
+                        () -> new CustomException(ErrorCode.INVALID_INCOME, "Income not found with index: " + index));
 
         // 유저가 소유한 소득인지 확인
         if (!isIncome.getUid().getUid().equals(tempMember.getUid())) {
-            throw new AccessDeniedException("You do not have permission to delete this income.");
+            throw new CustomException(ErrorCode.INVALID_OWNER, "You do not have permission to delete this income.");
         }
 
         incomeRepository.deleteByIndex(index);  // income 삭제

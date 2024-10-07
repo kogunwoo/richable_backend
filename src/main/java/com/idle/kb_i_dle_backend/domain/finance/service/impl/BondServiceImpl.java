@@ -1,18 +1,18 @@
 package com.idle.kb_i_dle_backend.domain.finance.service.impl;
 
+import com.idle.kb_i_dle_backend.config.exception.CustomException;
 import com.idle.kb_i_dle_backend.domain.finance.dto.BondDTO;
 import com.idle.kb_i_dle_backend.domain.finance.entity.Bond;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BondRepository;
 import com.idle.kb_i_dle_backend.domain.finance.service.BondService;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
+import com.idle.kb_i_dle_backend.global.codes.ErrorCode;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.apache.ibatis.javassist.NotFoundException;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +29,7 @@ public class BondServiceImpl implements BondService {
         List<Bond> bonds = bondRepository.findByUidAndDeleteDateIsNull(member);
 
         if (bonds.isEmpty()) {
-            throw new NotFoundException("");
+            throw new CustomException(ErrorCode.INVALID_BOND, "user dont have bond");
         }
 
         List<BondDTO> bondList = new ArrayList<>();
@@ -51,16 +51,16 @@ public class BondServiceImpl implements BondService {
 
     @Transactional
     @Override
-    public BondDTO updateBond(BondDTO bondDTO) throws ParseException {
+    public BondDTO updateBond(BondDTO bondDTO) {
         Member member = memberService.findMemberByUid(1);
 
         // Bond 조회
         Bond isBond = bondRepository.findByIndexAndDeleteDateIsNull(bondDTO.getIndex())
-                .orElseThrow(() -> new IllegalArgumentException("Bond not found with id: " + bondDTO.getIndex()));
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_BOND, "user dont have bond"));
 
         // Bond의 소유자가 해당 User인지 확인
         if (!isBond.getUid().equals(member)) {
-            throw new AccessDeniedException("You do not have permission to modify this bond.");
+            throw new CustomException(ErrorCode.INVALID_OWNER, "You do not have permission to modify this bond");
         }
 
         // 보유량만 수정되게
@@ -72,16 +72,16 @@ public class BondServiceImpl implements BondService {
 
     @Transactional
     @Override
-    public BondDTO deleteBond(Integer index) throws ParseException {
+    public BondDTO deleteBond(Integer index) {
         Member member = memberService.findMemberByUid(1);
 
         // Bond 조회
         Bond isBond = bondRepository.findByIndexAndDeleteDateIsNull(index)
-                .orElseThrow(() -> new IllegalArgumentException("Bond not found with id: " + index));
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_BOND, "user dont have bond"));
 
         // Bond의 소유자가 해당 User인지 확인
         if (!isBond.getUid().equals(member)) {
-            throw new AccessDeniedException("You do not have permission to modify this bond.");
+            throw new CustomException(ErrorCode.INVALID_OWNER, "You do not have permission to modify this bond");
         }
 
         isBond.setDeleteDate(new Date());

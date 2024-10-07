@@ -1,6 +1,12 @@
 package com.idle.kb_i_dle_backend.domain.invest.service.impl;
 
-import com.idle.kb_i_dle_backend.domain.finance.entity.*;
+import com.idle.kb_i_dle_backend.domain.finance.entity.Bank;
+import com.idle.kb_i_dle_backend.domain.finance.entity.Bond;
+import com.idle.kb_i_dle_backend.domain.finance.entity.BondProduct;
+import com.idle.kb_i_dle_backend.domain.finance.entity.Coin;
+import com.idle.kb_i_dle_backend.domain.finance.entity.CoinProduct;
+import com.idle.kb_i_dle_backend.domain.finance.entity.Stock;
+import com.idle.kb_i_dle_backend.domain.finance.entity.StockProduct;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BankRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BondProductRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BondRepository;
@@ -8,23 +14,30 @@ import com.idle.kb_i_dle_backend.domain.finance.repository.CoinPriceRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.CoinRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.StockPriceRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.StockRepository;
-import com.idle.kb_i_dle_backend.domain.invest.dto.*;
+import com.idle.kb_i_dle_backend.domain.invest.dto.AvailableCashDTO;
+import com.idle.kb_i_dle_backend.domain.invest.dto.CategorySumDTO;
+import com.idle.kb_i_dle_backend.domain.invest.dto.HighReturnProductDTO;
+import com.idle.kb_i_dle_backend.domain.invest.dto.HighReturnProductsDTO;
+import com.idle.kb_i_dle_backend.domain.invest.dto.InvestDTO;
+import com.idle.kb_i_dle_backend.domain.invest.dto.MaxPercentageCategoryDTO;
+import com.idle.kb_i_dle_backend.domain.invest.dto.RecommendedProductDTO;
 import com.idle.kb_i_dle_backend.domain.invest.service.InvestService;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
-import com.idle.kb_i_dle_backend.domain.member.repository.MemberRepository;
+import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class InvestServiceImpl implements InvestService {
-    private final MemberRepository memberRepository;
     private final BankRepository bankRepository;
     private final BondRepository bondRepository;
     private final CoinRepository coinRepository;
@@ -32,28 +45,16 @@ public class InvestServiceImpl implements InvestService {
     private final BondProductRepository bondProductRepository;
     private final StockPriceRepository stockPriceRepository;
     private final CoinPriceRepository coinPriceRepository;
+    private final MemberService memberService;
 
-    public InvestServiceImpl(BankRepository bankRepository, MemberRepository memberRepository,
-                             BondRepository bondRepository, CoinRepository coinRepository,
-                             StockRepository stockRepository, BondProductRepository bondProductRepository,
-                             StockPriceRepository stockPriceRepository, CoinPriceRepository coinPriceRepository) {
-        this.memberRepository = memberRepository;
-        this.bankRepository = bankRepository;
-        this.bondRepository = bondRepository;
-        this.coinRepository = coinRepository;
-        this.stockRepository = stockRepository;
-        this.bondProductRepository = bondProductRepository;
-        this.stockPriceRepository = stockPriceRepository;
-        this.coinPriceRepository = coinPriceRepository;
-    }
 
     @Override
-    public List<InvestDTO> getInvestList() throws Exception {
-        Member tempUser = memberRepository.findByUid(1).orElseThrow();
-        List<Bank> banks = bankRepository.findByUid(tempUser);
-        List<Bond> bonds = bondRepository.findByUid(tempUser);
-        List<Coin> coins = coinRepository.findByUid(tempUser);
-        List<Stock> stocks = stockRepository.findByUid(tempUser);
+    public List<InvestDTO> getInvestList(int uid) throws Exception {
+        Member member = memberService.findMemberByUid(uid);
+        List<Bank> banks = bankRepository.findByUid(member);
+        List<Bond> bonds = bondRepository.findByUid(member);
+        List<Coin> coins = coinRepository.findByUid(member);
+        List<Stock> stocks = stockRepository.findByUid(member);
 
         List<InvestDTO> investDTOs = new ArrayList<>();
         investDTOs.addAll(InvestDTO.fromUserBankList(banks));
@@ -65,8 +66,9 @@ public class InvestServiceImpl implements InvestService {
     }
 
     @Override
-    public long totalAsset() throws Exception {
-        List<InvestDTO> investDTOs = getInvestList();
+    public long totalAsset(int uid) throws Exception {
+        Member member = memberService.findMemberByUid(uid);
+        List<InvestDTO> investDTOs = getInvestList(uid);
 
         return investDTOs.stream()
                 .mapToLong(InvestDTO::getPrice)
@@ -74,8 +76,9 @@ public class InvestServiceImpl implements InvestService {
     }
 
     @Override
-    public MaxPercentageCategoryDTO getMaxPercentageCategory() throws Exception {
-        List<CategorySumDTO> categorySums = getInvestmentTendency();
+    public MaxPercentageCategoryDTO getMaxPercentageCategory(int uid) throws Exception {
+        Member member = memberService.findMemberByUid(uid);
+        List<CategorySumDTO> categorySums = getInvestmentTendency(uid);
 
         return categorySums.stream()
                 .max(Comparator.comparingDouble(CategorySumDTO::getPercentage))
@@ -87,29 +90,29 @@ public class InvestServiceImpl implements InvestService {
     }
 
     @Override
-    public AvailableCashDTO getAvailableCash() throws Exception {
-        Member tempUser = memberRepository.findByUid(1).orElseThrow(() -> new Exception("User not found"));
-        List<Bank> banks = bankRepository.findByUidAndSpecificCategoriesAndDeleteDateIsNull(tempUser);
+    public AvailableCashDTO getAvailableCash(int uid) throws Exception {
+        Member member = memberService.findMemberByUid(uid);
+        List<Bank> banks = bankRepository.findByUidAndSpecificCategoriesAndDeleteDateIsNull(member);
 
         Long totalAvailableCash = banks.stream()
                 .mapToLong(Bank::getBalanceAmt)
                 .sum();
 
-        Long totalAsset = totalAsset();
+        Long totalAsset = totalAsset(uid);
 
         return new AvailableCashDTO(totalAvailableCash, totalAsset);
     }
 
     @Override
-    public List<CategorySumDTO> getInvestmentTendency() throws Exception {
-        Member tempUser = memberRepository.findByUid(1).orElseThrow(() -> new Exception("User not found"));
-        List<InvestDTO> investDTOs = getInvestList();
+    public List<CategorySumDTO> getInvestmentTendency(int uid) throws Exception {
+        Member member = memberService.findMemberByUid(uid);
+        List<InvestDTO> investDTOs = getInvestList(uid);
 
         Map<String, Long> categorySums = investDTOs.stream()
                 .collect(Collectors.groupingBy(InvestDTO::getCategory,
                         Collectors.summingLong(InvestDTO::getPrice)));
 
-        long totalInvestment = totalAsset();
+        long totalInvestment = totalAsset(uid);
 
         return categorySums.entrySet().stream()
                 .map(entry -> {
@@ -122,8 +125,8 @@ public class InvestServiceImpl implements InvestService {
     }
 
     @Override
-    public List<RecommendedProductDTO> getRecommendedProducts() throws Exception {
-        MaxPercentageCategoryDTO maxCategory = getMaxPercentageCategory();
+    public List<RecommendedProductDTO> getRecommendedProducts(int uid) throws Exception {
+        MaxPercentageCategoryDTO maxCategory = getMaxPercentageCategory(uid);
         List<RecommendedProductDTO> recommendedProducts = new ArrayList<>();
 
         if ("안정형".equals(maxCategory.getTendency())) {
@@ -152,7 +155,7 @@ public class InvestServiceImpl implements InvestService {
     }
 
     @Override
-    public List<HighReturnProductDTO> getHighReturnStock() throws Exception {
+    public List<HighReturnProductDTO> getHighReturnStock(int uid) throws Exception {
         List<Object[]> highReturnStocks = stockPriceRepository.findPriceDifferenceBetweenLastTwoDates();
         return highReturnStocks.stream()
                 .filter(stock -> stock.length >= 5 && stock[2] != null && stock[3] != null && stock[4] != null)
@@ -178,7 +181,7 @@ public class InvestServiceImpl implements InvestService {
     }
 
     @Override
-    public List<HighReturnProductDTO> getHighReturnCoin() throws Exception {
+    public List<HighReturnProductDTO> getHighReturnCoin(int uid) throws Exception {
         List<Object[]> highReturnCoins = coinPriceRepository.findPriceDifferenceBetweenLastTwoDates();
         return highReturnCoins.stream()
                 .filter(coin -> coin.length >= 4 && coin[1] != null && coin[2] != null && coin[3] != null)
@@ -203,10 +206,10 @@ public class InvestServiceImpl implements InvestService {
     }
 
     @Override
-    public HighReturnProductsDTO getHighReturnProducts() {
+    public HighReturnProductsDTO getHighReturnProducts(int uid) {
         CompletableFuture<List<HighReturnProductDTO>> stocksFuture = CompletableFuture.supplyAsync(() -> {
             try {
-                return getHighReturnStock();
+                return getHighReturnStock(uid);
             } catch (Exception e) {
                 log.error("Error getting high return stocks", e);
                 return List.of();
@@ -215,7 +218,7 @@ public class InvestServiceImpl implements InvestService {
 
         CompletableFuture<List<HighReturnProductDTO>> coinsFuture = CompletableFuture.supplyAsync(() -> {
             try {
-                return getHighReturnCoin();
+                return getHighReturnCoin(uid);
             } catch (Exception e) {
                 log.error("Error getting high return coins", e);
                 return List.of();

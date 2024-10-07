@@ -25,9 +25,8 @@ public class SpotController {
 
 
     // 카테고리에 따른 총 가격 반환
-    @GetMapping("/spot/category/sum")
-    public ResponseEntity<?> getTotalPriceByCategory(@RequestBody HashMap<String, String> map) {
-        String category = map.get("category");
+    @GetMapping("/spot/{category}/sum")
+    public ResponseEntity<?> getTotalPriceByCategory(@PathVariable("category") String category) {
         try {
             SuccessResponseDTO response = new SuccessResponseDTO(true, spotService.getTotalPriceByCategory(category));
             return new ResponseEntity<>(response, HttpStatus.OK);

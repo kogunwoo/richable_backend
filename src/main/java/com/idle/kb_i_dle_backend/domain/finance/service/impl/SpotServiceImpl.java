@@ -1,5 +1,6 @@
 package com.idle.kb_i_dle_backend.domain.finance.service.impl;
 
+import com.idle.kb_i_dle_backend.config.exception.CustomException;
 import com.idle.kb_i_dle_backend.domain.finance.dto.PriceSumDTO;
 import com.idle.kb_i_dle_backend.domain.finance.dto.SpotDTO;
 import com.idle.kb_i_dle_backend.domain.finance.entity.Spot;
@@ -7,13 +8,13 @@ import com.idle.kb_i_dle_backend.domain.finance.repository.SpotRepository;
 import com.idle.kb_i_dle_backend.domain.finance.service.SpotService;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
+import com.idle.kb_i_dle_backend.global.codes.ErrorCode;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.apache.ibatis.javassist.NotFoundException;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,11 +29,19 @@ public class SpotServiceImpl implements SpotService {
     // 카테고리별 현물 자산 총합
     @Override
     public PriceSumDTO getTotalPriceByCategory(String category) throws Exception {
+
         Member member = memberService.findMemberByUid(1);
-        List<Spot> spots = spotRepository.findByUidAndCategoryAndDeleteDateIsNull(member, category);
+
+        String result = category.equals("car") ? "자동차" :
+                category.equals("elec") ? "전자기기" :
+                        category.equals("brand") ? "브랜드" :
+                                category.equals("luxury") ? "명품" :
+                                        "기타";
+
+        List<Spot> spots = spotRepository.findByUidAndCategoryAndDeleteDateIsNull(member, result);
 
         if (spots.isEmpty()) {
-            throw new NotFoundException("");
+            throw new CustomException(ErrorCode.INVALID_SPOT, "user dont have spot");
         }
 
         PriceSumDTO priceSum = new PriceSumDTO(
@@ -51,7 +60,7 @@ public class SpotServiceImpl implements SpotService {
         List<Spot> spots = spotRepository.findByUidAndDeleteDateIsNull(member);
 
         if (spots.isEmpty()) {
-            throw new NotFoundException("");
+            throw new CustomException(ErrorCode.INVALID_SPOT);
         }
 
         PriceSumDTO priceSum = new PriceSumDTO(
@@ -70,12 +79,19 @@ public class SpotServiceImpl implements SpotService {
         List<Spot> spots = spotRepository.findByUidAndDeleteDateIsNull(member);
 
         if (spots.isEmpty()) {
-            throw new NotFoundException("");
+            throw new CustomException(ErrorCode.INVALID_SPOT);
         }
 
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         List<SpotDTO> spotList = new ArrayList<>();
         for (Spot s : spots) {
-            SpotDTO spotDTO = SpotDTO.convertToDTO(s);
+            SpotDTO spotDTO = new SpotDTO();
+            spotDTO.setIndex(s.getIndex());
+            spotDTO.setCategory(s.getCategory());
+            spotDTO.setName(s.getName());
+            spotDTO.setPrice(s.getPrice());
+            String formattedAddDate = dateFormat.format(s.getAddDate());
+            spotDTO.setAddDate(formattedAddDate);
             spotList.add(spotDTO);
         }
 
@@ -99,11 +115,11 @@ public class SpotServiceImpl implements SpotService {
 
         // Spot 조회
         Spot isSpot = spotRepository.findByIndexAndDeleteDateIsNull(spotDTO.getIndex())
-                .orElseThrow(() -> new IllegalArgumentException("Spot not found with id: " + spotDTO.getIndex()));
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_SPOT));
 
         // Spot의 소유자가 해당 User인지 확인
         if (!isSpot.getUid().equals(member)) {
-            throw new AccessDeniedException("You do not have permission to modify this spot.");
+            throw new CustomException(ErrorCode.INVALID_OWNER);
         }
 
         isSpot.setName(spotDTO.getName());
@@ -121,11 +137,11 @@ public class SpotServiceImpl implements SpotService {
 
         // Spot 조회
         Spot isSpot = spotRepository.findByIndexAndDeleteDateIsNull(index)
-                .orElseThrow(() -> new IllegalArgumentException("Spot not found with id: " + index));
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_SPOT));
 
         // Spot의 소유자가 해당 User인지 확인
         if (!isSpot.getUid().equals(member)) {
-            throw new AccessDeniedException("You do not have permission to modify this spot.");
+            throw new CustomException(ErrorCode.INVALID_OWNER);
         }
 
         isSpot.setDeleteDate(new Date());

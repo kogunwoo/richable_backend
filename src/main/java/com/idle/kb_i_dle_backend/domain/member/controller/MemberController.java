@@ -1,13 +1,18 @@
 package com.idle.kb_i_dle_backend.domain.member.controller;
 
+
 import com.idle.kb_i_dle_backend.domain.member.dto.AuthResultDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.CustomUser;
 import com.idle.kb_i_dle_backend.domain.member.dto.LoginDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberInfoDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberJoinDTO;
+import com.idle.kb_i_dle_backend.domain.member.entity.MemberAPI;
+import com.idle.kb_i_dle_backend.domain.member.service.MemberApiService;
+import com.idle.kb_i_dle_backend.domain.member.service.MemberInfoService;
 import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
 import com.idle.kb_i_dle_backend.domain.member.util.JwtProcessor;
+import com.idle.kb_i_dle_backend.global.dto.SuccessResponseDTO;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
@@ -20,22 +25,25 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.json.JSONObject;
 
 @Slf4j
 @RestController
@@ -46,12 +54,17 @@ public class MemberController {
     private final AuthenticationManager authenticationManager;
     private final JwtProcessor jwtProcessor;
     private final MemberService memberService;
+    private final MemberInfoService memberInfoService;
+    private final MemberApiService memberApiService;
 
     public MemberController(AuthenticationManager authenticationManager, JwtProcessor jwtProcessor,
-                            MemberService memberService) {
+                            MemberService memberService, MemberInfoService memberInfoService,
+                            MemberApiService memberApiService) {
         this.authenticationManager = authenticationManager;
         this.jwtProcessor = jwtProcessor;
         this.memberService = memberService;
+        this.memberInfoService = memberInfoService;
+        this.memberApiService = memberApiService;
     }
 
     @PostMapping("/login")
@@ -66,7 +79,10 @@ public class MemberController {
             // Assuming you have a method to fetch UserInfoDTO (e.g., from the authenticated user details)
             MemberInfoDTO userInfo = getUserInfoFromAuthentication(authentication);
             // Generate JWT token with uid
-            String jwtToken = jwtProcessor.generateToken(userInfo.getId(), userInfo.getUid(), userInfo.getNickname());
+            String jwtToken = jwtProcessor.generateToken(userInfo.getId(), userInfo.getUid(), userInfo.getNickname(),
+                    userInfo.getEmail());
+            log.error("jwtProcessor 값 확인 : " + userInfo.getId() + " / " + userInfo.getUid() + " / "
+                    + userInfo.getNickname());
             // Return the AuthResultDTO with token and user info
             return ResponseEntity.ok(new AuthResultDTO(jwtToken, userInfo));
 
@@ -80,7 +96,9 @@ public class MemberController {
     private MemberInfoDTO getUserInfoFromAuthentication(Authentication authentication) {
         CustomUser customUser = (CustomUser) authentication.getPrincipal();
         MemberDTO member = customUser.getMember();  // Retrieve the MemberDTO object
-        return new MemberInfoDTO(member.getUid(), member.getId(), member.getNickname(), member.getAuth().toString());
+        log.error("memberDTO 확인 : " + member.getNickname() + " / " + member.getEmail());
+        return new MemberInfoDTO(member.getUid(), member.getId(), member.getNickname(), member.getAuth().toString(),
+                member.getEmail());
     }
 
     @Value("${naver.client.id}")
@@ -120,10 +138,10 @@ public class MemberController {
 
     @GetMapping("/naverCallback")
     public ResponseEntity<?> naverCallback(@RequestParam(required = false) String code,
-                                           @RequestParam(required = false) String state    ) throws Exception {
+                                           @RequestParam(required = false) String state, HttpServletRequest request)
+            throws Exception {
 
-        log.error("Received callback - code: {}, state: {}" +    code, state    );
-
+        log.info("Received callback - code: {}, state: {}", code, state);
 
         // 최종 인증 값인 접근 토큰을 발급
         String tokenUrl = "https://nid.naver.com/oauth2.0/token?grant_type=authorization_code"
@@ -131,22 +149,85 @@ public class MemberController {
                 + "&client_secret=" + clientSecret
                 + "&code=" + code
                 + "&state=" + state;
-        String authtoken = getHttpResponse(tokenUrl);
-        log.error("Token Response: {}", authtoken);
-        log.error("tokenUrl: {}", tokenUrl);
 
-        // JSON 파싱
-        JSONObject tokenJson = new JSONObject(authtoken);
-        String accessToken = tokenJson.getString("access_token");
+        String authtoken = null;
+        String accessToken = null;
+        int retryCount = 0;
+        int maxRetries = 3;
+
+        while (accessToken == null && retryCount < maxRetries) {
+            try {
+                authtoken = getHttpResponse(tokenUrl);
+                if (authtoken == null || authtoken.isEmpty()) {
+                    throw new Exception("Empty auth token received");
+                }
+
+                // JSON 파싱
+                JSONObject tokenJson = new JSONObject(authtoken);
+                accessToken = tokenJson.getString("access_token");
+
+                if (accessToken == null || accessToken.isEmpty()) {
+                    throw new Exception("Empty access token received");
+                }
+            } catch (Exception e) {
+                log.warn("Failed to get access token, attempt {} of {}", retryCount + 1, maxRetries, e);
+                retryCount++;
+                if (retryCount >= maxRetries) {
+                    log.error("Failed to get access token after {} attempts", maxRetries);
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body("Failed to authenticate with Naver");
+                }
+                // 재시도 전 잠시 대기
+                Thread.sleep(1000);
+            }
+        }
+
+        log.info("Access Token obtained successfully");
 
         // 사용자 프로필 정보 조회
         JSONObject userProfile = getUserProfile(accessToken);
         log.info("User Profile: {}", userProfile.toString());
 
         // 여기서 userProfile을 사용하여 회원가입 또는 로그인 처리
-        // 예: MemberDTO 생성 및 저장, JWT 토큰 생성 등
+        // 사용자 정보 처리 (회원가입 또는 로그인)
+        JSONObject responseObj = userProfile.getJSONObject("response");
+        String email = responseObj.getString("email");
+        String nickname = responseObj.getString("nickname");
 
-        return ResponseEntity.ok(userProfile.toString());
+        // 사용자 정보로 MemberDTO 생성 또는 조회
+        MemberDTO memberDTO = memberService.findByEmail(email);
+        if (memberDTO == null) {
+            // 새 사용자 등록 로직
+            MemberJoinDTO joinDTO = MemberJoinDTO.builder()
+                    .email(email)
+                    .nickname(nickname)
+                    // 다른 필요한 정보 설정
+                    .build();
+            memberService.MemberJoin(joinDTO);
+            memberDTO = memberService.findByEmail(email);
+        }
+
+        // JWT 토큰 생성
+        String jwtToken = jwtProcessor.generateToken(memberDTO.getId(), memberDTO.getUid(), memberDTO.getNickname(),
+                memberDTO.getEmail());
+        // JWT 토큰을 세션에 저장
+        HttpSession session = request.getSession();
+        session.setAttribute("jwtToken", jwtToken);
+
+        // 세션에 JWT 토큰이 제대로 저장되었는지 확인
+        String storedToken = (String) session.getAttribute("jwtToken");
+        if (storedToken == null || !storedToken.equals(jwtToken)) {
+            log.error("Failed to store JWT token in session");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to complete authentication process");
+        }
+        log.error("JWT token successfully stored in session");
+
+        // 홈페이지로 리다이렉트
+        String homeUrl = "http://localhost:5173"; // 프론트엔드 홈 URL
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .header(HttpHeaders.LOCATION, homeUrl)
+                .build();
     }
 
     private String getHttpResponse(String urlString) throws Exception {
@@ -164,7 +245,8 @@ public class MemberController {
 
         return response.toString();
     }
-    private JSONObject getUserProfile(String accessToken) throws Exception{
+
+    private JSONObject getUserProfile(String accessToken) throws Exception {
         String profileUrl = "https://openapi.naver.com/v1/nid/me";
         URL url = new URL(profileUrl);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -290,6 +372,131 @@ public class MemberController {
             return ResponseEntity.ok(Map.of("success", true, "message", "비밀번호가 성공적으로 재설정되었습니다."));
         } else {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", "비밀번호 재설정 중 오류가 발생했습니다."));
+        }
+    }
+
+    @GetMapping("/info")
+    public ResponseEntity<?> getMemberInfoByNickname(HttpServletRequest request) {
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
+        String nickname = jwtProcessor.getNickname(token);
+        Integer uid = jwtProcessor.getUid(token);
+        log.error("nickname" + nickname + " / " + "uid" + uid);
+
+        // 사용자 정보 가져오기
+        MemberInfoDTO memberInfoDTO = memberInfoService.getUserInfoByNickname(nickname);
+
+        // 사용자 정보가 없으면 404 반환
+        if (memberInfoDTO == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("사용자 정보가 없습니다.");
+        }
+
+        // uid를 사용하여 UserApiEntity 가져오기 (단일 객체로 처리)
+        MemberAPI memberAPI = memberApiService.getMemberApiByUid(uid);
+
+        // userApiEntity가 null인 경우 처리
+        if (memberAPI == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("API 데이터가 없습니다.");
+        }
+
+        // 본인 여부 판단
+//        if (tokenNickname.equals(nickname)) {
+        // 본인일 경우 모든 정보 반환
+        Map<String, Object> stockInfo = new HashMap<>();
+        stockInfo.put("base", memberAPI.getStock());
+        stockInfo.put("token", memberAPI.getStockToken());
+        stockInfo.put("secret", memberAPI.getStockSecret());
+        stockInfo.put("app", memberAPI.getStockApp());
+
+        Map<String, Object> coinInfo = new HashMap<>();
+        coinInfo.put("base", memberAPI.getCoin());
+        coinInfo.put("secret", memberAPI.getCoinSecret());
+        coinInfo.put("app", memberAPI.getCoinApp());
+
+        Map<String, Object> apiInfo = new HashMap<>();
+        apiInfo.put("bank", memberAPI.getBank());
+        apiInfo.put("stock", stockInfo);
+        apiInfo.put("coin", coinInfo);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("nickname", memberInfoDTO.getNickname());
+        data.put("email", memberInfoDTO.getEmail());
+        data.put("img", memberInfoDTO.getImg());
+        data.put("birthYear", memberInfoDTO.getBirthYear());
+        data.put("gender", memberInfoDTO.getGender());
+        data.put("certification", memberInfoDTO.isCertification());
+        data.put("api", apiInfo);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", data);
+
+        SuccessResponseDTO successResponse = new SuccessResponseDTO(true, response);
+        return ResponseEntity.ok(successResponse);
+//        } else {
+        // 본인이 아닌 경우 제한된 정보만 반환
+//            Map<String, Object> limitedData = new HashMap<>();
+//            limitedData.put("nickname", memberInfoDTO.getNickname());
+//            limitedData.put("img", memberInfoDTO.getImg());
+//
+//            Map<String, Object> response = new HashMap<>();
+//            response.put("data", limitedData);
+//
+//            ResponseDTO successResponse = new ResponseDTO(true, response);
+//            return ResponseEntity.ok(successResponse);
+//        }
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<?> updateMemberInfo(@RequestBody MemberInfoDTO updatedMemberInfo,
+                                              HttpServletRequest request) {
+        // JWT에서 현재 사용자의 닉네임 가져오기
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
+        String tokenNickname = jwtProcessor.getNickname(token);
+
+        // 본인 여부 판단
+        if (!tokenNickname.equals(updatedMemberInfo.getNickname())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("자신의 정보만 수정할 수 있습니다.");
+        }
+
+        // 사용자 정보 업데이트 로직
+        try {
+            MemberInfoDTO updatedInfo = memberInfoService.updateMemberInfo(updatedMemberInfo);
+
+            // 성공 응답 반환
+            Map<String, Object> data = new HashMap<>();
+            data.put("nickname", updatedInfo.getNickname());
+            data.put("email", updatedInfo.getEmail());
+            data.put("img", updatedInfo.getImg());
+            data.put("birthYear", updatedInfo.getBirthYear());
+            data.put("gender", updatedInfo.getGender());
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("data", data);
+
+            SuccessResponseDTO successResponse = new SuccessResponseDTO(true, response);
+            return ResponseEntity.ok(successResponse);
+        } catch (Exception e) {
+            // 예외 처리
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회원정보 수정 중 오류가 발생했습니다.");
+        }
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteMember(@PathVariable String id) {
+        // 서비스 로직을 통해 회원 삭제 처리
+        boolean isDeleted = memberService.deleteMemberById(id);
+
+        if (isDeleted) {
+            // 삭제 성공 시 응답 데이터 구성
+            Map<String, Object> data = new HashMap<>();
+            data.put("id", id);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("data", data);
+
+            SuccessResponseDTO Response = new SuccessResponseDTO(true, response);
+            return ResponseEntity.ok(Response);
+        } else {
+            return ResponseEntity.status(404).body("회원 정보를 찾을 수 없습니다.");
         }
     }
 

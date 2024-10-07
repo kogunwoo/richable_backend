@@ -3,6 +3,7 @@ package com.idle.kb_i_dle_backend.domain.finance.repository;
 import com.idle.kb_i_dle_backend.domain.finance.entity.Spot;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Date;
@@ -20,5 +21,10 @@ public interface SpotRepository extends JpaRepository<Spot, Long> {
     Optional<Spot> findByIndexAndDeleteDateIsNull(@Param("index")Integer index);
 
     List<Spot> findByUidAndAddDateBefore(Member uid, Date date);
+
+    @Query(value = "SELECT month(s.add_date) as month, SUM(s.price) as totalAmount " +
+            "FROM asset.spot s WHERE s.uid = :uid " +
+            "GROUP BY month(s.add_date)", nativeQuery = true)
+    List<Object[]> findMonthlySpotAssets(@Param("uid") Member uid);
     
 }

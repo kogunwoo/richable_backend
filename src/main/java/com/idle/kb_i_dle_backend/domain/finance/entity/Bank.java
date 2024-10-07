@@ -11,11 +11,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
+@Table(name = "bank", catalog = "asset")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "bank", catalog = "asset")
 public class Bank {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

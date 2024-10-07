@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.idle.kb_i_dle_backend.global.codes.ErrorCode;
 import com.idle.kb_i_dle_backend.global.dto.ErrorResponseDTO;
 import com.idle.kb_i_dle_backend.global.response.ErrorResponse;
+import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.servlet.NoHandlerFoundException;
-import java.io.IOException;
 
 @RestControllerAdvice
 @Slf4j
@@ -32,7 +32,8 @@ public class GlobalExceptionHandler {
      * @return ResponseEntity<ErrorResponse>
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    protected ResponseEntity<ErrorResponseDTO> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+    protected ResponseEntity<ErrorResponseDTO> handleMethodArgumentNotValidException(
+            MethodArgumentNotValidException ex) {
         log.error("handleMethodArgumentNotValidException", ex);
         BindingResult bindingResult = ex.getBindingResult();
         StringBuilder stringBuilder = new StringBuilder();
@@ -85,7 +86,8 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<ErrorResponseDTO> handleMissingRequestHeaderExceptionException(
             MissingServletRequestParameterException ex) {
         log.error("handleMissingServletRequestParameterException", ex);
-        final ErrorResponse errorResponse = ErrorResponse.of(ErrorCode.MISSING_REQUEST_PARAMETER_ERROR, ex.getMessage());
+        final ErrorResponse errorResponse = ErrorResponse.of(ErrorCode.MISSING_REQUEST_PARAMETER_ERROR,
+                ex.getMessage());
         final ErrorResponseDTO response = new ErrorResponseDTO(errorResponse);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
@@ -180,8 +182,14 @@ public class GlobalExceptionHandler {
         log.error("handleJsonProcessingException", ex);
         final ErrorResponse errorResponse = ErrorResponse.of(ErrorCode.REQUEST_BODY_MISSING_ERROR, ex.getMessage());
         ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO(errorResponse);
-        return new ResponseEntity<>(errorResponseDTO , HTTP_STATUS_OK);
+        return new ResponseEntity<>(errorResponseDTO, HTTP_STATUS_OK);
     }
+
+//    @ExceptionHandler(MissingRequestHeaderException.class)
+//    public ResponseEntity<SuccessResponseDTO> handleMissingRequestHeaderException(MissingRequestHeaderException ex) {
+//        SuccessResponseDTO response = new SuccessResponseDTO(false, "인증 토큰이 필요합니다.");
+//        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+//    }
 
     //CustomExeption
 
@@ -192,8 +200,6 @@ public class GlobalExceptionHandler {
         ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO(errorResponse);
         return new ResponseEntity<>(errorResponseDTO, HTTP_STATUS_OK);
     }
-
-
 
     // ==================================================================================================================
 
@@ -208,6 +214,6 @@ public class GlobalExceptionHandler {
         log.error("Exception", ex);
         final ErrorResponse errorResponse = ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR, ex.getMessage());
         ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO(errorResponse);
-        return new ResponseEntity<>(errorResponseDTO , HTTP_STATUS_OK);
+        return new ResponseEntity<>(errorResponseDTO, HTTP_STATUS_OK);
     }
 }

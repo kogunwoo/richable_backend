@@ -61,12 +61,14 @@ public enum ErrorCode {
     // Transaction Delete Error
     DELETE_ERROR(200, "9999", "Delete Transaction Error Exception"),
 
+    INVALID_OWNER(200, "M02", "You do not have permission to modify this asset"), // End
+
     //member find error
     INVALID_MEMEBER(200, "M01", "Invalid Member Id"),
 
     //GOAL
     //invalid index
-    INVALID_INDEX(200, "G01", "Inavlid Index"),
+    INVALID_INDEX(200, "G01", "Invalid Index"),
 
     INVALID_PRIORITY(200, "G02", "Invalid Priority"),
 
@@ -76,8 +78,29 @@ public enum ErrorCode {
 
     //INCOME
 
-    ; // End
+    //Bond
 
+    INVALID_BOND(200, "BO01", "user dont have bond"),
+
+    //Bank
+    INVALID_BANK(200, "B01", "user dont have banks"),
+
+    //Coin
+    INVALID_COIN(200, "B02", "user dont have coin"),
+
+    //spot
+    INVALID_SPOT(200, "S01", "user dont have spot"),
+
+    INVALID_STOCK(200, "ST01", "USER DONT HAVE STOCK"),
+
+    //INCOME
+    INVALID_INCOME(200, "I01", "USER DONT HAVE INCOME"),
+
+    //Invest
+
+    //OUTCOME
+    INVALID_OUTCOME(200, "O01", "User dont have outcome"),
+    ;
     /**
      * ******************************* Error Code Constructor ***************************************
      */

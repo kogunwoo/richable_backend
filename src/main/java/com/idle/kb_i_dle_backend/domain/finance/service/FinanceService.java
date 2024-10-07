@@ -6,11 +6,14 @@ import com.idle.kb_i_dle_backend.domain.finance.dto.BondReturnDTO;
 import com.idle.kb_i_dle_backend.domain.finance.dto.CoinReturnDTO;
 import com.idle.kb_i_dle_backend.domain.finance.dto.FinancialChangeDTO;
 import com.idle.kb_i_dle_backend.domain.finance.dto.FinancialSumDTO;
+import com.idle.kb_i_dle_backend.domain.finance.dto.MonthlyBalanceDTO;
 import com.idle.kb_i_dle_backend.domain.finance.dto.MonthlySavingRateDTO;
 import com.idle.kb_i_dle_backend.domain.finance.dto.StockReturnDTO;
 import com.idle.kb_i_dle_backend.domain.finance.dto.TotalChangeDTO;
+import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public interface FinanceService {
 
@@ -42,6 +45,14 @@ public interface FinanceService {
 
     // AS_10 달별 채권 수익률
     List<BondReturnDTO> getBondReturnTrend(int uid);
+
+    long sumStockAssets(Member memberOpt);
+
+    List<MonthlyBalanceDTO> getMonthlyIncomeOutcomeBalance(int uid);
+
+    Map<String, Object> compareAssetsWithAgeGroup(int uid);
+
+    List<Map<String, Object>> compareAssetsByCategoryWithAgeGroup(int uid);
 
 
 }

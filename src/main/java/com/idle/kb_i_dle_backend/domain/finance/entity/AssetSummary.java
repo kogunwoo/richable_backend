@@ -1,10 +1,17 @@
 package com.idle.kb_i_dle_backend.domain.finance.entity;
 
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
-import lombok.Getter;
-
-import javax.persistence.*;
 import java.util.Date;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.Table;
+import lombok.Getter;
 
 @Entity
 @Table(name = "asset_summary", catalog = "asset")
@@ -12,14 +19,13 @@ import java.util.Date;
 public class AssetSummary {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long index;
+    private Integer index;
 
     @ManyToOne
     @JoinColumn(name = "uid")
     private Member uid;
 
     private Long bond;
-
     private Long deposit;
     private Long saving;
     private Long subscription;

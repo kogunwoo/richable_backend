@@ -11,11 +11,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
+@Table(name = "bond", catalog = "asset")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "bond", catalog = "asset")
 public class Bond {
 
     @Id
@@ -29,7 +29,7 @@ public class Bond {
 
     @NotNull
     @Column(name = "itms_nm")
-    private String name;
+    private String  name;
 
     @NotNull
     private Integer cnt;

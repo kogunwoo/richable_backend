@@ -1,18 +1,19 @@
 package com.idle.kb_i_dle_backend.domain.finance.service.impl;
 
+import com.idle.kb_i_dle_backend.config.exception.CustomException;
 import com.idle.kb_i_dle_backend.domain.finance.dto.StockDTO;
 import com.idle.kb_i_dle_backend.domain.finance.entity.Stock;
 import com.idle.kb_i_dle_backend.domain.finance.repository.StockRepository;
 import com.idle.kb_i_dle_backend.domain.finance.service.StockService;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
+import com.idle.kb_i_dle_backend.global.codes.ErrorCode;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.javassist.NotFoundException;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,12 +56,12 @@ public class StockServiceImpl implements StockService {
         Member member = memberService.findMemberByUid(1);
 
         // Stock 조회
-        Stock isStock = stockRepository.findByIndexAndDeleteDateIsNull(stockDTO.getIndex())
-                .orElseThrow(() -> new IllegalArgumentException("Stock not found with id: " + stockDTO.getIndex()));
+        Stock isStock = (Stock) stockRepository.findByIndexAndDeleteDateIsNull(stockDTO.getIndex())
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_STOCK));
 
         // Stock의 소유자가 해당 User인지 확인
         if (!isStock.getUid().equals(member)) {
-            throw new AccessDeniedException("You do not have permission to modify this stock.");
+            throw new CustomException(ErrorCode.INVALID_OWNER);
         }
 
         // 수량만 수정되게
@@ -76,12 +77,12 @@ public class StockServiceImpl implements StockService {
         Member member = memberService.findMemberByUid(1);
 
         // Stock 조회
-        Stock isStock = stockRepository.findByIndexAndDeleteDateIsNull(index)
-                .orElseThrow(() -> new IllegalArgumentException("Stock not found with id: " + index));
+        Stock isStock = (Stock) stockRepository.findByIndexAndDeleteDateIsNull(index)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_STOCK));
 
         // Stock의 소유자가 해당 User인지 확인
         if (!isStock.getUid().equals(member)) {
-            throw new AccessDeniedException("You do not have permission to modify this stock.");
+            throw new CustomException(ErrorCode.INVALID_OWNER);
         }
         isStock.setDeleteDate(new Date());
 

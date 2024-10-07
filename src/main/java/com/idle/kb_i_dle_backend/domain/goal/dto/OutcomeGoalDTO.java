@@ -1,10 +1,8 @@
 package com.idle.kb_i_dle_backend.domain.goal.dto;
 
-import lombok.AllArgsConstructor;
+import java.util.Date;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.Date;
 
 @Getter
 @Setter
@@ -25,4 +23,6 @@ public class OutcomeGoalDTO {
         this.date = date;
         this.priority = priority;
     }
+
+
 }
