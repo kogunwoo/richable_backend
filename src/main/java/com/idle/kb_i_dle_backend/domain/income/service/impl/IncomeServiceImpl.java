@@ -6,7 +6,7 @@ import com.idle.kb_i_dle_backend.domain.income.entity.Income;
 import com.idle.kb_i_dle_backend.domain.income.repository.IncomeRepository;
 import com.idle.kb_i_dle_backend.domain.income.service.IncomeService;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
-import com.idle.kb_i_dle_backend.domain.member.repository.MemberRepository;
+import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,13 +20,13 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class IncomeServiceImpl implements IncomeService {
 
-    private final MemberRepository memberRepository;
+    private final MemberService memberService;
     private final IncomeRepository incomeRepository;
 
     @Override
     public List<IncomeDTO> getIncomeList() throws Exception {
-        Member tempMember = memberRepository.findByUid(1);
-        List<Income> incomes = incomeRepository.findByUid(tempMember);
+        Member member = memberService.findMemberByUid(1);
+        List<Income> incomes = incomeRepository.findByUid(member);
 
         if (incomes.isEmpty()) {
             throw new NotFoundException("");
@@ -43,8 +43,8 @@ public class IncomeServiceImpl implements IncomeService {
 
     @Override
     public long getIncomeSumInMonth(int uid, int year, int month) throws Exception {
-        Member tempUser = memberRepository.findByUid(1);
-        List<Income> incomes = incomeRepository.findByUidAndYearAndMonth(tempUser, year, month);
+        Member member = memberService.findMemberByUid(1);
+        List<Income> incomes = incomeRepository.findByUidAndYearAndMonth(member, year, month);
         Long sumOfIncomes = incomes.stream().mapToLong(Income::getAmount).sum();
 
         return sumOfIncomes;
@@ -53,7 +53,7 @@ public class IncomeServiceImpl implements IncomeService {
 
     @Override
     public IncomeDTO getIncomeByIndex(Integer index) throws Exception {
-        Member tempMember = memberRepository.findByUid(1);
+        Member member = memberService.findMemberByUid(1);
         try {
             Income isIncome = incomeRepository.findByIndex(index);
         } catch (Exception e) {
@@ -61,7 +61,7 @@ public class IncomeServiceImpl implements IncomeService {
         }
 
         // 유저가 소유한 income인지 확인
-        if (!isIncome.getUid().getUid().equals(tempMember.getUid())) {
+        if (!isIncome.getUid().getUid().equals(member.getUid())) {
             throw new AccessDeniedException("You do not have permission to delete this income.");
         }
 
