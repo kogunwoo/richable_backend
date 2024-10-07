@@ -3,14 +3,11 @@ package com.idle.kb_i_dle_backend.domain.member.service;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberJoinDTO;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
-import java.util.Optional;
 
 public interface MemberService {
     boolean checkDupl(String id);
 
-    Optional<Member> getMember(String id);
-
-    Optional<Member> findMemberByUid(int id);
+    Member findMemberByUid(int id);
 
     void MemberJoin(MemberJoinDTO memberjoindto);
 
@@ -19,7 +16,7 @@ public interface MemberService {
 
     boolean checkPassword(String rawPassword, String encodedPassword);
 
-    boolean checkAgree(boolean info, boolean finance,String id);
+    boolean checkAgree(boolean info, boolean finance, String id);
 
     String findIdByEmail(String email);
 

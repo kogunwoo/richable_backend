@@ -1,10 +1,8 @@
 package com.idle.kb_i_dle_backend.domain.goal.dto;
 
-import java.math.BigDecimal;
+import java.util.Date;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.Date;
 
 @Getter
 @Setter

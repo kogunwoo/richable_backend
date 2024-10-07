@@ -1,8 +1,7 @@
 package com.idle.kb_i_dle_backend.domain.income.controller;
 
-import com.idle.kb_i_dle_backend.common.dto.DataDTO;
-import com.idle.kb_i_dle_backend.common.dto.ErrorResponseDTO;
-import com.idle.kb_i_dle_backend.common.dto.ResponseDTO;
+import com.idle.kb_i_dle_backend.global.dto.ErrorResponseDTO;
+import com.idle.kb_i_dle_backend.global.dto.SuccessResponseDTO;
 import com.idle.kb_i_dle_backend.domain.income.dto.IncomeDTO;
 import com.idle.kb_i_dle_backend.domain.income.service.IncomeService;
 import lombok.RequiredArgsConstructor;
@@ -28,10 +27,10 @@ public class IncomeController {
     @GetMapping("/all")
     public ResponseEntity<?> getTotalIncomeList() {
         try {
-            ResponseDTO response = new ResponseDTO(true, incomeService.getIncomeList());
+            SuccessResponseDTO response = new SuccessResponseDTO(true, incomeService.getIncomeList());
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
+            ErrorResponseDTO response = new ErrorResponseDTO( e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
@@ -40,10 +39,10 @@ public class IncomeController {
     @GetMapping("/detail/{index}")
     public ResponseEntity<?> getIncomeDetail(@PathVariable("index") Integer index) {
         try {
-            ResponseDTO response = new ResponseDTO(true, incomeService.getIncomeByIndex(index));
+            SuccessResponseDTO response = new SuccessResponseDTO(true, incomeService.getIncomeByIndex(index));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
+            ErrorResponseDTO response = new ErrorResponseDTO( e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
@@ -52,10 +51,10 @@ public class IncomeController {
     @PostMapping("/add")
     public ResponseEntity<?> addIncome(@RequestBody IncomeDTO incomeDTO) {
         try {
-            ResponseDTO response = new ResponseDTO(true, incomeService.addIncome(incomeDTO));
+            SuccessResponseDTO response = new SuccessResponseDTO(true, incomeService.addIncome(incomeDTO));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
+            ErrorResponseDTO response = new ErrorResponseDTO(e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
@@ -64,10 +63,10 @@ public class IncomeController {
     @PutMapping("/update")
     public ResponseEntity<?> updateIncome(@RequestBody IncomeDTO incomeDTO) {
         try {
-            ResponseDTO response = new ResponseDTO(true, incomeService.updateIncome(incomeDTO));
+            SuccessResponseDTO response = new SuccessResponseDTO(true, incomeService.updateIncome(incomeDTO));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
+            ErrorResponseDTO response = new ErrorResponseDTO( e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
@@ -78,10 +77,10 @@ public class IncomeController {
         try {
             Map<String, Object> indexData = new HashMap<>();
             indexData.put("index", incomeService.deleteIncomeByUidAndIndex(index));
-            ResponseDTO response = new ResponseDTO(true, indexData);
+            SuccessResponseDTO response = new SuccessResponseDTO(true, indexData);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            ErrorResponseDTO response = new ErrorResponseDTO(false, e.getMessage());
+            ErrorResponseDTO response = new ErrorResponseDTO(e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }

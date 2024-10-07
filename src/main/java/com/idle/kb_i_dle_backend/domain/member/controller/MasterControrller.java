@@ -1,13 +1,10 @@
 package com.idle.kb_i_dle_backend.domain.member.controller;
 
-import com.idle.kb_i_dle_backend.common.dto.ErrorResponseDTO;
-import com.idle.kb_i_dle_backend.common.dto.ResponseDTO;
 import com.idle.kb_i_dle_backend.domain.member.service.MasterService;
-import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
+import com.idle.kb_i_dle_backend.global.dto.ErrorResponseDTO;
+import com.idle.kb_i_dle_backend.global.dto.SuccessResponseDTO;
 import javax.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,11 +28,11 @@ public class MasterControrller {
 
         try {
             masterService.updateStockPrices();
-            ResponseDTO response = new ResponseDTO(true, "stock price update complete");
+            SuccessResponseDTO response = new SuccessResponseDTO(true, "stock price update complete");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error in getAvailableAsset: ", e);
-            ErrorResponseDTO response = new ErrorResponseDTO(false,
+            ErrorResponseDTO response = new ErrorResponseDTO(
                     "Failed to retrieve available assets: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
@@ -47,11 +44,11 @@ public class MasterControrller {
 
         try {
             masterService.updateCoinPrices();
-            ResponseDTO response = new ResponseDTO(true, "coin price update complete");
+            SuccessResponseDTO response = new SuccessResponseDTO(true, "coin price update complete");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error in getAvailableAsset: ", e);
-            ErrorResponseDTO response = new ErrorResponseDTO(false,
+            ErrorResponseDTO response = new ErrorResponseDTO(
                     "Failed to retrieve available assets: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }

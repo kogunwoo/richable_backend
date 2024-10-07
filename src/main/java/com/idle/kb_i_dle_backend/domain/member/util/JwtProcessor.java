@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public final class JwtProcessor {
-    static private final long TOKEN_VALID_MILISECOND = 1000L * 60 * 60; // 60 minutes
+    static private final long TOKEN_VALID_MILISECOND = 1000L * 60 * 60 * 24; // 60 minutes
     private static final String ENCRYPTION_SECRET = "TPk93NCNEQKs66+Ht89m+qVM8WkXoysjxanI7qh9hK0=";
 
     // For development use
@@ -19,7 +19,7 @@ public final class JwtProcessor {
     private Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
 
     // JWT generation
-    public String generateToken(String subject, Integer uid,String nickname,String email) {
+    public String generateToken(String subject, Integer uid, String nickname, String email) {
         String encryptedUid = AESUtil.encrypt(uid.toString(), ENCRYPTION_SECRET);
 
         return Jwts.builder()
