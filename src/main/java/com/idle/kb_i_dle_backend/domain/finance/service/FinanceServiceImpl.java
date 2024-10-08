@@ -58,7 +58,7 @@ public class FinanceServiceImpl implements FinanceService {
     // 금융 자산 합계 계산
     @Override
     public FinancialSumDTO getFinancialAssetsSum(int uid) {
-        Member member = memberService.findMemberByUid(uid);
+        Member member = memberRepository.findByUid(uid);
         Long financialAssetsSum = calculateFinancialAssetsSum(member);
         return new FinancialSumDTO(financialAssetsSum);
     }
@@ -74,7 +74,7 @@ public class FinanceServiceImpl implements FinanceService {
 
     @Override
     public FinancialSumDTO getAssetSummeryByDateBefore(int uid, Date date) {
-        Member member = memberService.findMemberByUid(uid);
+        Member member = memberRepository.findByUid(uid);
         AssetSummary assetSummary = assetSummaryRepository.findFirstByUidAndUpdateDateBeforeOrderByUpdateDateDesc(
                 member, date);
         return new FinancialSumDTO(assetSummary.getTotalAmount());
@@ -165,7 +165,7 @@ public class FinanceServiceImpl implements FinanceService {
 
     @Override
     public List<StockReturnDTO> getStockReturnTrend(int uid) {
-        Member member = memberService.findMemberByUid(uid);
+        Member member = memberRepository.findByUid(uid);
         List<StockReturnDTO> stockReturns = new ArrayList<>();
         List<Stock> stocks = stockRepository.findAllByUidAndDeleteDateIsNull(member);
 
@@ -485,7 +485,7 @@ public class FinanceServiceImpl implements FinanceService {
     public Map<String, Object> compareAssetsWithAgeGroup(int uid) {
 
         // 1. 현재 사용자의 uid를 기반으로 나이 정보 추출
-        Member member = memberService.findMemberByUid(uid);
+        Member member = memberRepository.findByUid(uid);
 
         int birthYear = member.getBirth_year();
 
