@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Slf4j
 @RestController
@@ -52,31 +53,36 @@ public class MemberController {
     public ResponseEntity<?> naverlogin(HttpServletRequest request) {
         try {
             Map<String, Object> naverLoginResult = memberService.initiateNaverLogin(request);
-            String redirectUrl = (String) naverLoginResult.get("redirectUrl");
-
-            if (redirectUrl != null && !redirectUrl.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.FOUND)
-                        .header(HttpHeaders.LOCATION, redirectUrl)
-                        .build();
-            } else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(new ErrorResponseDTO("Failed to generate Naver login URL"));
-            }
+            return ResponseEntity.ok(new SuccessResponseDTO(true, naverLoginResult));
         } catch (Exception e) {
+            log.error("Failed to initiate Naver login", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ErrorResponseDTO("Failed to initiate Naver login"));
+                    .body(new ErrorResponseDTO("네이버 로그인 초기화 중 오류가 발생했습니다."));
         }
     }
 
-    @GetMapping("/naverCallback")
-    public ResponseEntity<?> naverCallback(@RequestParam(required = false) String code,
-                                           @RequestParam(required = false) String state,
-                                           HttpServletRequest request) {
+    @PostMapping("/naverCallback")
+    public ResponseEntity<?> naverCallback(@RequestBody Map<String, String> params) {
+        String code = params.get("code");
+        String state = params.get("state");
+
+        if (code == null || state == null) {
+            return ResponseEntity.badRequest().body(new ErrorResponseDTO("Invalid request parameters"));
+        }
+
         try {
-            Map<String, Object> callbackResult = memberService.processNaverCallback(code, state, request);
-            return ResponseEntity.ok(callbackResult);
+            Map<String, Object> callbackResult = memberService.processNaverCallback(code, state);
+
+            // 응답 구조를 클라이언트의 기대에 맞게 수정
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("token", callbackResult.get("token"));
+            responseData.put("userInfo", callbackResult.get("userInfo"));
+
+            return ResponseEntity.ok(new SuccessResponseDTO(true, responseData));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponseDTO("Failed to process Naver callback"));
+            log.error("Failed to process Naver callback", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponseDTO("네이버 로그인 처리 중 오류가 발생했습니다."));
         }
     }
 
