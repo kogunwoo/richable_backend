@@ -1,19 +1,21 @@
 package com.idle.kb_i_dle_backend.domain.invest.controller;
 
+import com.idle.kb_i_dle_backend.domain.invest.dto.AvailableCashDTO;
+import com.idle.kb_i_dle_backend.domain.invest.dto.HighReturnProductDTO;
+import com.idle.kb_i_dle_backend.domain.invest.dto.HighReturnProductsDTO;
+import com.idle.kb_i_dle_backend.domain.invest.dto.MaxPercentageCategoryDTO;
+import com.idle.kb_i_dle_backend.domain.invest.dto.RecommendedProductDTO;
+import com.idle.kb_i_dle_backend.domain.invest.service.InvestService;
+import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
 import com.idle.kb_i_dle_backend.global.dto.ErrorResponseDTO;
 import com.idle.kb_i_dle_backend.global.dto.SuccessResponseDTO;
-import com.idle.kb_i_dle_backend.domain.invest.dto.*;
-import com.idle.kb_i_dle_backend.domain.invest.service.InvestService;
-import com.idle.kb_i_dle_backend.domain.member.util.JwtProcessor;
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -23,11 +25,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class InvestController {
 
     private final InvestService investService;
+    private final MemberService memberService;
 
     // 투자 여유 자산 조회
     @GetMapping("/available")
-    public ResponseEntity<?> getAvailableAsset(HttpServletRequest request) {
-        Integer uid = (Integer) request.getAttribute("uid");
+    public ResponseEntity<?> getAvailableAsset() {
+        Integer uid = memberService.getCurrentUid();
         log.info("check uid in invest" + uid);
         try {
             AvailableCashDTO availableCashDTO = investService.getAvailableCash(uid);
@@ -43,8 +46,8 @@ public class InvestController {
 
     // 성향 조회
     @GetMapping("/tendency")
-    public ResponseEntity<?> getMaxPercentageCategory(HttpServletRequest request) {
-        Integer uid = (Integer) request.getAttribute("uid");
+    public ResponseEntity<?> getMaxPercentageCategory() {
+        Integer uid = memberService.getCurrentUid();
         try {
             MaxPercentageCategoryDTO maxPercentageCategory = investService.getMaxPercentageCategory(uid);
             SuccessResponseDTO response = new SuccessResponseDTO(true, maxPercentageCategory);
@@ -58,8 +61,8 @@ public class InvestController {
     }
 
     @GetMapping("/recommended")
-    public ResponseEntity<?> getRecommendedProducts(HttpServletRequest request) {
-        Integer uid = (Integer) request.getAttribute("uid");
+    public ResponseEntity<?> getRecommendedProducts() {
+        Integer uid = memberService.getCurrentUid();
         try {
             List<RecommendedProductDTO> recommendedProducts = investService.getRecommendedProducts(uid);
             SuccessResponseDTO response = new SuccessResponseDTO(true, recommendedProducts);
@@ -73,8 +76,8 @@ public class InvestController {
     }
 
     @GetMapping("/highreturn/stock")
-    public ResponseEntity<?> getHighReturnStock(HttpServletRequest request) {
-        Integer uid = (Integer) request.getAttribute("uid");
+    public ResponseEntity<?> getHighReturnStock() {
+        Integer uid = memberService.getCurrentUid();
         try {
             List<HighReturnProductDTO> highReturnProductDTOS = investService.getHighReturnStock(uid);
             SuccessResponseDTO response = new SuccessResponseDTO(true, highReturnProductDTOS);
@@ -89,8 +92,8 @@ public class InvestController {
     }
 
     @GetMapping("/highreturn/coin")
-    public ResponseEntity<?> getHighReturnCoin(HttpServletRequest request) {
-        Integer uid = (Integer) request.getAttribute("uid");
+    public ResponseEntity<?> getHighReturnCoin() {
+        Integer uid = memberService.getCurrentUid();
         try {
             List<HighReturnProductDTO> highReturnCoins = investService.getHighReturnCoin(uid);
             SuccessResponseDTO response = new SuccessResponseDTO(true, highReturnCoins);
@@ -104,8 +107,8 @@ public class InvestController {
     }
 
     @GetMapping("/highreturn")
-    public ResponseEntity<?> getHighReturnProducts(HttpServletRequest request) {
-        Integer uid = (Integer) request.getAttribute("uid");
+    public ResponseEntity<?> getHighReturnProducts() {
+        Integer uid = memberService.getCurrentUid();
         try {
             HighReturnProductsDTO highReturnProducts = investService.getHighReturnProducts(uid);
             SuccessResponseDTO response = new SuccessResponseDTO(true, highReturnProducts.getProducts());

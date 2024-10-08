@@ -1,18 +1,24 @@
 package com.idle.kb_i_dle_backend.domain.finance.controller;
 
-import com.idle.kb_i_dle_backend.global.dto.ErrorResponseDTO;
-import com.idle.kb_i_dle_backend.global.dto.SuccessResponseDTO;
 import com.idle.kb_i_dle_backend.domain.finance.dto.SpotDTO;
 import com.idle.kb_i_dle_backend.domain.finance.service.SpotService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
+import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
+import com.idle.kb_i_dle_backend.global.dto.ErrorResponseDTO;
+import com.idle.kb_i_dle_backend.global.dto.SuccessResponseDTO;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/finance")
@@ -20,15 +26,17 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class SpotController {
 
-    @Autowired
     private final SpotService spotService;  // SpotServiceImpl 대신 SpotService 인터페이스로 주입
+    private final MemberService memberService;
 
 
     // 카테고리에 따른 총 가격 반환
     @GetMapping("/spot/{category}/sum")
     public ResponseEntity<?> getTotalPriceByCategory(@PathVariable("category") String category) {
         try {
-            SuccessResponseDTO response = new SuccessResponseDTO(true, spotService.getTotalPriceByCategory(category));
+            Integer uid = memberService.getCurrentUid();
+            SuccessResponseDTO response = new SuccessResponseDTO(true,
+                    spotService.getTotalPriceByCategory(uid, category));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             ErrorResponseDTO response = new ErrorResponseDTO(e.getMessage());
@@ -37,15 +45,15 @@ public class SpotController {
     }
 
 
-
     // 현물 자산 총 가격 반환
     @GetMapping("/spot/sum")
-    public ResponseEntity<?> getTotalPriceByCategory(){
+    public ResponseEntity<?> getTotalPriceByCategory() {
         try {
-            SuccessResponseDTO response = new SuccessResponseDTO(true, spotService.getTotalPrice());
+            Integer uid = memberService.getCurrentUid();
+            SuccessResponseDTO response = new SuccessResponseDTO(true, spotService.getTotalPrice(uid));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            ErrorResponseDTO response = new ErrorResponseDTO( e.getMessage());
+            ErrorResponseDTO response = new ErrorResponseDTO(e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
@@ -54,10 +62,11 @@ public class SpotController {
     @GetMapping("/spot/all")
     public ResponseEntity<?> getTotalSpotList() {
         try {
-            SuccessResponseDTO response = new SuccessResponseDTO(true, spotService.getSpotList());
+            Integer uid = memberService.getCurrentUid();
+            SuccessResponseDTO response = new SuccessResponseDTO(true, spotService.getSpotList(uid));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            ErrorResponseDTO response = new ErrorResponseDTO( e.getMessage());
+            ErrorResponseDTO response = new ErrorResponseDTO(e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
@@ -66,10 +75,11 @@ public class SpotController {
     @PostMapping("/spot/add")
     public ResponseEntity<?> addSpot(@RequestBody SpotDTO spotDTO) {
         try {
-            SuccessResponseDTO response = new SuccessResponseDTO(true, spotService.addSpot(spotDTO));
+            Integer uid = memberService.getCurrentUid();
+            SuccessResponseDTO response = new SuccessResponseDTO(true, spotService.addSpot(uid, spotDTO));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            ErrorResponseDTO response = new ErrorResponseDTO( e.getMessage());
+            ErrorResponseDTO response = new ErrorResponseDTO(e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
@@ -78,10 +88,11 @@ public class SpotController {
     @PutMapping("/spot/update")
     public ResponseEntity<?> updateSpot(@RequestBody SpotDTO spotDTO) {
         try {
-            SuccessResponseDTO response = new SuccessResponseDTO(true, spotService.updateSpot(spotDTO));
+            Integer uid = memberService.getCurrentUid();
+            SuccessResponseDTO response = new SuccessResponseDTO(true, spotService.updateSpot(uid, spotDTO));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            ErrorResponseDTO response = new ErrorResponseDTO( e.getMessage());
+            ErrorResponseDTO response = new ErrorResponseDTO(e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
@@ -90,8 +101,9 @@ public class SpotController {
     @DeleteMapping("/spot/delete/{index}")
     public ResponseEntity<?> deleteSpot(@PathVariable("index") Integer index) {
         try {
+            Integer uid = memberService.getCurrentUid();
             Map<String, Object> indexData = new HashMap<>();
-            indexData.put("index", spotService.deleteSpot(index).getIndex());
+            indexData.put("index", spotService.deleteSpot(uid, index).getIndex());
             SuccessResponseDTO response = new SuccessResponseDTO(true, indexData);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {

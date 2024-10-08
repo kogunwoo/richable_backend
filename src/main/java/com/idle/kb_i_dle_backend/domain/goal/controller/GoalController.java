@@ -10,6 +10,7 @@ import com.idle.kb_i_dle_backend.domain.goal.dto.RequestPriorityDTO;
 import com.idle.kb_i_dle_backend.domain.goal.dto.ResponseIndexDTO;
 import com.idle.kb_i_dle_backend.domain.goal.dto.ResponseUpdateAchiveDTO;
 import com.idle.kb_i_dle_backend.domain.goal.service.GoalService;
+import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
 import com.idle.kb_i_dle_backend.global.dto.SuccessResponseDTO;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -31,58 +32,49 @@ public class GoalController {
 
     private static final Logger log = LoggerFactory.getLogger(GoalController.class);
     private final GoalService goalService;
+    private final MemberService memberService;
 
-    @GetMapping("/")
+    @GetMapping("")
     public ResponseEntity<SuccessResponseDTO> getAssetGoal() {
-        try {
-            AssetGoalDTO assetGoalDTO = goalService.getAssetGoal(1);
-            return ResponseEntity.ok(new SuccessResponseDTO(false, assetGoalDTO));
-        } catch (Exception e) {
-            return ResponseEntity.ok(new SuccessResponseDTO(false, e.getMessage()));
-        }
+        Integer uid = memberService.getCurrentUid();
+        log.info("Uid is " + uid);
+        AssetGoalDTO assetGoalDTO = goalService.getAssetGoal(uid);
+        return ResponseEntity.ok(new SuccessResponseDTO(false, assetGoalDTO));
     }
 
     @GetMapping("/outcome")
     public ResponseEntity<SuccessResponseDTO> getOutcomeGoal() {
-        try {
-            List<OutcomeGoalDTO> outcomeGoalDTOS = goalService.getOutcomeGoals(1);
-            return ResponseEntity.ok(new SuccessResponseDTO(true, outcomeGoalDTOS));
-        } catch (Exception e) {
-            return ResponseEntity.ok(new SuccessResponseDTO(false, e.getMessage()));
-        }
+        Integer uid = memberService.getCurrentUid();
+        List<OutcomeGoalDTO> outcomeGoalDTOS = goalService.getOutcomeGoals(uid);
+        return ResponseEntity.ok(new SuccessResponseDTO(true, outcomeGoalDTOS));
     }
 
     @PostMapping("/set")
     public ResponseEntity<SuccessResponseDTO> setGoal(@RequestBody AddGoalDTO goal) {
-        try {
-            GoalDTO goalDTO = goalService.saveGoal(1, goal);
-            return ResponseEntity.ok(new SuccessResponseDTO(true, goalDTO));
-        } catch (Exception e) {
-            return ResponseEntity.ok(new SuccessResponseDTO(false, e.getMessage()));
-        }
+        Integer uid = memberService.getCurrentUid();
+        GoalDTO goalDTO = goalService.saveGoal(uid, goal);
+        return ResponseEntity.ok(new SuccessResponseDTO(true, goalDTO));
     }
 
     @PutMapping("/set")
     public ResponseEntity<SuccessResponseDTO> updateGoalAchive(@RequestBody RequestIndexDTO index) {
-        try {
-            ResponseUpdateAchiveDTO responseUpdateAchiveDTO = goalService.updateAchive(1, index);
-            return ResponseEntity.ok(new SuccessResponseDTO(true, responseUpdateAchiveDTO));
-        } catch (Exception e) {
-            return ResponseEntity.ok(new SuccessResponseDTO(false, e.getMessage()));
-        }
+        Integer uid = memberService.getCurrentUid();
+        ResponseUpdateAchiveDTO responseUpdateAchiveDTO = goalService.updateAchive(uid, index);
+        return ResponseEntity.ok(new SuccessResponseDTO(true, responseUpdateAchiveDTO));
+
     }
 
     @DeleteMapping("/delete")
     public ResponseEntity<SuccessResponseDTO> deleteGoal(@RequestBody RequestDeleteDTO requestDeleteDTO) {
-        ResponseIndexDTO responseIndexDTO = goalService.removeGoal(1, requestDeleteDTO);
+        Integer uid = memberService.getCurrentUid();
+        ResponseIndexDTO responseIndexDTO = goalService.removeGoal(uid, requestDeleteDTO);
         return ResponseEntity.ok(new SuccessResponseDTO(true, responseIndexDTO));
     }
 
     @PutMapping("/priority")
-    public ResponseEntity<SuccessResponseDTO> updatePriority(@RequestBody RequestPriorityDTO requestPriorityDTO)
-            throws Exception {
-        ResponseUpdateAchiveDTO responseUpdateAchiveDTO = goalService.updatePriority(100, requestPriorityDTO);
+    public ResponseEntity<SuccessResponseDTO> updatePriority(@RequestBody RequestPriorityDTO requestPriorityDTO) {
+        Integer uid = memberService.getCurrentUid();
+        ResponseUpdateAchiveDTO responseUpdateAchiveDTO = goalService.updatePriority(uid, requestPriorityDTO);
         return ResponseEntity.ok(new SuccessResponseDTO(true, responseUpdateAchiveDTO));
-
     }
 }

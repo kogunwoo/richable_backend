@@ -1,6 +1,10 @@
 package com.idle.kb_i_dle_backend.domain.member.service;
 
-import com.idle.kb_i_dle_backend.domain.member.dto.*;
+import com.idle.kb_i_dle_backend.domain.member.dto.CustomUser;
+import com.idle.kb_i_dle_backend.domain.member.dto.LoginDTO;
+import com.idle.kb_i_dle_backend.domain.member.dto.MemberDTO;
+import com.idle.kb_i_dle_backend.domain.member.dto.MemberInfoDTO;
+import com.idle.kb_i_dle_backend.domain.member.dto.MemberJoinDTO;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import com.idle.kb_i_dle_backend.domain.member.entity.MemberAPI;
 import com.idle.kb_i_dle_backend.domain.member.exception.MemberException;
@@ -11,12 +15,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.*;
 import java.security.SecureRandom;
-import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
+import javax.persistence.EntityNotFoundException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
@@ -107,6 +117,7 @@ public class MemberServiceImpl implements MemberService {
 
         Map<String, Object> result = new HashMap<>();
         result.put("redirectUrl", naverAuthUrl);
+        result.put("state", state);
         return result;
     }
 
@@ -566,5 +577,10 @@ public class MemberServiceImpl implements MemberService {
             log.error("Unexpected error occurred while finding member by email: {}. Error: {}", email, e.getMessage());
             throw new MemberException(ErrorCode.INTERNAL_SERVER_ERROR, "Failed to find member by email");
         }
+    }
+
+    @Override
+    public Integer getCurrentUid() {
+        return (Integer) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 }

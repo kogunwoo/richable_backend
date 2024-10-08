@@ -25,8 +25,8 @@ public class StockServiceImpl implements StockService {
     private final StockRepository stockRepository;
 
     @Override
-    public List<StockDTO> getStockList() throws Exception {
-        Member member = memberService.findMemberByUid(1);
+    public List<StockDTO> getStockList(Integer uid) throws Exception {
+        Member member = memberService.findMemberByUid(uid);
         List<Stock> stocks = stockRepository.findByUidAndDeleteDateIsNull(member);
 
         if (stocks.isEmpty()) {
@@ -43,8 +43,8 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
-    public StockDTO addStock(StockDTO stockDTO) throws ParseException {
-        Member member = memberService.findMemberByUid(1);
+    public StockDTO addStock(Integer uid, StockDTO stockDTO) throws ParseException {
+        Member member = memberService.findMemberByUid(uid);
         Stock savedStock = stockRepository.save(StockDTO.convertToEntity(member, stockDTO));
 
         return StockDTO.convertToDTO(savedStock);
@@ -52,8 +52,8 @@ public class StockServiceImpl implements StockService {
 
     @Transactional
     @Override
-    public StockDTO updateStock(StockDTO stockDTO) throws ParseException {
-        Member member = memberService.findMemberByUid(1);
+    public StockDTO updateStock(Integer uid, StockDTO stockDTO) throws ParseException {
+        Member member = memberService.findMemberByUid(uid);
 
         // Stock 조회
         Stock isStock = (Stock) stockRepository.findByIndexAndDeleteDateIsNull(stockDTO.getIndex())
@@ -73,8 +73,8 @@ public class StockServiceImpl implements StockService {
 
     @Transactional
     @Override
-    public StockDTO deleteStock(Integer index) throws ParseException {
-        Member member = memberService.findMemberByUid(1);
+    public StockDTO deleteStock(Integer uid, Integer index) throws ParseException {
+        Member member = memberService.findMemberByUid(uid);
 
         // Stock 조회
         Stock isStock = (Stock) stockRepository.findByIndexAndDeleteDateIsNull(index)

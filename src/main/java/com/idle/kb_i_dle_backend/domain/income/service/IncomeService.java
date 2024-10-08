@@ -5,16 +5,16 @@ import java.text.ParseException;
 import java.util.List;
 
 public interface IncomeService {
-    List<IncomeDTO> getIncomeList() throws Exception;
+    List<IncomeDTO> getIncomeList(Integer uid) throws Exception;
 
-    long getIncomeSumInMonth(int uid, int year, int month);
+    long getIncomeSumInMonth(Integer uid, int year, int month);
 
-    IncomeDTO getIncomeByIndex(Integer index);
+    IncomeDTO getIncomeByIndex(Integer uid, Integer index);
 
-    IncomeDTO addIncome(IncomeDTO incomeDTO) throws ParseException;
+    IncomeDTO addIncome(Integer uid, IncomeDTO incomeDTO) throws ParseException;
 
-    IncomeDTO updateIncome(IncomeDTO incomeDTO) throws ParseException;
+    IncomeDTO updateIncome(Integer uid, IncomeDTO incomeDTO) throws ParseException;
 
-    Integer deleteIncomeByUidAndIndex(Integer index);
+    Integer deleteIncomeByUidAndIndex(Integer uid, Integer index);
 
 }
