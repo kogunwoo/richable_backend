@@ -44,12 +44,8 @@ public class GoalController {
 
     @GetMapping("/outcome")
     public ResponseEntity<SuccessResponseDTO> getOutcomeGoal() {
-        try {
-            List<OutcomeGoalDTO> outcomeGoalDTOS = goalService.getOutcomeGoals(1);
-            return ResponseEntity.ok(new SuccessResponseDTO(true, outcomeGoalDTOS));
-        } catch (Exception e) {
-            return ResponseEntity.ok(new SuccessResponseDTO(false, e.getMessage()));
-        }
+        List<OutcomeGoalDTO> outcomeGoalDTOS = goalService.getOutcomeGoals(1);
+        return ResponseEntity.ok(new SuccessResponseDTO(true, outcomeGoalDTOS));
     }
 
     @PostMapping("/set")
@@ -83,6 +79,5 @@ public class GoalController {
             throws Exception {
         ResponseUpdateAchiveDTO responseUpdateAchiveDTO = goalService.updatePriority(100, requestPriorityDTO);
         return ResponseEntity.ok(new SuccessResponseDTO(true, responseUpdateAchiveDTO));
-
     }
 }
