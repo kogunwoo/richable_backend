@@ -44,12 +44,6 @@ jobs:
           ./gradlew build
           echo "gradle 빌드 완료"
 
-      - name: 빌드 파일 위치 및 확인
-        run: |
-          ls -l build/libs
-          ls -l build/libs/exploded
-
-
       - name: 도커 로그인
         run: |
           echo "Docker 로그인 중..."
