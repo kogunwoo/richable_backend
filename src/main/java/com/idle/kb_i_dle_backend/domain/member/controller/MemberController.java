@@ -134,7 +134,7 @@ public class MemberController {
         } else {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", "비밀번호 재설정 중 오류가 발생했습니다."));
         }
-    }
+        }
 
     @GetMapping("/info")
     public ResponseEntity<?> getMemberInfoByNickname(HttpServletRequest request) {
