@@ -10,7 +10,6 @@ COPY build/libs/kb_i_dle_backend-1.0-SNAPSHOT.war /usr/local/tomcat/webapps/app.
 # server.xml의 8080 포트를 80으로 변경
 RUN sed -i 's/port="8080"/port="80"/' /usr/local/tomcat/conf/server.xml
 
-
 # 애플리케이션 포트 노출
 EXPOSE 80
 

@@ -76,4 +76,3 @@ jobs:
             fi
             echo "새로운 컨테이너 실행"
             docker run -d --name ${{ secrets.DOCKER_CONTAINER_NAME }} -p 80:80 ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ github.sha }}
-            EOF
