@@ -24,8 +24,8 @@ public class IncomeServiceImpl implements IncomeService {
     private final IncomeRepository incomeRepository;
 
     @Override
-    public List<IncomeDTO> getIncomeList() throws Exception {
-        Member tempMember = memberService.findMemberByUid(1);
+    public List<IncomeDTO> getIncomeList(Integer uid) throws Exception {
+        Member tempMember = memberService.findMemberByUid(uid);
         List<Income> incomes = incomeRepository.findByUid(tempMember);
 
         if (incomes.isEmpty()) {
@@ -42,7 +42,7 @@ public class IncomeServiceImpl implements IncomeService {
     }
 
     @Override
-    public long getIncomeSumInMonth(int uid, int year, int month) {
+    public long getIncomeSumInMonth(Integer uid, int year, int month) {
         Member tempUser = memberService.findMemberByUid(uid);
         List<Income> incomes = incomeRepository.findByUidAndYearAndMonth(tempUser, year, month);
         Long sumOfIncomes = incomes.stream().mapToLong(Income::getAmount).sum();
@@ -52,8 +52,8 @@ public class IncomeServiceImpl implements IncomeService {
 
 
     @Override
-    public IncomeDTO getIncomeByIndex(Integer index) {
-        Member tempMember = memberService.findMemberByUid(1);
+    public IncomeDTO getIncomeByIndex(Integer uid, Integer index) {
+        Member tempMember = memberService.findMemberByUid(uid);
         Income isIncome = incomeRepository.findByIndex(index)
                 .orElseThrow(
                         () -> new CustomException(ErrorCode.INVALID_INCOME, "Income not found with index: " + index));
@@ -67,8 +67,8 @@ public class IncomeServiceImpl implements IncomeService {
     }
 
     @Override
-    public IncomeDTO addIncome(IncomeDTO incomeDTO) throws ParseException {
-        Member tempMember = memberService.findMemberByUid(1);
+    public IncomeDTO addIncome(Integer uid, IncomeDTO incomeDTO) throws ParseException {
+        Member tempMember = memberService.findMemberByUid(uid);
         Income savedIncome = incomeRepository.save(IncomeDTO.convertToEntity(tempMember, incomeDTO));
 
         return IncomeDTO.convertToDTO(savedIncome);
@@ -76,8 +76,8 @@ public class IncomeServiceImpl implements IncomeService {
 
     @Transactional
     @Override
-    public IncomeDTO updateIncome(IncomeDTO incomeDTO) throws ParseException {
-        Member member = memberService.findMemberByUid(1);
+    public IncomeDTO updateIncome(Integer uid, IncomeDTO incomeDTO) throws ParseException {
+        Member member = memberService.findMemberByUid(uid);
 
         // Income 조회
         Income isIncome = incomeRepository.findByIndex(incomeDTO.getIncomeId())
@@ -104,8 +104,8 @@ public class IncomeServiceImpl implements IncomeService {
     // 특정 유저와 index에 해당하는 소득 삭제
     @Transactional
     @Override
-    public Integer deleteIncomeByUidAndIndex(Integer index) {
-        Member tempMember = memberService.findMemberByUid(1);
+    public Integer deleteIncomeByUidAndIndex(Integer uid, Integer index) {
+        Member tempMember = memberService.findMemberByUid(uid);
         Income isIncome = incomeRepository.findByIndex(index)
                 .orElseThrow(
                         () -> new CustomException(ErrorCode.INVALID_INCOME, "Income not found with index: " + index));
