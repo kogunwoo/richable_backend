@@ -3,10 +3,12 @@ package com.idle.kb_i_dle_backend.domain.member.controller;
 
 import com.idle.kb_i_dle_backend.domain.member.dto.LoginDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberJoinDTO;
+import com.idle.kb_i_dle_backend.domain.member.repository.MemberRepository;
 import com.idle.kb_i_dle_backend.domain.member.service.MemberApiService;
 import com.idle.kb_i_dle_backend.domain.member.service.MemberInfoService;
 import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
 import com.idle.kb_i_dle_backend.domain.member.util.JwtProcessor;
+import com.idle.kb_i_dle_backend.global.dto.ErrorResponseDTO;
 import com.idle.kb_i_dle_backend.global.dto.SuccessResponseDTO;
 
 import java.util.HashMap;
@@ -37,6 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberController {
 
     private final MemberService memberService;
+    private final MemberRepository memberRepository;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO) {
@@ -67,16 +70,22 @@ public class MemberController {
     @GetMapping("/checkDupl/{id}")
     public ResponseEntity<?> checkDuplicateUsername(@PathVariable String id) {
         boolean result = memberService.checkDupl(id);
-        SuccessResponseDTO successResponse = new SuccessResponseDTO(true, result);
-        return ResponseEntity.ok(successResponse);
+        if (result == true){
+            SuccessResponseDTO successResponse = new SuccessResponseDTO(true, result);
+            return ResponseEntity.ok(successResponse);
+        } else {
+            ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO("중복된 ID");
+            return ResponseEntity.ok(errorResponseDTO);
+        }
     }
 
     @PostMapping("/terms/{id}")
-    public ResponseEntity<Map<String, Boolean>> updateUserAgreement(
+    public ResponseEntity<?> updateUserAgreement(
             @PathVariable String id,
             @RequestBody Map<String, Boolean> agreementData) {
-        Map<String, Boolean> result = memberService.updateUserAgreement(id, agreementData);
-        return ResponseEntity.ok(result);
+        boolean result = memberService.updateUserAgreement(id, agreementData);
+        SuccessResponseDTO successResponse = new SuccessResponseDTO(true, result);
+        return ResponseEntity.ok(successResponse);
     }
 
     @PostMapping("/findid")
@@ -89,35 +98,42 @@ public class MemberController {
 
     @PostMapping("/findid/auth")
     public ResponseEntity<?> verifyCode(@RequestBody Map<String, String> payload) {
-        try {
             Map<String, Object> result = memberService.verifyCode(payload.get("email"), payload.get("code"));
             boolean isVerified = (boolean) result.get("verified");
-            return ResponseEntity.ok(new SuccessResponseDTO(isVerified, result));
-        } catch (Exception e) {
-            log.error("Error in verifyCode endpoint: ", e);
-            Map<String, String> errorResult = new HashMap<>();
-            errorResult.put("message", "서버 오류가 발생했습니다.");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new SuccessResponseDTO(false, errorResult));
-        }
+            if (isVerified) {
+                String id = memberRepository.findByEmail(payload.get("email")).getId();
+                return ResponseEntity.ok(Map.of("id", id));
+            } else {
+                return ResponseEntity.badRequest().body(Map.of("message", "잘못된 인증 코드입니다."));
+            }
     }
 
     @PostMapping("/find/pw/auth")
     public ResponseEntity<?> findPw(@RequestBody Map<String, String> payload) {
         String result = memberService.findPwByEmail(payload.get("email"));
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(Map.of("message", result));
     }
 
     @PostMapping("/find_pw_auth")
     public ResponseEntity<?> verifyCode2(@RequestBody Map<String, String> payload) {
-        String result = String.valueOf(memberService.verifyCode(payload.get("email"), payload.get("code")));
-        return ResponseEntity.ok(result);
+        Map<String, Object> result = memberService.verifyCode(payload.get("email"), payload.get("code"));
+        boolean isVerified = (boolean) result.get("verified");
+        if (isVerified) {
+            String id = memberRepository.findByEmail(payload.get("email")).getId();
+            return ResponseEntity.ok(Map.of("id", id));
+        } else {
+            return ResponseEntity.badRequest().body(Map.of("message", "잘못된 인증 코드입니다."));
+        }
     }
 
     @PostMapping("/set/pw")
     public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> payload) {
         boolean result = memberService.resetPassword(payload.get("id"), payload.get("newPassword"));
-        return ResponseEntity.ok(result);
+        if (result) {
+            return ResponseEntity.ok(Map.of("success", true, "message", "비밀번호가 성공적으로 재설정되었습니다."));
+        } else {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "비밀번호 재설정 중 오류가 발생했습니다."));
+        }
     }
 
     @GetMapping("/info")

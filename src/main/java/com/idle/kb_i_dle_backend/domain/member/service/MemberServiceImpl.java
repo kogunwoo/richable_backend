@@ -207,17 +207,15 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public boolean checkAgree(boolean info, boolean finance, String id) {
-        return false;
+        return true;
     }
 
     @Override
-    public Map<String, Boolean> updateUserAgreement(String id, Map<String, Boolean> agreementData) {
+    public boolean updateUserAgreement(String id, Map<String, Boolean> agreementData) {
         boolean info = agreementData.get("info");
         boolean finance = agreementData.get("finance");
-        boolean success = checkAgree(info, finance, id);
-        Map<String, Boolean> response = new HashMap<>();
-        response.put("success", success);
-        return response;
+        boolean result = checkAgree(info, finance, id);
+        return result;
     }
 
     private String generateRandomCode() {

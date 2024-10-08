@@ -18,7 +18,7 @@ public interface MemberService {
 
     String registerMember(MemberJoinDTO signupDTO);
 
-    Map<String, Boolean> updateUserAgreement(String id, Map<String, Boolean> agreementData);
+    boolean updateUserAgreement(String id, Map<String, Boolean> agreementData);
 
     boolean checkDupl(String id);
 
