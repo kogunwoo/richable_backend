@@ -23,6 +23,7 @@ import com.idle.kb_i_dle_backend.domain.invest.dto.MaxPercentageCategoryDTO;
 import com.idle.kb_i_dle_backend.domain.invest.dto.RecommendedProductDTO;
 import com.idle.kb_i_dle_backend.domain.invest.service.InvestService;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
+import com.idle.kb_i_dle_backend.domain.member.repository.MemberRepository;
 import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -46,6 +47,7 @@ public class InvestServiceImpl implements InvestService {
     private final StockPriceRepository stockPriceRepository;
     private final CoinPriceRepository coinPriceRepository;
     private final MemberService memberService;
+    private final MemberRepository memberRepository;
 
 
     @Override
@@ -77,7 +79,7 @@ public class InvestServiceImpl implements InvestService {
 
     @Override
     public MaxPercentageCategoryDTO getMaxPercentageCategory(int uid) throws Exception {
-        Member member = memberService.findMemberByUid(uid);
+        Member member = memberRepository.findByUid(uid);
         List<CategorySumDTO> categorySums = getInvestmentTendency(uid);
 
         return categorySums.stream()

@@ -417,22 +417,20 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public boolean deleteMemberById(String id) {
-        log.info("Attempting to delete member with id: {}", id);
+    public boolean deleteMemberById(String nickname) {
+        log.info("Attempting to delete member with nickname: {}", nickname);
         try {
-            Optional<Member> memberOptional = memberRepository.findById(id);
-            Member member = memberOptional.orElseThrow(() ->
-                    new MemberException(ErrorCode.MEMBER_NOT_FOUND, "Member not found with id: " + id));
+            Member memberOptional = memberRepository.findByNickname(nickname);
 
-            memberRepository.delete(member);
-            log.info("Successfully deleted member with id: {}", id);
+            memberRepository.delete(memberOptional);
+            log.info("Successfully deleted member with nickname: {}", nickname);
 
             return true;
         } catch (MemberException e) {
-            log.error("Failed to delete member with id: {}. Error: {}", id, e.getMessage());
+            log.error("Failed to delete member with nickname: {}. Error: {}", nickname, e.getMessage());
             throw e;
         } catch (Exception e) {
-            log.error("Unexpected error occurred while deleting member with id: {}. Error: {}", id, e.getMessage());
+            log.error("Unexpected error occurred while deleting member with nickname: {}. Error: {}", nickname, e.getMessage());
             throw new MemberException(ErrorCode.INTERNAL_SERVER_ERROR, "Failed to delete member");
         }
     }
