@@ -151,9 +151,9 @@ public class MemberController {
         return ResponseEntity.ok(new SuccessResponseDTO(true, result));
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteMember(@PathVariable String id) {
-        boolean result = memberService.deleteMemberById(id);
+    @DeleteMapping("/delete/{nickname}")
+    public ResponseEntity<?> deleteMember(@PathVariable String nickname) {
+        boolean result = memberService.deleteMemberById(nickname);
         return ResponseEntity.ok(new SuccessResponseDTO(true, result));
     }
 
