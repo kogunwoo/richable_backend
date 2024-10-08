@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -48,17 +49,35 @@ public class MemberController {
     }
 
     @GetMapping("/naverlogin")
-    public ResponseEntity<?> naverlogin(HttpServletRequest request) throws Exception {
-        Map<String, Object> naverLoginResult = memberService.initiateNaverLogin(request);
-        return ResponseEntity.ok(naverLoginResult);
+    public ResponseEntity<?> naverlogin(HttpServletRequest request) {
+        try {
+            Map<String, Object> naverLoginResult = memberService.initiateNaverLogin(request);
+            String redirectUrl = (String) naverLoginResult.get("redirectUrl");
+
+            if (redirectUrl != null && !redirectUrl.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.FOUND)
+                        .header(HttpHeaders.LOCATION, redirectUrl)
+                        .build();
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(new ErrorResponseDTO("Failed to generate Naver login URL"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponseDTO("Failed to initiate Naver login"));
+        }
     }
 
     @GetMapping("/naverCallback")
     public ResponseEntity<?> naverCallback(@RequestParam(required = false) String code,
                                            @RequestParam(required = false) String state,
-                                           HttpServletRequest request) throws Exception {
-        Map<String, Object> callbackResult = memberService.processNaverCallback(code, state, request);
-        return ResponseEntity.ok(callbackResult);
+                                           HttpServletRequest request) {
+        try {
+            Map<String, Object> callbackResult = memberService.processNaverCallback(code, state, request);
+            return ResponseEntity.ok(callbackResult);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponseDTO("Failed to process Naver callback"));
+        }
     }
 
     @PostMapping("/register")

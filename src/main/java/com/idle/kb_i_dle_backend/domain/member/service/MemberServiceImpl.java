@@ -7,6 +7,7 @@ import com.idle.kb_i_dle_backend.domain.member.exception.MemberException;
 import com.idle.kb_i_dle_backend.domain.member.repository.MemberRepository;
 import com.idle.kb_i_dle_backend.domain.member.util.JwtProcessor;
 import com.idle.kb_i_dle_backend.global.codes.ErrorCode;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -20,6 +21,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -30,6 +35,9 @@ import org.springframework.stereotype.Service;
 import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
@@ -99,60 +107,69 @@ public class MemberServiceImpl implements MemberService {
 
         Map<String, Object> result = new HashMap<>();
         result.put("redirectUrl", naverAuthUrl);
-        result.put("state", state);
         return result;
     }
 
     @Override
     public Map<String, Object> processNaverCallback(String code, String state, HttpServletRequest request) throws Exception {
-        String tokenUrl = "https://nid.naver.com/oauth2.0/token?grant_type=authorization_code"
-                + "&client_id=" + clientId
-                + "&client_secret=" + clientSecret
-               + "&code=" + code
-               + "&state=" + state;
-
-        String accessToken = getHttpResponse(tokenUrl);
+        String accessToken = getNaverAccessToken(code, state);
         JSONObject userProfile = getUserProfile(accessToken);
+        log.error("userProfile check"+userProfile);
 
         JSONObject responseObj = userProfile.getJSONObject("response");
         String email = responseObj.getString("email");
         String nickname = responseObj.getString("nickname");
 
-        MemberDTO memberDTO = findByEmail(email);
-        if (memberDTO == null) {
-            MemberJoinDTO joinDTO = MemberJoinDTO.builder()
-                    .email(email)
-                    .nickname(nickname)
-                   .build();
-            MemberJoin(joinDTO);
-            memberDTO = findByEmail(email);
+        Member member = memberRepository.findByEmail(email);
+        if (member == null) {
+            member = createNaverMember(email, nickname);
         }
 
-        String jwtToken = jwtProcessor.generateToken(memberDTO.getId(), memberDTO.getUid(), memberDTO.getNickname(),
-               memberDTO.getEmail());
-        HttpSession session = request.getSession();
-        session.setAttribute("jwtToken", jwtToken);
+        String jwt = jwtProcessor.generateToken(member.getId(), member.getUid(), member.getNickname(), member.getEmail());
 
         Map<String, Object> result = new HashMap<>();
-        result.put("token", jwtToken);
+        result.put("token", jwt);
         result.put("redirectUrl", "http://localhost:5173");
         return result;
     }
-        private String getHttpResponse(String urlString) throws Exception {
-            URL url = new URL(urlString);
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("GET");
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            String inputLine;
-            StringBuffer response = new StringBuffer();
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
-            }
-            in.close();
+    private String getHttpResponse(String urlString) throws Exception {
+        URL url = new URL(urlString);
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("GET");
 
-            return response.toString();
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        String inputLine;
+        StringBuffer response = new StringBuffer();
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
         }
+        in.close();
+
+        return response.toString();
+    }
+
+    private String getNaverAccessToken(String code, String state) throws Exception {
+        String tokenUrl = "https://nid.naver.com/oauth2.0/token";
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+        map.add("grant_type", "authorization_code");
+        map.add("client_id", clientId);
+        map.add("client_secret", clientSecret);
+        map.add("code", code);
+        map.add("state", state);
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
+
+        ResponseEntity<String> response = restTemplate.postForEntity(tokenUrl, request, String.class);
+
+        JSONObject jsonObject = new JSONObject(response.getBody());
+        return jsonObject.getString("access_token");
+    }
 
     private JSONObject getUserProfile(String accessToken) throws Exception {
         String profileUrl = "https://openapi.naver.com/v1/nid/me";
@@ -177,6 +194,24 @@ public class MemberServiceImpl implements MemberService {
 
         return new JSONObject(response.toString());
     }
+    private Member createNaverMember(String email, String nickname) {
+        MemberJoinDTO memberJoinDTO = MemberJoinDTO.builder()
+                .id(email.split("@")[0])
+                .password("1234*") // 임의의 비밀번호 생성
+                .email(email)
+                .nickname(nickname)
+                .gender('M') // 기본값, 실제로는 네이버 API에서 제공하는 정보를 사용해야 합니다.
+                .birth_year(2022) // 기본값, 실제로는 네이버 API에서 제공하는 정보를 사용해야 합니다.
+                .auth("ROLE_MEMBER")
+                .agreementInfo(false)
+                .agreementFinance(false)
+                .build();
+
+        Member member = Member.from(memberJoinDTO);
+        member.setPassword(passwordEncoder.encode(member.getPassword())); // 비밀번호 암호화
+
+        return memberRepository.save(member);
+    }
 
     @Override
     public String registerMember(MemberJoinDTO signupDTO) {
@@ -197,12 +232,76 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public Member findMemberByUid(int id) {
-        return null;
+        try {
+            Member member = memberRepository.findByUid(id);
+            if (member == null) {
+                throw new MemberException(ErrorCode.INVALID_MEMEBER);
+            }
+            return member;
+        } catch (Exception e) {
+            throw new MemberException(ErrorCode.INVALID_MEMEBER, e.getMessage());
+        }
     }
 
     @Override
+    @Transactional
     public void MemberJoin(MemberJoinDTO memberjoindto) {
+        try {
+            log.debug("Starting MemberJoin process for ID: {}", memberjoindto.getId());
 
+            if (memberjoindto.isAgreementInfo()) {
+                memberjoindto.setAgreementInfo(true);
+            } else {
+                memberjoindto.setAgreementInfo(false);
+            }
+            if (memberjoindto.isAgreementFinance()) {
+                memberjoindto.setAgreementFinance(true);
+            } else {
+                memberjoindto.setAgreementFinance(false);
+            }
+            if (memberjoindto.getAuth() == null || memberjoindto.getAuth().isEmpty()) {
+                memberjoindto.setAuth("ROLE_MEMBER");
+            }
+
+            log.debug("Checking if user exists");
+            if (memberRepository.existsById(memberjoindto.getId())) {
+                throw new IllegalStateException("User already exists");
+            }
+
+            log.debug("Validating nickname");
+            if (memberjoindto.getNickname() == null || memberjoindto.getNickname().length() > 50) {
+                throw new IllegalArgumentException("Nickname must not be null and should not exceed 50 characters");
+            }
+
+            log.debug("Validating ID");
+            if (memberjoindto.getId() == null || memberjoindto.getId().isEmpty()) {
+                throw new IllegalStateException("User ID is required");
+            }
+
+            log.debug("Encoding password");
+            String encodePassword = passwordEncoder.encode(memberjoindto.getPassword());
+
+            log.debug("Building User entity");
+            Member newMember = Member.builder()
+                    .id(memberjoindto.getId())
+                    .password(encodePassword)
+                    .nickname(memberjoindto.getNickname())
+                    .gender(String.valueOf(memberjoindto.getGender()))
+                    .email(memberjoindto.getEmail())
+                    .birth_year(memberjoindto.getBirth_year())
+                    .auth(memberjoindto.getAuth())
+
+                    .agreementInfo(memberjoindto.isAgreementInfo())
+                    .agreementFinance(memberjoindto.isAgreementFinance())
+                    .build();
+
+            log.debug("Saving new user: {}", newMember);
+            memberRepository.save(newMember);
+            log.debug("User saved successfully");
+        } catch (Exception e) {
+            log.error("Error in MemberJoin: ", e);
+            throw e;
+        }
     }
 
     @Override
@@ -430,7 +529,8 @@ public class MemberServiceImpl implements MemberService {
             log.error("Failed to delete member with nickname: {}. Error: {}", nickname, e.getMessage());
             throw e;
         } catch (Exception e) {
-            log.error("Unexpected error occurred while deleting member with nickname: {}. Error: {}", nickname, e.getMessage());
+            log.error("Unexpected error occurred while deleting member with nickname: {}. Error: {}", nickname,
+                    e.getMessage());
             throw new MemberException(ErrorCode.INTERNAL_SERVER_ERROR, "Failed to delete member");
         }
     }
