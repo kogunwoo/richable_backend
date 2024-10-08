@@ -57,8 +57,8 @@ public class OutcomeServiceImpl implements OutcomeService {
      * @return
      */
     @Override
-    public ResponseCategorySumListDTO findCategorySum(Integer year, Integer month) {
-        Member member = memberService.findMemberByUid(1);
+    public ResponseCategorySumListDTO findCategorySum(Integer uid, Integer year, Integer month) {
+        Member member = memberService.findMemberByUid(uid);
 
         List<CategorySumDTO> categorySumDTOS = outcomeUserRepository.findCategorySumByUidAndYearAndMonth(member, year,
                 month);
@@ -75,8 +75,8 @@ public class OutcomeServiceImpl implements OutcomeService {
      * @return
      */
     @Override
-    public MonthOutcomeDTO findMonthOutcome(Integer year, Integer month) {
-        Member user = memberService.findMemberByUid(1);
+    public MonthOutcomeDTO findMonthOutcome(Integer uid, Integer year, Integer month) {
+        Member user = memberService.findMemberByUid(uid);
         MonthOutcomeDTO monthOutcomeDTO;
         List<OutcomeUser> consumes = outcomeUserRepository.findAmountAllByUidAndYearAndMonth(user, year, month);
         List<Long> dailyAmount = new ArrayList<>(Collections.nCopies(31, 0L));
@@ -111,7 +111,7 @@ public class OutcomeServiceImpl implements OutcomeService {
      */
     @Override
     @Transactional
-    public CompareAverageCategoryOutcomeDTO compareWithAverage(int uid, int year, int month, String category) {
+    public CompareAverageCategoryOutcomeDTO compareWithAverage(Integer uid, int year, int month, String category) {
         //먼저 사용자 uid를 가져오고
         Member user = memberService.findMemberByUid(uid);
         //dto 생성
@@ -285,8 +285,8 @@ public class OutcomeServiceImpl implements OutcomeService {
     // 소비 CRUD 추가
 
     @Override
-    public List<OutcomeUserDTO> getOutcomeList() throws Exception {
-        Member tempMember = memberService.findMemberByUid(1);
+    public List<OutcomeUserDTO> getOutcomeList(Integer uid) throws Exception {
+        Member tempMember = memberService.findMemberByUid(uid);
         List<OutcomeUser> outcomes = outcomeUserRepository.findByUid(tempMember);
 
         if (outcomes.isEmpty()) {
@@ -303,8 +303,8 @@ public class OutcomeServiceImpl implements OutcomeService {
     }
 
     @Override
-    public OutcomeUserDTO getOutcomeByIndex(Integer index) throws Exception {
-        Member tempMember = memberService.findMemberByUid(1);
+    public OutcomeUserDTO getOutcomeByIndex(Integer uid, Integer index) throws Exception {
+        Member tempMember = memberService.findMemberByUid(uid);
         OutcomeUser isOutcomeUser = outcomeUserRepository.findByIndex(index)
                 .orElseThrow(
                         () -> new CustomException(ErrorCode.INVALID_OUTCOME, "Outcome not found with index: " + index));
@@ -318,8 +318,8 @@ public class OutcomeServiceImpl implements OutcomeService {
     }
 
     @Override
-    public OutcomeUserDTO addOutcome(OutcomeUserDTO outcomeUserDTO) throws ParseException {
-        Member tempMember = memberService.findMemberByUid(1);
+    public OutcomeUserDTO addOutcome(Integer uid, OutcomeUserDTO outcomeUserDTO) throws ParseException {
+        Member tempMember = memberService.findMemberByUid(uid);
         OutcomeUser savedOutcome = outcomeUserRepository.save(
                 OutcomeUserDTO.convertToEntity(tempMember, outcomeUserDTO));
 
@@ -328,8 +328,8 @@ public class OutcomeServiceImpl implements OutcomeService {
 
     @Transactional
     @Override
-    public OutcomeUserDTO updateOutcome(OutcomeUserDTO outcomeUserDTO) throws ParseException {
-        Member tempMember = memberService.findMemberByUid(1);
+    public OutcomeUserDTO updateOutcome(Integer uid, OutcomeUserDTO outcomeUserDTO) throws ParseException {
+        Member tempMember = memberService.findMemberByUid(uid);
 
         // Outcome 조회
         OutcomeUser isOutcomeUser = outcomeUserRepository.findByIndex(outcomeUserDTO.getIndex())
@@ -358,8 +358,8 @@ public class OutcomeServiceImpl implements OutcomeService {
 
     @Transactional
     @Override
-    public Integer deleteOutcomeByUidAndIndex(Integer index) {
-        Member tempMember = memberService.findMemberByUid(1);
+    public Integer deleteOutcomeByUidAndIndex(Integer uid, Integer index) {
+        Member tempMember = memberService.findMemberByUid(uid);
         OutcomeUser isOutcomeUser = outcomeUserRepository.findByIndex(index)
                 .orElseThrow(
                         () -> new CustomException(ErrorCode.INVALID_OUTCOME, "Outcome not found with index: " + index));

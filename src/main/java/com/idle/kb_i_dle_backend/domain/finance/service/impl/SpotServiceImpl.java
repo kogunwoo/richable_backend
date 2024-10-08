@@ -28,9 +28,9 @@ public class SpotServiceImpl implements SpotService {
 
     // 카테고리별 현물 자산 총합
     @Override
-    public PriceSumDTO getTotalPriceByCategory(String category) throws Exception {
+    public PriceSumDTO getTotalPriceByCategory(Integer uid, String category) throws Exception {
 
-        Member member = memberService.findMemberByUid(1);
+        Member member = memberService.findMemberByUid(uid);
 
         String result = category.equals("car") ? "자동차" :
                 category.equals("elec") ? "전자기기" :
@@ -55,8 +55,8 @@ public class SpotServiceImpl implements SpotService {
 
     // 전체 현물 자산 총합
     @Override
-    public PriceSumDTO getTotalPrice() throws Exception {
-        Member member = memberService.findMemberByUid(1);
+    public PriceSumDTO getTotalPrice(Integer uid) throws Exception {
+        Member member = memberService.findMemberByUid(uid);
         List<Spot> spots = spotRepository.findByUidAndDeleteDateIsNull(member);
 
         if (spots.isEmpty()) {
@@ -74,8 +74,8 @@ public class SpotServiceImpl implements SpotService {
 
     // 현물 자산 목록 전체 조회
     @Override
-    public List<SpotDTO> getSpotList() throws Exception {
-        Member member = memberService.findMemberByUid(1);
+    public List<SpotDTO> getSpotList(Integer uid) throws Exception {
+        Member member = memberService.findMemberByUid(uid);
         List<Spot> spots = spotRepository.findByUidAndDeleteDateIsNull(member);
 
         if (spots.isEmpty()) {
@@ -100,8 +100,8 @@ public class SpotServiceImpl implements SpotService {
 
     // 현물 자산 추가
     @Override
-    public SpotDTO addSpot(SpotDTO spotDTO) throws ParseException {
-        Member member = memberService.findMemberByUid(1);
+    public SpotDTO addSpot(Integer uid, SpotDTO spotDTO) throws ParseException {
+        Member member = memberService.findMemberByUid(uid);
         Spot savedSpot = spotRepository.save(SpotDTO.convertToEntity(member, spotDTO));
 
         return SpotDTO.convertToDTO(savedSpot);
@@ -110,8 +110,8 @@ public class SpotServiceImpl implements SpotService {
     // 현물 자산 수정
     @Transactional
     @Override
-    public SpotDTO updateSpot(SpotDTO spotDTO) throws ParseException {
-        Member member = memberService.findMemberByUid(1);
+    public SpotDTO updateSpot(Integer uid, SpotDTO spotDTO) throws ParseException {
+        Member member = memberService.findMemberByUid(uid);
 
         // Spot 조회
         Spot isSpot = spotRepository.findByIndexAndDeleteDateIsNull(spotDTO.getIndex())
@@ -132,8 +132,8 @@ public class SpotServiceImpl implements SpotService {
     // 특정 유저와 index에 해당하는 Spot 삭제
     @Transactional
     @Override
-    public SpotDTO deleteSpot(Integer index) {
-        Member member = memberService.findMemberByUid(1);
+    public SpotDTO deleteSpot(Integer uid, Integer index) {
+        Member member = memberService.findMemberByUid(uid);
 
         // Spot 조회
         Spot isSpot = spotRepository.findByIndexAndDeleteDateIsNull(index)

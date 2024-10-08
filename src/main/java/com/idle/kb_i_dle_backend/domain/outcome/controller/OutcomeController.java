@@ -1,5 +1,6 @@
 package com.idle.kb_i_dle_backend.domain.outcome.controller;
 
+import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
 import com.idle.kb_i_dle_backend.domain.outcome.dto.CompareAverageCategoryOutcomeDTO;
 import com.idle.kb_i_dle_backend.domain.outcome.dto.MonthOutcomeDTO;
 import com.idle.kb_i_dle_backend.domain.outcome.dto.OutcomeUserDTO;
@@ -34,12 +35,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class OutcomeController {
 
     private final OutcomeService outcomeService;
+    private final MemberService memberService;
 
 
     @GetMapping("/simulation/{cntYear}/{cntMonth}")
     public ResponseEntity<SuccessResponseDTO> simulation6Month(@PathVariable int cntYear, @PathVariable int cntMonth)
             throws ParseException {
-        Simulation6MonthDTO simulation6MonthDTO = outcomeService.calculate6MonthSaveOutcome(1, cntYear, cntMonth);
+        Integer uid = memberService.getCurrentUid();
+        Simulation6MonthDTO simulation6MonthDTO = outcomeService.calculate6MonthSaveOutcome(uid, cntYear, cntMonth);
         return ResponseEntity.ok(new SuccessResponseDTO(true, simulation6MonthDTO));
     }
 
@@ -54,8 +57,10 @@ public class OutcomeController {
     @GetMapping("/review/sum/{cntYear}/{cntMonth}")
     public ResponseEntity<SuccessResponseDTO> saveOutcomeInMonth(@PathVariable int cntYear,
                                                                  @PathVariable int cntMonth) {
+        Integer uid = memberService.getCurrentUid();
         Calendar calendar = Calendar.getInstance();
-        PossibleSaveOutcomeInMonthDTO possibleSaveOutcomeInMonthDTO = outcomeService.findPossibleSaveOutcome(1, cntYear,
+        PossibleSaveOutcomeInMonthDTO possibleSaveOutcomeInMonthDTO = outcomeService.findPossibleSaveOutcome(uid,
+                cntYear,
                 cntMonth);
         SuccessResponseDTO successResponseDTO = new SuccessResponseDTO(true, possibleSaveOutcomeInMonthDTO);
         return ResponseEntity.ok(successResponseDTO);
@@ -72,6 +77,8 @@ public class OutcomeController {
     @GetMapping("/compare/{cntYear}/{cntMonth}/{category}")
     public ResponseEntity<SuccessResponseDTO> compareWithAverage(@PathVariable int cntYear, @PathVariable int cntMonth,
                                                                  @PathVariable String category) {
+        Integer uid = memberService.getCurrentUid();
+
         Calendar calendar = Calendar.getInstance();
 
         // 시작일 설정 (해당 연도와 월의 첫 번째 날)
@@ -84,7 +91,7 @@ public class OutcomeController {
         calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
         Date endDate = calendar.getTime();
 
-        CompareAverageCategoryOutcomeDTO compareAverageCategoryOutcomeDTO = outcomeService.compareWithAverage(1,
+        CompareAverageCategoryOutcomeDTO compareAverageCategoryOutcomeDTO = outcomeService.compareWithAverage(uid,
                 cntYear, cntMonth, category);
         return ResponseEntity.ok(new SuccessResponseDTO(true, compareAverageCategoryOutcomeDTO));
     }
@@ -92,14 +99,15 @@ public class OutcomeController {
 
     @GetMapping("/category/sum/{cntYear}/{cntMonth}")
     public ResponseEntity<SuccessResponseDTO> categorySumList(@PathVariable int cntYear, @PathVariable int cntMonth) {
-        ResponseCategorySumListDTO responseCategorySumListDTO = outcomeService.findCategorySum(cntYear, cntMonth);
+        Integer uid = memberService.getCurrentUid();
+        ResponseCategorySumListDTO responseCategorySumListDTO = outcomeService.findCategorySum(uid, cntYear, cntMonth);
         return ResponseEntity.ok(new SuccessResponseDTO(true, responseCategorySumListDTO));
     }
 
     @GetMapping("/category/dailysum/{cntYear}/{cntMonth}")
     public ResponseEntity<SuccessResponseDTO> monthConsume(@PathVariable int cntYear, @PathVariable int cntMonth) {
-        System.out.println("month!!!!!!!!!!!");
-        MonthOutcomeDTO monthOutcomeDTO = outcomeService.findMonthOutcome(cntYear, cntMonth);
+        Integer uid = memberService.getCurrentUid();
+        MonthOutcomeDTO monthOutcomeDTO = outcomeService.findMonthOutcome(uid, cntYear, cntMonth);
         return ResponseEntity.ok(new SuccessResponseDTO(true, monthOutcomeDTO));
     }
 
@@ -109,7 +117,8 @@ public class OutcomeController {
     @GetMapping("/all")
     public ResponseEntity<?> getTotalOutcomeList() {
         try {
-            SuccessResponseDTO response = new SuccessResponseDTO(true, outcomeService.getOutcomeList());
+            Integer uid = memberService.getCurrentUid();
+            SuccessResponseDTO response = new SuccessResponseDTO(true, outcomeService.getOutcomeList(uid));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             ErrorResponseDTO response = new ErrorResponseDTO(e.getMessage());
@@ -121,7 +130,8 @@ public class OutcomeController {
     @GetMapping("/detail/{index}")
     public ResponseEntity<?> getOutcomeDetail(@PathVariable("index") Integer index) {
         try {
-            SuccessResponseDTO response = new SuccessResponseDTO(true, outcomeService.getOutcomeByIndex(index));
+            Integer uid = memberService.getCurrentUid();
+            SuccessResponseDTO response = new SuccessResponseDTO(true, outcomeService.getOutcomeByIndex(uid, index));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             ErrorResponseDTO response = new ErrorResponseDTO(e.getMessage());
@@ -133,7 +143,8 @@ public class OutcomeController {
     @PostMapping("/add")
     public ResponseEntity<?> addOutcome(@RequestBody OutcomeUserDTO outcomeUserDTO) {
         try {
-            SuccessResponseDTO response = new SuccessResponseDTO(true, outcomeService.addOutcome(outcomeUserDTO));
+            Integer uid = memberService.getCurrentUid();
+            SuccessResponseDTO response = new SuccessResponseDTO(true, outcomeService.addOutcome(uid, outcomeUserDTO));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             ErrorResponseDTO response = new ErrorResponseDTO(e.getMessage());
@@ -145,7 +156,9 @@ public class OutcomeController {
     @PutMapping("/update")
     public ResponseEntity<?> updateOutcome(@RequestBody OutcomeUserDTO outcomeUserDTO) {
         try {
-            SuccessResponseDTO response = new SuccessResponseDTO(true, outcomeService.updateOutcome(outcomeUserDTO));
+            Integer uid = memberService.getCurrentUid();
+            SuccessResponseDTO response = new SuccessResponseDTO(true,
+                    outcomeService.updateOutcome(uid, outcomeUserDTO));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             ErrorResponseDTO response = new ErrorResponseDTO(e.getMessage());
@@ -157,8 +170,9 @@ public class OutcomeController {
     @DeleteMapping("/delete/{index}")
     public ResponseEntity<?> deleteOutcome(@PathVariable("index") Integer index) {
         try {
+            Integer uid = memberService.getCurrentUid();
             Map<String, Object> indexData = new HashMap<>();
-            indexData.put("index", outcomeService.deleteOutcomeByUidAndIndex(index));
+            indexData.put("index", outcomeService.deleteOutcomeByUidAndIndex(uid, index));
             SuccessResponseDTO response = new SuccessResponseDTO(true, indexData);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {

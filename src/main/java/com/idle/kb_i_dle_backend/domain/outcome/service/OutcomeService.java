@@ -11,25 +11,25 @@ import java.util.List;
 
 public interface OutcomeService {
 
-    ResponseCategorySumListDTO findCategorySum(Integer year, Integer month);
+    ResponseCategorySumListDTO findCategorySum(Integer uid, Integer year, Integer month);
 
-    MonthOutcomeDTO findMonthOutcome(Integer year, Integer month);
+    MonthOutcomeDTO findMonthOutcome(Integer uid, Integer year, Integer month);
 
-    CompareAverageCategoryOutcomeDTO compareWithAverage(int uid, int year, int month, String category);
+    CompareAverageCategoryOutcomeDTO compareWithAverage(Integer uid, int year, int month, String category);
 
     PossibleSaveOutcomeInMonthDTO findPossibleSaveOutcome(Integer uid, int year, int month);
 
     Simulation6MonthDTO calculate6MonthSaveOutcome(Integer uid, int year, int month) throws ParseException;
 
     // 소비 CRUD 추가
-    List<OutcomeUserDTO> getOutcomeList() throws Exception;
+    List<OutcomeUserDTO> getOutcomeList(Integer uid) throws Exception;
 
-    OutcomeUserDTO getOutcomeByIndex(Integer index) throws Exception;
+    OutcomeUserDTO getOutcomeByIndex(Integer uid, Integer index) throws Exception;
 
-    OutcomeUserDTO addOutcome(OutcomeUserDTO outcomeUserDTO) throws ParseException;
+    OutcomeUserDTO addOutcome(Integer uid, OutcomeUserDTO outcomeUserDTO) throws ParseException;
 
-    OutcomeUserDTO updateOutcome(OutcomeUserDTO outcomeUserDTO) throws ParseException;
+    OutcomeUserDTO updateOutcome(Integer uid, OutcomeUserDTO outcomeUserDTO) throws ParseException;
 
-    Integer deleteOutcomeByUidAndIndex(Integer index);
+    Integer deleteOutcomeByUidAndIndex(Integer uid, Integer index);
 
 }
