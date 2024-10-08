@@ -8,6 +8,7 @@ import com.idle.kb_i_dle_backend.domain.member.util.JwtProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -64,7 +65,10 @@ public class SecurityConfig {
         config.addAllowedOrigin("http://localhost:8080");
         config.addAllowedOrigin("https://nid.naver.com");
         config.addAllowedHeader("*"); // 모든 헤더 허용
-        config.addAllowedMethod("*"); // 모든 메서드 허용 (GET, POST, PUT, DELETE, etc.)
+        config.addAllowedMethod(HttpMethod.GET);
+        config.addAllowedMethod(HttpMethod.POST);
+        config.addAllowedMethod(HttpMethod.PUT);
+        config.addAllowedMethod(HttpMethod.DELETE);
 
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);

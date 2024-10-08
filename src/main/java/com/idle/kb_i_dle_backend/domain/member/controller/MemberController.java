@@ -61,24 +61,15 @@ public class MemberController {
         }
     }
 
-    @PostMapping("/naverCallback")
-    public ResponseEntity<?> naverCallback(@RequestBody Map<String, String> params) {
-        String code = params.get("code");
-        String state = params.get("state");
-
+    @GetMapping("/naverCallback")
+    public ResponseEntity<?> naverCallback(@RequestParam("code") String code, @RequestParam("state") String state) {
         if (code == null || state == null) {
             return ResponseEntity.badRequest().body(new ErrorResponseDTO("Invalid request parameters"));
         }
 
         try {
             Map<String, Object> callbackResult = memberService.processNaverCallback(code, state);
-
-            // 응답 구조를 클라이언트의 기대에 맞게 수정
-            Map<String, Object> responseData = new HashMap<>();
-            responseData.put("token", callbackResult.get("token"));
-            responseData.put("userInfo", callbackResult.get("userInfo"));
-
-            return ResponseEntity.ok(new SuccessResponseDTO(true, responseData));
+            return ResponseEntity.ok(new SuccessResponseDTO(true, callbackResult));
         } catch (Exception e) {
             log.error("Failed to process Naver callback", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
