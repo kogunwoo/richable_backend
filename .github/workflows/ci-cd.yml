@@ -1,7 +1,7 @@
 name: Spring Framework CI/CD with Gradle
 
 on:
-  pull_request:
+  push:
     branches: [ master ]
 
 jobs:
@@ -44,33 +44,39 @@ jobs:
           ./gradlew build
           echo "gradle 빌드 완료"
 
-      - name: 빌드 파일 위치 및 확인
-        run: |
-          ls -l build/libs
-          ls -l build/libs/exploded
-
-
       - name: 도커 로그인
         run: |
           echo "Docker 로그인 중..."
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: 도커 이미지 빌드
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ github.sha }} .
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ github.sha }} .
+          docker tag ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:latest
 
       - name: Docker Hub 에 Push
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ github.sha }}
-
-      - name: Deploy to EC2
         run: |
-          echo "EC2 에 연결중..."
-          ssh -o StrictHostKeyChecking=no -i ${{ secrets.EC2_SSH_KEY }} ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
-          echo "도커 이미지 가져 오는중..."
-          docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ github.sha }}
-          echo "실행중이던 컨테이너 중지"
-          docker stop ${{ secrets.DOCKER_CONTAINER_NAME }} || true
-          echo "실행중이던 컨테이너 삭제"
-          docker rm ${{ secrets.DOCKER_CONTAINER_NAME }} || true
-          echo "새로운 컨테이너 실행"
-          docker run -d --name ${{ secrets.DOCKER_CONTAINER_NAME }} -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ github.sha }}
-          EOF
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:latest
+
+      - name: DEPLOY
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_PUBLIC_IP }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_SSH_PORT }}
+          script: |
+            echo "도커 이미지 가져 오는중..."
+            docker pull  ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:lastest
+            echo "실행중인 컨테이너 확인"
+            if [ "$(docker ps -q -f name=${{ secrets.DOCKER_CONTAINER_NAME }})" ]; then
+              echo "실행중이던 컨테이너 중지"
+              docker stop ${{ secrets.DOCKER_CONTAINER_NAME }}
+              echo "실행중이던 컨테이너 삭제"
+              docker rm ${{ secrets.DOCKER_CONTAINER_NAME }}
+            else
+              echo "실행중인 컨테이너 없음"
+            fi
+            echo "새로운 컨테이너 실행"
+            docker run -d --name ${{ secrets.DOCKER_CONTAINER_NAME }} -p 80:8080 ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:lastest
