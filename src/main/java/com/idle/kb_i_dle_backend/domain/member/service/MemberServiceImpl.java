@@ -65,8 +65,8 @@ public class MemberServiceImpl implements MemberService {
 
             CustomUser customUser = (CustomUser) authentication.getPrincipal();
             MemberDTO member = customUser.getMember();
-            MemberInfoDTO userInfo = new MemberInfoDTO(member.getUid(), member.getId(), member.getNickname(), member.getAuth().toString(),
-                    member.getEmail());
+            MemberInfoDTO userInfo = new MemberInfoDTO(member.getUid(), member.getId(),
+                    member.getEmail(), member.getNickname(), member.getAuth().toString());
 
             String jwtToken = jwtProcessor.generateToken(userInfo.getId(), userInfo.getUid(), userInfo.getNickname(),
                     userInfo.getEmail());
