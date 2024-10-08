@@ -68,7 +68,7 @@ jobs:
           port: ${{ secrets.EC2_SSH_PORT }}
           script: |
             echo "도커 이미지 가져 오는중..."
-            docker pull  ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:lastest
+            docker pull  ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:latest 
             echo "실행중인 컨테이너 확인"
             if [ "$(docker ps -q -f name=${{ secrets.DOCKER_CONTAINER_NAME }})" ]; then
               echo "실행중이던 컨테이너 중지"
@@ -79,4 +79,4 @@ jobs:
               echo "실행중인 컨테이너 없음"
             fi
             echo "새로운 컨테이너 실행"
-            docker run -d --name ${{ secrets.DOCKER_CONTAINER_NAME }} -p 80:8080 ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:lastest
+            docker run -d --name ${{ secrets.DOCKER_CONTAINER_NAME }} -p 80:8080 ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:latest 
