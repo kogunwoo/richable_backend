@@ -24,8 +24,8 @@ public class BankServiceImpl implements BankService {
     private final BankRepository bankRepository;
 
     @Override
-    public List<BankDTO> getBankList() throws Exception {
-        Member member = memberService.findMemberByUid(1);
+    public List<BankDTO> getBankList(Integer uid) {
+        Member member = memberService.findMemberByUid(uid);
         List<Bank> banks = bankRepository.findByUidAndDeleteDateIsNull(member);
 
         if (banks.isEmpty()) {
@@ -42,8 +42,8 @@ public class BankServiceImpl implements BankService {
     }
 
     @Override
-    public BankDTO addBank(BankDTO bankDTO) throws ParseException {
-        Member member = memberService.findMemberByUid(1);
+    public BankDTO addBank(Integer uid, BankDTO bankDTO) throws ParseException {
+        Member member = memberService.findMemberByUid(uid);
         Bank savedBank = bankRepository.save(BankDTO.convertToEntity(member, bankDTO));
 
         return BankDTO.convertToDTO(savedBank);
@@ -51,8 +51,8 @@ public class BankServiceImpl implements BankService {
 
     @Transactional
     @Override
-    public BankDTO updateBank(BankDTO bankDTO) throws ParseException {
-        Member member = memberService.findMemberByUid(1);
+    public BankDTO updateBank(Integer uid, BankDTO bankDTO) {
+        Member member = memberService.findMemberByUid(uid);
 
         // Bank 조회
         Bank isBank = bankRepository.findByIndexAndDeleteDateIsNull(bankDTO.getIndex())
@@ -72,8 +72,8 @@ public class BankServiceImpl implements BankService {
 
     @Transactional
     @Override
-    public BankDTO deleteBank(Integer index) throws ParseException {
-        Member member = memberService.findMemberByUid(1);
+    public BankDTO deleteBank(Integer uid, Integer index) {
+        Member member = memberService.findMemberByUid(uid);
 
         // Bank 조회
         Bank isBank = bankRepository.findByIndexAndDeleteDateIsNull(index)
