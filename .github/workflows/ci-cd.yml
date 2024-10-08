@@ -55,16 +55,22 @@ jobs:
       - name: Docker Hub 에 Push
         run: docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ github.sha }}
 
-      - name: Deploy to EC2
-        run: |
-          echo "EC2 에 연결중..."
-          ssh -o StrictHostKeyChecking=no -i ${{ secrets.EC2_SSH_KEY }} ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
-          echo "도커 이미지 가져 오는중..."
-          docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ github.sha }}
-          echo "실행중이던 컨테이너 중지"
-          docker stop ${{ secrets.DOCKER_CONTAINER_NAME }} || true
-          echo "실행중이던 컨테이너 삭제"
-          docker rm ${{ secrets.DOCKER_CONTAINER_NAME }} || true
-          echo "새로운 컨테이너 실행"
-          docker run -d --name ${{ secrets.DOCKER_CONTAINER_NAME }} -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ github.sha }}
-          EOF
+      - name: DEPLOY
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_PUBLIC_IP }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_SSH_PORT }}
+          script: |
+            echo "EC2 에 연결중..."
+            ssh -o StrictHostKeyChecking=no -i ${{ secrets.EC2_SSH_KEY }} ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
+            echo "도커 이미지 가져 오는중..."
+            docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+            echo "실행중이던 컨테이너 중지"
+            docker stop ${{ secrets.DOCKER_CONTAINER_NAME }} || true
+            echo "실행중이던 컨테이너 삭제"
+            docker rm ${{ secrets.DOCKER_CONTAINER_NAME }} || true
+            echo "새로운 컨테이너 실행"
+            docker run -d --name ${{ secrets.DOCKER_CONTAINER_NAME }} -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+            EOF
