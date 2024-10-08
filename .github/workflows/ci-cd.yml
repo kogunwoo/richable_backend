@@ -1,7 +1,7 @@
 name: Spring Framework CI/CD with Gradle
 
 on:
-  pull_request:
+  push:
     branches: [ master ]
 
 jobs:
@@ -50,10 +50,14 @@ jobs:
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: 도커 이미지 빌드
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ github.sha }} .
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ github.sha }} .
+          docker tag ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:latest
 
       - name: Docker Hub 에 Push
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:latest
 
       - name: DEPLOY
         uses: appleboy/ssh-action@master
@@ -75,4 +79,4 @@ jobs:
               echo "실행중인 컨테이너 없음"
             fi
             echo "새로운 컨테이너 실행"
-            docker run -d --name ${{ secrets.DOCKER_CONTAINER_NAME }} -p 80:8080 ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+            docker run -d --name ${{ secrets.DOCKER_CONTAINER_NAME }} -p 80:8080 ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:lastest
