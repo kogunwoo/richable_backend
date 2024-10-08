@@ -62,13 +62,19 @@ public class MemberController {
     }
 
     @GetMapping("/naverCallback")
-    public ResponseEntity<?> naverCallback(@RequestParam("code") String code, @RequestParam("state") String state) {
+    public ResponseEntity<?> naverCallback(@RequestParam("code") String code, @RequestParam("state") String state, HttpServletRequest request) {
+        // 세션에서 저장된 state 가져오기
+        String sessionState = (String) request.getSession().getAttribute("naverState");
+
         if (code == null || state == null) {
             return ResponseEntity.badRequest().body(new ErrorResponseDTO("Invalid request parameters"));
         }
 
         try {
             Map<String, Object> callbackResult = memberService.processNaverCallback(code, state);
+            // 리다이렉트 URL 추가
+            callbackResult.put("redirectUrl", "http://localhost:5173/");  // 또는 프론트엔드의 홈 URL
+
             return ResponseEntity.ok(new SuccessResponseDTO(true, callbackResult));
         } catch (Exception e) {
             log.error("Failed to process Naver callback", e);
