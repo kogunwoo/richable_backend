@@ -13,7 +13,8 @@ public interface MemberRepository extends JpaRepository<Member, Integer> {
 
     Optional<Member> findById(String id);
 
-    Member findByNickname(String nickname);
+//    @Query("SELECT new com.idle.kb_i_dle_backend.domain.member.dto.MemberDTO(m.uid, m.id, m.email, m.nickname, m.auth,null ,null,null,false,null ) FROM Member m WHERE m.nickname = :nickname")
+    Member findByNickname(@Param("nickname") String nickname);
 
     Member findByEmail(String email);
 

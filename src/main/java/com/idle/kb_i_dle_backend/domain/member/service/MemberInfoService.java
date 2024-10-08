@@ -40,9 +40,9 @@ public class MemberInfoService {
             return new MemberInfoDTO(
                     member.getUid(),
                     member.getId(),
+                    member.getEmail(),
                     member.getNickname(),
                     member.getAuth(),
-                    member.getEmail(),
                     member.getProfile(),
                     member.getBirth_year(),
                     member.getGender(),
