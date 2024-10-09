@@ -347,6 +347,13 @@ public class MemberServiceImpl implements MemberService {
     public boolean updateUserAgreement(String id, Map<String, Boolean> agreementData) {
         boolean info = agreementData.get("info");
         boolean finance = agreementData.get("finance");
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Member not found with id: " + id));
+
+        member.setAgreementInfo(info);
+        member.setAgreementFinance(finance);
+
+        memberRepository.save(member);
         boolean result = checkAgree(info, finance, id);
         return result;
     }

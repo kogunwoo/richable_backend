@@ -101,7 +101,7 @@ public class MemberController {
         }
     }
 
-    @PostMapping("/terms/{id}")
+    @PostMapping("/agree/{id}")
     public ResponseEntity<?> updateUserAgreement(
             @PathVariable String id,
             @RequestBody Map<String, Boolean> agreementData) {
@@ -110,7 +110,7 @@ public class MemberController {
         return ResponseEntity.ok(successResponse);
     }
 
-    @PostMapping("/findid")
+    @PostMapping("/find/id")
     public ResponseEntity<?> findId(@RequestBody Map<String, String> payload) {
         Map<String, String> result = memberService.findIdByEmail(payload.get("email"));
         boolean isSuccess = !result.containsKey("error");
@@ -118,31 +118,33 @@ public class MemberController {
         return ResponseEntity.ok(successResponse);
     }
 
-    @PostMapping("/findid/auth")
+    @PostMapping("/find/id/auth")
     public ResponseEntity<?> verifyCode(@RequestBody Map<String, String> payload) {
             Map<String, Object> result = memberService.verifyCode(payload.get("email"), payload.get("code"));
             boolean isVerified = (boolean) result.get("verified");
             if (isVerified) {
                 String id = memberRepository.findByEmail(payload.get("email")).getId();
-                return ResponseEntity.ok(Map.of("id", id));
+                SuccessResponseDTO successResponse = new SuccessResponseDTO(true, id);
+                return ResponseEntity.ok(successResponse);
             } else {
                 return ResponseEntity.badRequest().body(Map.of("message", "잘못된 인증 코드입니다."));
             }
     }
 
-    @PostMapping("/find/pw/auth")
+    @PostMapping("/find/pw")
     public ResponseEntity<?> findPw(@RequestBody Map<String, String> payload) {
         String result = memberService.findPwByEmail(payload.get("email"));
-        return ResponseEntity.ok(Map.of("message", result));
+        SuccessResponseDTO successResponse = new SuccessResponseDTO(true, result);
+        return ResponseEntity.ok(successResponse);
     }
 
-    @PostMapping("/find_pw_auth")
+    @PostMapping("/find/pw/auth")
     public ResponseEntity<?> verifyCode2(@RequestBody Map<String, String> payload) {
         Map<String, Object> result = memberService.verifyCode(payload.get("email"), payload.get("code"));
         boolean isVerified = (boolean) result.get("verified");
         if (isVerified) {
-            String id = memberRepository.findByEmail(payload.get("email")).getId();
-            return ResponseEntity.ok(Map.of("id", id));
+            SuccessResponseDTO successResponse = new SuccessResponseDTO(true, result);
+            return ResponseEntity.ok(successResponse);
         } else {
             return ResponseEntity.badRequest().body(Map.of("message", "잘못된 인증 코드입니다."));
         }
@@ -152,9 +154,11 @@ public class MemberController {
     public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> payload) {
         boolean result = memberService.resetPassword(payload.get("id"), payload.get("newPassword"));
         if (result) {
-            return ResponseEntity.ok(Map.of("success", true, "message", "비밀번호가 성공적으로 재설정되었습니다."));
+            SuccessResponseDTO successResponse = new SuccessResponseDTO(true, "비밀번호 재설정에 성공하였습니다.");
+            return ResponseEntity.ok(successResponse);
         } else {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "비밀번호 재설정 중 오류가 발생했습니다."));
+            ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO("비밀번호 재설정 중 오류가 발생했습니다.");
+            return ResponseEntity.badRequest().body(errorResponseDTO);
         }
         }
 

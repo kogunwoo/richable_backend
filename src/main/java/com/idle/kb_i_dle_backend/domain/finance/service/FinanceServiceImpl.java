@@ -25,6 +25,8 @@ import com.idle.kb_i_dle_backend.domain.income.repository.IncomeRepository;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
 import com.idle.kb_i_dle_backend.domain.outcome.repository.OutcomeUserRepository;
+
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -242,7 +244,14 @@ public class FinanceServiceImpl implements FinanceService {
                 if (i == 1) {
                     // 현재 가격과 매입 가격 비교하여 수익률 계산
                     double currentPrice = 30000; // 임의로 설정된 현재 가격
-                    double purchasePrice = coinRepository.findCoinPriceBy(coin.getCurrency());
+                    double purchasePrice = 0.0;
+                    // null인 경우 처리 로직
+                    if (coinRepository.findCoinPriceBy(coin.getCurrency()) == null) {
+                        purchasePrice = 0.0; // 또는 다른 적절한 기본값
+                    } else {
+                        coinRepository.findCoinPriceBy(coin.getCurrency());
+                    }
+
 
                     if (purchasePrice > 0) {
                         double coinReturn = ((currentPrice / purchasePrice) * 100) - 100;
@@ -253,7 +262,13 @@ public class FinanceServiceImpl implements FinanceService {
                     // 특정 달의 가격으로 수익률 계산
                     if (!purchaseDate.isAfter(currentMonthDate)) {
                         Double currentMonthPrice = coinRepository.getCoinPriceForMonth(coin.getCurrency(), i);
-                        double purchasePrice = coinRepository.findCoinPriceBy(coin.getCurrency());
+                        double purchasePrice = 0.0;
+                        if (coinRepository.findCoinPriceBy(coin.getCurrency()) == null) {
+                            // 예: 기본값 설정, 로그 기록, 또는 예외 처리
+                            purchasePrice = 0.0; // 또는 다른 적절한 기본값
+                        } else {
+                            coinRepository.findCoinPriceBy(coin.getCurrency());
+                        }
 
                         if (currentMonthPrice != null && purchasePrice > 0) {
                             double coinReturn = ((currentMonthPrice / purchasePrice) * 100) - 100;
@@ -462,13 +477,13 @@ public class FinanceServiceImpl implements FinanceService {
 
         for (Object[] income : incomeResults) {
             String month = (String) income[0];
-            long totalIncome = (long) income[1];
+            long totalIncome = ((BigDecimal) income[1]).longValueExact();
             balanceMap.put(month, new MonthlyBalanceDTO(month, totalIncome, 0L, totalIncome));
         }
 
         for (Object[] outcome : outcomeResults) {
             String month = (String) outcome[0];
-            long totalOutcome = (long) outcome[1];
+            long totalOutcome = ((BigDecimal) outcome[1]).longValueExact();
             if (balanceMap.containsKey(month)) {
                 MonthlyBalanceDTO dto = balanceMap.get(month);
                 dto.setTotalOutcome(totalOutcome);

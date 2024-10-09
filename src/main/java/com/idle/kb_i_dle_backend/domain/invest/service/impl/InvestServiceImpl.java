@@ -1,12 +1,6 @@
 package com.idle.kb_i_dle_backend.domain.invest.service.impl;
 
-import com.idle.kb_i_dle_backend.domain.finance.entity.Bank;
-import com.idle.kb_i_dle_backend.domain.finance.entity.Bond;
-import com.idle.kb_i_dle_backend.domain.finance.entity.BondProduct;
-import com.idle.kb_i_dle_backend.domain.finance.entity.Coin;
-import com.idle.kb_i_dle_backend.domain.finance.entity.CoinProduct;
-import com.idle.kb_i_dle_backend.domain.finance.entity.Stock;
-import com.idle.kb_i_dle_backend.domain.finance.entity.StockProduct;
+import com.idle.kb_i_dle_backend.domain.finance.entity.*;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BankRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BondProductRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BondRepository;
@@ -134,8 +128,7 @@ public class InvestServiceImpl implements InvestService {
         if ("안정형".equals(maxCategory.getTendency())) {
             List<CoinProduct> coins = coinRepository.findTop5ByOrderByClosingPriceDesc()
                     .stream().limit(5).collect(Collectors.toList());
-            List<StockProduct> stocks = stockRepository.findTop5ByOrderByPriceDesc()
-                    .stream().limit(5).collect(Collectors.toList());
+            List<StockPrice> stocks = stockPriceRepository.findTop5ByLatestDateOrderByPriceDesc();
 
             recommendedProducts.addAll(coins.stream()
                     .map(coin -> new RecommendedProductDTO("코인", coin.getCoinName(),
@@ -143,7 +136,7 @@ public class InvestServiceImpl implements InvestService {
                     .collect(Collectors.toList()));
 
             recommendedProducts.addAll(stocks.stream()
-                    .map(stock -> new RecommendedProductDTO("주식", stock.getKrStockNm(), stock.getPrice()))
+                    .map(stock -> new RecommendedProductDTO("주식", stock.getStock_nm(), stock.getPrice()))
                     .collect(Collectors.toList()));
         } else {
             List<BondProduct> bonds = bondProductRepository.findTop5ByOrderByPriceDesc();
