@@ -25,51 +25,31 @@ public interface AssetSummaryRepository extends JpaRepository<AssetSummary, Inte
     @Transactional
     @Query(value = """
         INSERT INTO asset.asset_summary (
-            uid, update_date, deposit, saving, subscription, withdrawal, cash, 
-            stock, coin, bond, total_amount )
+            uid, update_date, deposit, saving, subscription, withdrawal, cash, stock, coin, bond, total_amount
+        )
         SELECT 
-            :uid AS uid, 
+            b.uid, 
             NOW() AS update_date,
             COALESCE(SUM(CASE WHEN b.prod_category = '적금' THEN b.balance_amt ELSE 0 END), 0) AS deposit,
             COALESCE(SUM(CASE WHEN b.prod_category = '예금' THEN b.balance_amt ELSE 0 END), 0) AS saving,
             COALESCE(SUM(CASE WHEN b.prod_category = '청약' THEN b.balance_amt ELSE 0 END), 0) AS subscription,
-            COALESCE(SUM(CASE WHEN b.prod_category = '입출금' THEN b.balance_amt ELSE 0 END), 0) AS withdrawal,
+            COALESCE(SUM(CASE WHEN b.prod_category = '입출금' THEN b.balance_amt ELSE 0 END), 0) +
+            COALESCE((SELECT SUM(i.amount) FROM asset.income i WHERE i.uid = b.uid), 0) -
+            COALESCE((SELECT SUM(o.amount) FROM outcome.outcome_user o WHERE o.uid = b.uid), 0) AS withdrawal,
             COALESCE(SUM(CASE WHEN b.prod_category = '현금' THEN b.balance_amt ELSE 0 END), 0) AS cash,
-            COALESCE((
-                SELECT SUM(s.hldg_qty * s.avg_buy_price)
-                FROM asset.stock s
-                WHERE s.uid = :uid AND s.delete_date IS NULL
-            ), 0) AS stock,
-            COALESCE((
-                SELECT SUM(c.balance * c.avg_buy_price)
-                FROM asset.coin c
-                WHERE c.uid = :uid AND c.delete_date IS NULL
-            ), 0) AS coin,
-            COALESCE((
-                SELECT SUM(bd.per_price * bd.cnt)
-                FROM asset.bond bd
-                WHERE bd.uid = :uid AND bd.prod_category IS NOT NULL AND bd.delete_date IS NULL
-            ), 0) AS bond,
+            COALESCE((SELECT SUM(s.hldg_qty * s.avg_buy_price) FROM asset.stock s WHERE s.uid = b.uid AND s.delete_date IS NULL), 0) AS stock,
+            COALESCE((SELECT SUM(c.balance * c.avg_buy_price) FROM asset.coin c WHERE c.uid = b.uid AND c.delete_date IS NULL), 0) AS coin,
+            COALESCE((SELECT SUM(bd.per_price * bd.cnt) FROM asset.bond bd WHERE bd.uid = b.uid AND bd.prod_category IS NOT NULL AND bd.delete_date IS NULL), 0) AS bond,
             COALESCE(SUM(CASE WHEN b.prod_category = '적금' THEN b.balance_amt ELSE 0 END), 0) +
             COALESCE(SUM(CASE WHEN b.prod_category = '예금' THEN b.balance_amt ELSE 0 END), 0) +
             COALESCE(SUM(CASE WHEN b.prod_category = '청약' THEN b.balance_amt ELSE 0 END), 0) +
             COALESCE(SUM(CASE WHEN b.prod_category = '입출금' THEN b.balance_amt ELSE 0 END), 0) +
             COALESCE(SUM(CASE WHEN b.prod_category = '현금' THEN b.balance_amt ELSE 0 END), 0) +
-            COALESCE((
-                SELECT SUM(s.hldg_qty * s.avg_buy_price)
-                FROM asset.stock s
-                WHERE s.uid = :uid AND s.delete_date IS NULL
-            ), 0) +
-            COALESCE((
-                SELECT SUM(c.balance * c.avg_buy_price)
-                FROM asset.coin c
-                WHERE c.uid = :uid AND c.delete_date IS NULL
-            ), 0) +
-            COALESCE((
-                SELECT SUM(bd.per_price * bd.cnt)
-                FROM asset.bond bd
-                WHERE bd.uid = :uid AND bd.prod_category IS NOT NULL AND bd.delete_date IS NULL
-            ), 0) AS total_amount
+            COALESCE((SELECT SUM(s.hldg_qty * s.avg_buy_price) FROM asset.stock s WHERE s.uid = b.uid AND s.delete_date IS NULL), 0) +
+            COALESCE((SELECT SUM(c.balance * c.avg_buy_price) FROM asset.coin c WHERE c.uid = b.uid AND c.delete_date IS NULL), 0) +
+            COALESCE((SELECT SUM(bd.per_price * bd.cnt) FROM asset.bond bd WHERE bd.uid = b.uid AND bd.prod_category IS NOT NULL AND bd.delete_date IS NULL), 0) +
+            COALESCE((SELECT SUM(i.amount) FROM asset.income i WHERE i.uid = b.uid), 0) -
+            COALESCE((SELECT SUM(o.amount) FROM outcome.outcome_user o WHERE o.uid = b.uid), 0) AS total_amount
         FROM asset.bank b
         WHERE b.delete_date IS NULL AND b.uid = :uid
         GROUP BY b.uid
