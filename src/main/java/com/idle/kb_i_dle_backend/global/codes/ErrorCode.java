@@ -108,7 +108,9 @@ public enum ErrorCode {
     EMAIL_NOT_FOUND(400, "M04", "email not found"),
     INVALID_VERIFICATION_CODE(400, "M05", "Invalid Verification Code"),
     MEMBER_NOT_FOUND(400, "M06", "member not found by id"),
-    NAVER_LOGIN_FAILED(400,"M07","navigate failed"),
+    TOKEN_IS_NOT_VALID(401, "M07", "token is not valid"),
+    PERMISSION_FORBIDDEN(403, "M08", "permission forbidden"),
+    NAVER_LOGIN_FAILED(400,"M09","navigate failed"),
 
 
     //S3

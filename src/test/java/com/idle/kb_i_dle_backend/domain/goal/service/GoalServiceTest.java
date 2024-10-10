@@ -1,5 +1,6 @@
 package com.idle.kb_i_dle_backend.domain.goal.service;
 
+
 import org.junit.jupiter.api.Test;
 
 class GoalServiceTest {
