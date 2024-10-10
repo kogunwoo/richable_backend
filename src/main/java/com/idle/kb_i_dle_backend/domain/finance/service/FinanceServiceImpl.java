@@ -125,13 +125,17 @@ public class FinanceServiceImpl implements FinanceService {
         Date now = new Date();
         List<FinancialChangeDTO> financialChanges = new ArrayList<>();
 
-        financialChanges.add(new FinancialChangeDTO(1, assetSummaryRepository.findLatestByUidZeroMonthAgo(member).getTotalAmount()));
-        financialChanges.add(new FinancialChangeDTO(2, assetSummaryRepository.findLatestByUidOneMonthAgo(member, getDateBeforeMonths(now, 1)).getTotalAmount()));
-        financialChanges.add(new FinancialChangeDTO(3, assetSummaryRepository.findLatestByUidTwoMonthAgo(member, getDateBeforeMonths(now, 2)).getTotalAmount()));
-        financialChanges.add(new FinancialChangeDTO(4, assetSummaryRepository.findLatestByUidThreeMonthAgo(member, getDateBeforeMonths(now, 3)).getTotalAmount()));
-        financialChanges.add(new FinancialChangeDTO(5, assetSummaryRepository.findLatestByUidFourMonthAgo(member, getDateBeforeMonths(now, 4)).getTotalAmount()));
-        financialChanges.add(new FinancialChangeDTO(6, assetSummaryRepository.findLatestByUidFiveMonthAgo(member, getDateBeforeMonths(now, 5)).getTotalAmount()));
+        // 최신 값 처리
+        AssetSummary zeroMonthAgo = assetSummaryRepository.findLatestByUidZeroMonthAgo(member);
+        Long zeroMonthAgoAmount = zeroMonthAgo != null ? zeroMonthAgo.getTotalAmount() : 0L;
+        financialChanges.add(new FinancialChangeDTO(1, zeroMonthAgoAmount));
 
+        // 나머지 월별 처리
+        for (int i = 1; i <= 5; i++) {
+            AssetSummary summary = assetSummaryRepository.findLatestByUidOneMonthAgo(member, getDateBeforeMonths(now, i));
+            Long amount = summary != null ? summary.getTotalAmount() : 0L;
+            financialChanges.add(new FinancialChangeDTO(i + 1, amount));
+        }
         return financialChanges;
     }
 
@@ -143,12 +147,36 @@ public class FinanceServiceImpl implements FinanceService {
 
         for (int i = 0; i < 6; i++) {
             long monthlySum = switch (i) {
-                case 0 -> assetSummaryRepository.findLatestByUidZeroMonthAgo(member).getTotalAmount() + calculateSpotAssetsSum(member);
-                case 1 -> assetSummaryRepository.findLatestByUidOneMonthAgo(member, getDateBeforeMonths(now, 1)).getTotalAmount() + calculateSpotAssetsSumBefore(member, 1);
-                case 2 -> assetSummaryRepository.findLatestByUidTwoMonthAgo(member, getDateBeforeMonths(now, 2)).getTotalAmount() + calculateSpotAssetsSumBefore(member, 2);
-                case 3 -> assetSummaryRepository.findLatestByUidThreeMonthAgo(member, getDateBeforeMonths(now, 3)).getTotalAmount() + calculateSpotAssetsSumBefore(member, 3);
-                case 4 -> assetSummaryRepository.findLatestByUidFourMonthAgo(member, getDateBeforeMonths(now, 4)).getTotalAmount() + calculateSpotAssetsSumBefore(member, 4);
-                case 5 -> assetSummaryRepository.findLatestByUidFiveMonthAgo(member, getDateBeforeMonths(now, 5)).getTotalAmount() + calculateSpotAssetsSumBefore(member, 5);
+                case 0 -> {
+                    AssetSummary zeroMonthAgo = assetSummaryRepository.findLatestByUidZeroMonthAgo(member);
+                    long zeroMonthAgoAmount = zeroMonthAgo != null ? zeroMonthAgo.getTotalAmount() : 0L;
+                    yield zeroMonthAgoAmount + calculateSpotAssetsSum(member);
+                }
+                case 1 -> {
+                    AssetSummary oneMonthAgo = assetSummaryRepository.findLatestByUidOneMonthAgo(member, getDateBeforeMonths(now, 1));
+                    long oneMonthAgoAmount = oneMonthAgo != null ? oneMonthAgo.getTotalAmount() : 0L;
+                    yield oneMonthAgoAmount + calculateSpotAssetsSumBefore(member, 1);
+                }
+                case 2 -> {
+                    AssetSummary twoMonthAgo = assetSummaryRepository.findLatestByUidOneMonthAgo(member, getDateBeforeMonths(now, 2));
+                    long twoMonthAgoAmount = twoMonthAgo != null ? twoMonthAgo.getTotalAmount() : 0L;
+                    yield twoMonthAgoAmount + calculateSpotAssetsSumBefore(member, 2);
+                }
+                case 3 -> {
+                    AssetSummary threeMonthAgo = assetSummaryRepository.findLatestByUidOneMonthAgo(member, getDateBeforeMonths(now, 3));
+                    long threeMonthAgoAmount = threeMonthAgo != null ? threeMonthAgo.getTotalAmount() : 0L;
+                    yield threeMonthAgoAmount + calculateSpotAssetsSumBefore(member, 3);
+                }
+                case 4 -> {
+                    AssetSummary fourMonthAgo = assetSummaryRepository.findLatestByUidOneMonthAgo(member, getDateBeforeMonths(now, 4));
+                    long fourMonthAgoAmount = fourMonthAgo != null ? fourMonthAgo.getTotalAmount() : 0L;
+                    yield fourMonthAgoAmount + calculateSpotAssetsSumBefore(member, 4);
+                }
+                case 5 -> {
+                    AssetSummary fiveMonthAgo = assetSummaryRepository.findLatestByUidOneMonthAgo(member, getDateBeforeMonths(now, 5));
+                    long fiveMonthAgoAmount = fiveMonthAgo != null ? fiveMonthAgo.getTotalAmount() : 0L;
+                    yield fiveMonthAgoAmount + calculateSpotAssetsSumBefore(member, 5);
+                }
                 default -> throw new IllegalStateException("Unexpected value: " + i);
             };
             totalChanges.add(new TotalChangeDTO(i + 1, monthlySum));
@@ -337,7 +365,7 @@ public class FinanceServiceImpl implements FinanceService {
         List<Object[]> spotAssets = spotRepository.findMonthlySpotAssets(uid);
         return spotAssets.stream()
                 .filter(row -> (int) row[0] == monthsAgo)  // month 필터링
-                .mapToLong(row -> ((long) row[1]))  // totalAmount 계산
+                .mapToLong(row -> ((BigDecimal) row[1]).longValue())  // totalAmount 계산
                 .sum();
     }
 
