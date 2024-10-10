@@ -111,6 +111,9 @@ dependencies {
     // JSON 라이브러리 추가
     implementation 'org.json:json:20210307'
 
+    //aws
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
 
 }
 
