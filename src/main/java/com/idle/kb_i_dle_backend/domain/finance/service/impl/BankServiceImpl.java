@@ -12,6 +12,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -89,5 +90,13 @@ public class BankServiceImpl implements BankService {
 
         Bank savedBank = bankRepository.save(isBank);
         return BankDTO.convertToDTO(savedBank);
+    }
+
+    public List<BankDTO> getAccount(Integer uid) {
+        Member member = memberService.findMemberByUid(uid);
+        List<Bank> accountBank = bankRepository.findByUidAndSpecificCategoriesAndDeleteDateIsNull(member);
+        return accountBank.stream()
+                .map(BankDTO::convertToDTO)
+                .collect(Collectors.toList());
     }
 }

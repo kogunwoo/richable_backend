@@ -23,7 +23,7 @@
 //
 //        // API 데이터 설정
 //        ApiDataDTO apiDataDTO = new ApiDataDTO();
-//        apiDataDTO.setBank(tokenRequestDTO.getApi().getBank());
+//        apiDataDTO.setBank(tokenRequestDTO.getApi().getAccount());
 //        apiDataDTO.setStock(tokenRequestDTO.getApi().getStock());
 //        apiDataDTO.setCoin(tokenRequestDTO.getApi().getCoin());
 //

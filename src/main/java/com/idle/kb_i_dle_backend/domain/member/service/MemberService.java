@@ -13,7 +13,7 @@ public interface MemberService {
 
     Map<String, Object> initiateNaverLogin(HttpServletRequest request) throws Exception;
 
-    Map<String, Object> processNaverCallback(String code, String state, HttpServletRequest request) throws Exception;
+    Map<String, Object> processNaverCallback(String code, String state) throws Exception;
 
     String registerMember(MemberJoinDTO signupDTO);
 
