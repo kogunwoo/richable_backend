@@ -58,7 +58,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/goal/**")
                 .addPathPatterns("/income/**")
                 .addPathPatterns("/outcome/**")
-                .addPathPatterns("/invest/**"); // 특정 URL 패턴에 대해 인터셉터 적용
+                .addPathPatterns("/invest/**")
+                .addPathPatterns("/asset/**"); // 특정 URL 패턴에 대해 인터셉터 적용
     }
     @Bean
     public RestTemplate restTemplate() {
