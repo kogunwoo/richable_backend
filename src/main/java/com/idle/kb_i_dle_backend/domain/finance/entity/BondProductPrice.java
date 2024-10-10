@@ -44,4 +44,6 @@ public class BondProductPrice {
 
     @Column(name = "6m_b_price")
     private int sixMonthsAgoPrice;
+
+
 }

@@ -10,14 +10,20 @@ import com.idle.kb_i_dle_backend.domain.finance.dto.StockReturnDTO;
 import com.idle.kb_i_dle_backend.domain.finance.dto.TotalChangeDTO;
 import com.idle.kb_i_dle_backend.domain.finance.entity.AssetSummary;
 import com.idle.kb_i_dle_backend.domain.finance.entity.Bond;
+import com.idle.kb_i_dle_backend.domain.finance.entity.BondProduct;
+import com.idle.kb_i_dle_backend.domain.finance.entity.BondProductPrice;
 import com.idle.kb_i_dle_backend.domain.finance.entity.Coin;
+import com.idle.kb_i_dle_backend.domain.finance.entity.CoinProduct;
+import com.idle.kb_i_dle_backend.domain.finance.entity.CoinProductPrice;
 import com.idle.kb_i_dle_backend.domain.finance.entity.Spot;
 import com.idle.kb_i_dle_backend.domain.finance.entity.Stock;
 import com.idle.kb_i_dle_backend.domain.finance.entity.StockProduct;
 import com.idle.kb_i_dle_backend.domain.finance.entity.StockProductPrice;
 import com.idle.kb_i_dle_backend.domain.finance.repository.AssetSummaryRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BankRepository;
+import com.idle.kb_i_dle_backend.domain.finance.repository.BondProductRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BondRepository;
+import com.idle.kb_i_dle_backend.domain.finance.repository.CoinProductPriceRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.CoinRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.SpotRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.StockProductPriceRepository;
@@ -50,16 +56,21 @@ public class FinanceServiceImpl implements FinanceService {
 
     private final BankRepository bankRepository;
     private final BondRepository bondRepository;
+    private final BondProductRepository bondProductRepository;
     private final CoinRepository coinRepository;
+    private final CoinProductPriceRepository coinProductPriceRepository;
     private final SpotRepository spotRepository;
+    private final StockPriceRepository stockPriceRepository;
+    private final StockProductRepository stockProductRepository;
+    private final StockProductPriceRepository stockProductPriceRepository;
     private final StockRepository stockRepository;
     private final IncomeRepository incomeRepository;
     private final OutcomeUserRepository outComeUserRepository;
     private final AssetSummaryRepository assetSummaryRepository;
+
     private final MemberService memberService;
-    private final StockPriceRepository stockPriceRepository;
-    private final StockProductPriceRepository stockProductPriceRepository;
-    private final StockProductRepository stockProductRepository;
+
+
 
     // 소수점 이하 한 자리로 포맷팅할 수 있는 DecimalFormat
     private static final DecimalFormat df = new DecimalFormat("#.#");
@@ -202,124 +213,117 @@ public class FinanceServiceImpl implements FinanceService {
     //6개월 코인 수익률
     @Override
     public List<CoinReturnDTO> getCoinReturnTrend(int uid) {
-        List<CoinReturnDTO> coinReturns = new ArrayList<>();
-        DecimalFormat df = new DecimalFormat("#.##");
         Member member = memberService.findMemberByUid(uid);
+        List<CoinReturnDTO> coinReturns = new ArrayList<>();
+        List<Coin> coins = coinRepository.findAllByUidAndDeleteDateIsNull(member);
 
-        for (int i = 1; i < 7; i++) {
+        for (int i = 0; i < 6; i++) {
             double totalCoinReturn = 0;
             int coinCount = 0;
 
-            List<Coin> coins = coinRepository.findByUid(member);
-
             for (Coin coin : coins) {
-                Date purchaseDateAsDate = coin.getAddDate();
-                LocalDate purchaseDate = purchaseDateAsDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                LocalDate currentMonthDate = LocalDate.now().minusMonths(i);
-                Date endDate = Date.from(currentMonthDate.withDayOfMonth(currentMonthDate.lengthOfMonth())
-                        .atStartOfDay(ZoneId.systemDefault()).toInstant());
+                CoinProduct coinProduct = coinRepository.findByCoinName(coin.getCurrency());
+                if (coinProduct == null) continue;
 
-                if (i == 1) {
-                    // 현재 가격과 매입 가격 비교하여 수익률 계산
-                    double currentPrice = 30000; // 임의로 설정된 현재 가격
-                    double purchasePrice = 0.0;
-                    // null인 경우 처리 로직
-                    if (coinRepository.findCoinPriceBy(coin.getCurrency()) == null) {
-                        purchasePrice = 0.0; // 또는 다른 적절한 기본값
-                    } else {
-                        coinRepository.findCoinPriceBy(coin.getCurrency());
-                    }
+                CoinProductPrice coinProductPrice = coinProduct.getCoinProductPrice();
+                if (coinProductPrice == null) continue;
 
-                    if (purchasePrice > 0) {
-                        double coinReturn = ((currentPrice / purchasePrice) * 100) - 100;
-                        totalCoinReturn += coinReturn;
-                        coinCount++;
-                    }
+                double currentPrice;
+                if (i == 0) {
+                    // 현재 가격 (CoinProduct의 closingPrice 사용)
+                    currentPrice = Double.parseDouble(coinProduct.getClosingPrice());
                 } else {
-                    // 특정 달의 가격으로 수익률 계산
-                    if (!purchaseDate.isAfter(currentMonthDate)) {
-                        Double currentMonthPrice = coinRepository.getCoinPriceForMonth(coin.getCurrency(), i);
-                        double purchasePrice = 0.0;
-                        if (coinRepository.findCoinPriceBy(coin.getCurrency()) == null) {
-                            // 예: 기본값 설정, 로그 기록, 또는 예외 처리
-                            purchasePrice = 0.0; // 또는 다른 적절한 기본값
-                        } else {
-                            coinRepository.findCoinPriceBy(coin.getCurrency());
-                        }
+                    // i개월 전 가격
+                    currentPrice = getPriceForMonth(coinProductPrice, i);
+                }
 
-                        if (currentMonthPrice != null && purchasePrice > 0) {
-                            double coinReturn = ((currentMonthPrice / purchasePrice) * 100) - 100;
-                            totalCoinReturn += coinReturn;
-                            coinCount++;
-                        }
-                    }
+                double purchasePrice = coin.getAvgBuyPrice();
+
+                if (purchasePrice > 0 && currentPrice > 0) {
+                    double coinReturn = ((currentPrice / purchasePrice) * 100) - 100;
+                    totalCoinReturn += coinReturn;
+                    coinCount++;
                 }
             }
 
             if (coinCount > 0) {
                 double averageCoinReturn = totalCoinReturn / coinCount;
-                coinReturns.add(new CoinReturnDTO(i, Double.parseDouble(df.format(averageCoinReturn))));
+                coinReturns.add(new CoinReturnDTO(i + 1, Double.parseDouble(df.format(averageCoinReturn))));
             } else {
-                coinReturns.add(new CoinReturnDTO(i, 0.0));
+                coinReturns.add(new CoinReturnDTO(i + 1, 0.0));
             }
         }
+
         return coinReturns;
+    }
+
+    private double getPriceForMonth(CoinProductPrice coinProductPrice, int monthsAgo) {
+        return switch (monthsAgo) {
+            case 1 -> Double.parseDouble(coinProductPrice.getOneMonthAgoPrice());
+            case 2 -> Double.parseDouble(coinProductPrice.getTwoMonthsAgoPrice());
+            case 3 -> Double.parseDouble(coinProductPrice.getThreeMonthsAgoPrice());
+            case 4 -> Double.parseDouble(coinProductPrice.getFourMonthsAgoPrice());
+            case 5 -> Double.parseDouble(coinProductPrice.getFiveMonthsAgoPrice());
+            default -> 0;
+        };
     }
 
     //6개월 채권 수익률
     @Override
     public List<BondReturnDTO> getBondReturnTrend(int uid) {
-        List<BondReturnDTO> bondReturns = new ArrayList<>();
-        DecimalFormat df = new DecimalFormat("#.##");
         Member member = memberService.findMemberByUid(uid);
+        List<BondReturnDTO> bondReturns = new ArrayList<>();
+        List<Bond> bonds = bondRepository.findAllByUidAndDeleteDateIsNull(member);
 
-        for (int i = 1; i < 7; i++) {
+        for (int i = 0; i < 6; i++) {
             double totalBondReturn = 0;
             int bondCount = 0;
 
-            List<Bond> bonds = bondRepository.findByUid(member);
-
             for (Bond bond : bonds) {
-                Date purchaseDateAsDate = bond.getAddDate();
-                LocalDate purchaseDate = purchaseDateAsDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                LocalDate currentMonthDate = LocalDate.now().minusMonths(i);
-                Date endDate = Date.from(currentMonthDate.withDayOfMonth(currentMonthDate.lengthOfMonth())
-                        .atStartOfDay(ZoneId.systemDefault()).toInstant());
+                BondProduct bondProduct = bondRepository.findByIsinCdNm(bond.getName());
+                if (bondProduct == null) continue;
 
-                if (i == 1) {
-                    // 현재 가격과 매입 가격 비교하여 수익률 계산
-                    double currentPrice = 100000; // 임의로 설정된 현재 가격
-                    double purchasePrice = bondRepository.
-                            getPriceByName(bond.getName());
+                BondProductPrice bondProductPrice = bondProduct.getBondProductPrice();
+                if (bondProductPrice == null) continue;
 
-                    if (purchasePrice > 0) {
-                        double bondReturn = ((currentPrice / purchasePrice) * 100) - 100;
-                        totalBondReturn += bondReturn;
-                        bondCount++;
-                    }
+                double currentPrice;
+                if (i == 0) {
+                    // 현재 가격 (BondProduct의 price 사용)
+                    currentPrice = bondProduct.getPrice();
                 } else {
-                    // 특정 달의 가격으로 수익률 계산
-                    if (!purchaseDate.isAfter(currentMonthDate)) {
-                        Double currentMonthPrice = bondRepository.getBondPriceForMonth(bond.getName(), i);
-                        double purchasePrice = bondRepository.getPriceByName(bond.getName());
+                    // i개월 전 가격
+                    currentPrice = getPriceForMonth(bondProductPrice, i);
+                }
 
-                        if (currentMonthPrice != null && purchasePrice > 0) {
-                            double bondReturn = ((currentMonthPrice / purchasePrice) * 100) - 100;
-                            totalBondReturn += bondReturn;
-                            bondCount++;
-                        }
-                    }
+                double purchasePrice = bond.getPrice();
+
+                if (purchasePrice > 0 && currentPrice > 0) {
+                    double bondReturn = ((currentPrice / purchasePrice) * 100) - 100;
+                    totalBondReturn += bondReturn;
+                    bondCount++;
                 }
             }
 
             if (bondCount > 0) {
                 double averageBondReturn = totalBondReturn / bondCount;
-                bondReturns.add(new BondReturnDTO(i, Double.parseDouble(df.format(averageBondReturn))));
+                bondReturns.add(new BondReturnDTO(i + 1, Double.parseDouble(df.format(averageBondReturn))));
             } else {
-                bondReturns.add(new BondReturnDTO(i, 0.0));
+                bondReturns.add(new BondReturnDTO(i + 1, 0.0));
             }
         }
+
         return bondReturns;
+    }
+
+    private double getPriceForMonth(BondProductPrice bondProductPrice, int monthsAgo) {
+        return switch (monthsAgo) {
+            case 1 -> bondProductPrice.getOneMonthAgoPrice();
+            case 2 -> bondProductPrice.getTwoMonthsAgoPrice();
+            case 3 -> bondProductPrice.getThreeMonthsAgoPrice();
+            case 4 -> bondProductPrice.getFourMonthsAgoPrice();
+            case 5 -> bondProductPrice.getFiveMonthsAgoPrice();
+            default -> 0;
+        };
     }
 
     // Spot 자산 합산 메서드
