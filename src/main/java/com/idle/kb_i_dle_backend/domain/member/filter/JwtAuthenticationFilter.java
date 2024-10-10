@@ -7,7 +7,6 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -39,14 +38,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // Extract JWT from Authorization header
         String token = extractToken(request);
-
+        log.info("jwt JwtAuthenticationFilter token");
         // Validate token and set authentication if valid
         if (token != null && jwtProcessor.validateToken(token)) {
             String username = jwtProcessor.getId(token);
-            Integer uid = jwtProcessor.getUid(token);
 
-            HttpSession session = request.getSession();
-            session.setAttribute("uid", uid);
             // Load user details
             UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
             Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null,
