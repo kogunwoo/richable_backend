@@ -1,6 +1,7 @@
 package com.idle.kb_i_dle_backend.domain.member.service;
 
-import com.idle.kb_i_dle_backend.domain.member.dto.CustomUser;
+import com.idle.kb_i_dle_backend.config.exception.CustomException;
+import com.idle.kb_i_dle_backend.domain.member.dto.CustomUserDetails;
 import com.idle.kb_i_dle_backend.domain.member.dto.LoginDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberInfoDTO;
@@ -44,6 +45,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -85,10 +87,10 @@ public class MemberServiceImpl implements MemberService {
             Authentication authentication = authenticationManager.authenticate(authenticationToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            CustomUser customUser = (CustomUser) authentication.getPrincipal();
-            MemberDTO member = customUser.getMember();
+            CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+            Member member = customUserDetails.getMember();
             MemberInfoDTO userInfo = new MemberInfoDTO(member.getUid(), member.getId(),
-                    member.getEmail(), member.getNickname(), member.getAuth().toString());
+                    member.getEmail(), member.getNickname(), member.getAuth());
 
             String jwtToken = jwtProcessor.generateToken(userInfo.getId(), userInfo.getUid(), userInfo.getNickname(),
                     userInfo.getEmail());
@@ -611,6 +613,18 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public Integer getCurrentUid() {
-        return (Integer) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        try {
+            UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
+                    .getPrincipal();
+            Optional<Member> member = memberRepository.findById(userDetails.getUsername());
+
+            if (member.isEmpty()) {
+                throw new CustomException(ErrorCode.INVALID_MEMEBER);
+            }
+            return member.get().getUid();
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.INVALID_MEMEBER);
+
+        }
     }
 }
