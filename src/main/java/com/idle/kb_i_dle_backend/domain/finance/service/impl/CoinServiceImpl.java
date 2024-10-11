@@ -24,8 +24,8 @@ public class CoinServiceImpl implements CoinService {
     private final CoinRepository coinRepository;
 
     @Override
-    public List<CoinDTO> getCoinList() throws Exception {
-        Member member = memberService.findMemberByUid(1);
+    public List<CoinDTO> getCoinList(Integer uid) throws Exception {
+        Member member = memberService.findMemberByUid(uid);
         List<Coin> coins = coinRepository.findByUidAndDeleteDateIsNull(member);
 
         if (coins.isEmpty()) {
@@ -42,8 +42,8 @@ public class CoinServiceImpl implements CoinService {
     }
 
     @Override
-    public CoinDTO addCoin(CoinDTO coinDTO) throws ParseException {
-        Member member = memberService.findMemberByUid(1);
+    public CoinDTO addCoin(Integer uid, CoinDTO coinDTO) throws ParseException {
+        Member member = memberService.findMemberByUid(uid);
         Coin savedCoin = coinRepository.save(CoinDTO.convertToEntity(member, coinDTO));
 
         return CoinDTO.convertToDTO(savedCoin);
@@ -51,8 +51,8 @@ public class CoinServiceImpl implements CoinService {
 
     @Transactional
     @Override
-    public CoinDTO updateCoin(CoinDTO coinDTO) throws ParseException {
-        Member member = memberService.findMemberByUid(1);
+    public CoinDTO updateCoin(Integer uid, CoinDTO coinDTO) throws ParseException {
+        Member member = memberService.findMemberByUid(uid);
 
         // Coin 조회
         Coin isCoin = coinRepository.findByIndexAndDeleteDateIsNull(coinDTO.getIndex())
@@ -73,8 +73,8 @@ public class CoinServiceImpl implements CoinService {
 
     @Transactional
     @Override
-    public CoinDTO deleteCoin(Integer index) throws ParseException {
-        Member member = memberService.findMemberByUid(1);
+    public CoinDTO deleteCoin(Integer uid, Integer index) throws ParseException {
+        Member member = memberService.findMemberByUid(uid);
 
         // Coin 조회
         Coin isCoin = coinRepository.findByIndexAndDeleteDateIsNull(index)

@@ -102,15 +102,20 @@ public enum ErrorCode {
     INVALID_OUTCOME(200, "O01", "User dont have outcome"),
 
     //member
-    INVALID_UNAUTHOR(401,"M01", "Unauthorized"),
-    USER_ALREADY_EXISTS(400,"M02", "already exist"),
-    REGISTRATION_FAILED(400,"M03","register failed"),
-    EMAIL_NOT_FOUND(400,"M04","email not found"),
-    INVALID_VERIFICATION_CODE(400,"M05","Invalid Verification Code"),
-    MEMBER_NOT_FOUND(400,"M06","member not found by id"),
+    INVALID_UNAUTHOR(401, "M01", "Unauthorized"),
+    USER_ALREADY_EXISTS(400, "M02", "already exist"),
+    REGISTRATION_FAILED(400, "M03", "register failed"),
+    EMAIL_NOT_FOUND(400, "M04", "email not found"),
+    INVALID_VERIFICATION_CODE(400, "M05", "Invalid Verification Code"),
+    MEMBER_NOT_FOUND(400, "M06", "member not found by id"),
+    TOKEN_IS_NOT_VALID(401, "M07", "token is not valid"),
+    PERMISSION_FORBIDDEN(403, "M08", "permission forbidden"),
+    NAVER_LOGIN_FAILED(400,"M09","navigate failed"),
 
-    ;
-    ;
+
+    //S3
+    INVALID_FILE(400, "S01", "Invalid File"),
+    ;;
 
 
     /**

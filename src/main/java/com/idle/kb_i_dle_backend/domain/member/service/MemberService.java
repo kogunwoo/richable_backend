@@ -1,12 +1,11 @@
 package com.idle.kb_i_dle_backend.domain.member.service;
 
-import com.idle.kb_i_dle_backend.domain.member.dto.MemberDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.LoginDTO;
+import com.idle.kb_i_dle_backend.domain.member.dto.MemberDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberJoinDTO;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
-
-import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 
 public interface MemberService {
 
@@ -14,7 +13,7 @@ public interface MemberService {
 
     Map<String, Object> initiateNaverLogin(HttpServletRequest request) throws Exception;
 
-    Map<String, Object> processNaverCallback(String code, String state, HttpServletRequest request) throws Exception;
+    Map<String, Object> processNaverCallback(String code, String state) throws Exception;
 
     String registerMember(MemberJoinDTO signupDTO);
 
@@ -45,4 +44,6 @@ public interface MemberService {
     boolean deleteMemberById(String id);
 
     MemberDTO findByEmail(String email);
+
+    Integer getCurrentUid();
 }

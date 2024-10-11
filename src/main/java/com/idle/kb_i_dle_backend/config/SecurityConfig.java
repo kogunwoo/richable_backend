@@ -8,6 +8,7 @@ import com.idle.kb_i_dle_backend.domain.member.util.JwtProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -51,7 +52,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+            throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
@@ -64,7 +66,10 @@ public class SecurityConfig {
         config.addAllowedOrigin("http://localhost:8080");
         config.addAllowedOrigin("https://nid.naver.com");
         config.addAllowedHeader("*"); // 모든 헤더 허용
-        config.addAllowedMethod("*"); // 모든 메서드 허용 (GET, POST, PUT, DELETE, etc.)
+        config.addAllowedMethod(HttpMethod.GET);
+        config.addAllowedMethod(HttpMethod.POST);
+        config.addAllowedMethod(HttpMethod.PUT);
+        config.addAllowedMethod(HttpMethod.DELETE);
 
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
@@ -80,22 +85,30 @@ public class SecurityConfig {
      * @throws Exception
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter, CustomMemberDetailsService userDetailsService) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter,
+                                                   CustomMemberDetailsService userDetailsService) throws Exception {
         http
                 .csrf().disable()
-                .addFilterBefore(corsFilter(), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new JwtAuthenticationFilter(jwtProcessor, userDetailsService), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/**").permitAll()
-//                .antMatchers("/invest/**").authenticated()  // /invest/** 경로에 대해 인증 요구
-//                .antMatchers("/member/login", "/member/register", "/member/naverlogin", "/member/naverCallback").permitAll()  // 로그인 및 회원가입 관련 경로는 모두 허용
+                .antMatchers("/member/login", "/member/naverCallback", "/member/naverlogin").permitAll()
+                .antMatchers("/invest/**").authenticated()  // /invest/** 경로에 대해 인증 요구
+                .antMatchers("/finance/**").authenticated()
+                .antMatchers("/goal/**").authenticated()
+                .antMatchers("/income/**").authenticated()
+                .antMatchers("/outcome/**").authenticated()
+                .antMatchers("/asset/**").authenticated()
+                .antMatchers("/master/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
+//                .antMatchers("/member/login", "/member/register", "/member/naverlogin", "/member/naverCallback").permitAll()  // 로그인 및 회원가입 관련 경로는 모두 허용
                 .and()
                 .exceptionHandling()
                 .accessDeniedHandler(accessDeniedHandler)
-                .authenticationEntryPoint(authenticationEntryPoint);
+                .authenticationEntryPoint(authenticationEntryPoint)
+                .and()
+                .addFilterBefore(new JwtAuthenticationFilter(jwtProcessor, userDetailsService),
+                        UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

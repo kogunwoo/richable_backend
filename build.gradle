@@ -94,10 +94,10 @@ dependencies {
     // JUnit 및 테스트 관련 의존성
     testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
-    testImplementation 'org.springframework:spring-test:5.3.22'
+    testImplementation 'org.springframework:spring-test:5.3.37'
     testImplementation 'org.mockito:mockito-core:3.+'
     testImplementation 'org.assertj:assertj-core:3.24.2'
-
+    testImplementation 'org.springframework.security:spring-security-test:5.7.9'
 
     testCompileOnly 'org.projectlombok:lombok:1.18.22'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
@@ -110,6 +110,9 @@ dependencies {
 
     // JSON 라이브러리 추가
     implementation 'org.json:json:20210307'
+
+    //aws
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 
 
 }

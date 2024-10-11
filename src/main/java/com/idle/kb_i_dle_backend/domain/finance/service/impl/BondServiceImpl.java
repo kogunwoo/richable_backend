@@ -24,8 +24,8 @@ public class BondServiceImpl implements BondService {
     private final BondRepository bondRepository;
 
     @Override
-    public List<BondDTO> getBondList() throws Exception {
-        Member member = memberService.findMemberByUid(1);
+    public List<BondDTO> getBondList(Integer uid) throws Exception {
+        Member member = memberService.findMemberByUid(uid);
         List<Bond> bonds = bondRepository.findByUidAndDeleteDateIsNull(member);
 
         if (bonds.isEmpty()) {
@@ -42,8 +42,8 @@ public class BondServiceImpl implements BondService {
     }
 
     @Override
-    public BondDTO addBond(BondDTO bondDTO) throws ParseException {
-        Member member = memberService.findMemberByUid(1);
+    public BondDTO addBond(Integer uid, BondDTO bondDTO) throws ParseException {
+        Member member = memberService.findMemberByUid(uid);
         Bond savedBond = bondRepository.save(BondDTO.convertToEntity(member, bondDTO));
 
         return BondDTO.convertToDTO(savedBond);
@@ -51,8 +51,8 @@ public class BondServiceImpl implements BondService {
 
     @Transactional
     @Override
-    public BondDTO updateBond(BondDTO bondDTO) {
-        Member member = memberService.findMemberByUid(1);
+    public BondDTO updateBond(Integer uid, BondDTO bondDTO) {
+        Member member = memberService.findMemberByUid(uid);
 
         // Bond 조회
         Bond isBond = bondRepository.findByIndexAndDeleteDateIsNull(bondDTO.getIndex())
@@ -72,8 +72,8 @@ public class BondServiceImpl implements BondService {
 
     @Transactional
     @Override
-    public BondDTO deleteBond(Integer index) {
-        Member member = memberService.findMemberByUid(1);
+    public BondDTO deleteBond(Integer uid, Integer index) {
+        Member member = memberService.findMemberByUid(uid);
 
         // Bond 조회
         Bond isBond = bondRepository.findByIndexAndDeleteDateIsNull(index)
