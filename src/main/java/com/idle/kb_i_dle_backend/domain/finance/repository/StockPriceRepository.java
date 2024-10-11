@@ -54,6 +54,15 @@ public interface StockPriceRepository extends JpaRepository<StockPrice, Long> {
             "VALUES (:standardCode, :date, :price)", nativeQuery = true)
     void insertStockPrice(@Param("price") Integer price, @Param("standardCode") String standardCode, @Param("date") Date date);
 
+    @Query(value = "SELECT sp.* FROM product.stock_price sp " +
+            "INNER JOIN (SELECT MAX(date) as max_date FROM product.stock_price) latest " +
+            "ON sp.date = latest.max_date " +
+            "WHERE sp.price IS NOT NULL " +
+            "ORDER BY sp.price DESC " +
+            "LIMIT 5",
+            nativeQuery = true)
+    List<StockPrice> findTop5ByLatestDateOrderByPriceDesc();
+
 // insertStockPrice에서 stock_nm 업데이트
 //    use product;
 //-- 임시 테이블 생성

@@ -49,7 +49,7 @@ public class MasterServiceImpl implements MasterService {
         ExecutorService executorService = Executors.newFixedThreadPool(20);
 
         // 현재 날짜를 "yyyyMMdd" 형식의 문자열로 변환
-        String currentDate = "20241002";
+        String currentDate = "20241007";
 //                LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
 
