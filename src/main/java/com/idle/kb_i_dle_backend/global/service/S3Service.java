@@ -7,6 +7,9 @@ import com.idle.kb_i_dle_backend.global.codes.ErrorCode;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -73,12 +76,31 @@ public class S3Service {
 
     private String uploadProfile(File uploadFile, String dirName, String userId) {
 
-        String fileName = dirName + "/" + userId;
-        String uploadImageUrl = putS3(uploadFile, fileName);
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] encodedHash = digest.digest(userId.getBytes(StandardCharsets.UTF_8));
 
-        removeNewFile(uploadFile); // convert() 과정에서 로컬에 생성된 파일 삭제
+            // 해시 값을 16진수 문자열로 변환
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : encodedHash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
 
-        return uploadImageUrl;
+            String fileName = dirName + "/" + hexString;
+            String uploadImageUrl = putS3(uploadFile, fileName);
+
+            removeNewFile(uploadFile); // convert() 과정에서 로컬에 생성된 파일 삭제
+
+            return uploadImageUrl;
+        } catch (NoSuchAlgorithmException e) {
+            throw new CustomException(ErrorCode.NO_SUCH_ALGO, e.getMessage());
+        }
+        // SHA-256 해싱 알고리즘 사용
+
     }
 
     /**
