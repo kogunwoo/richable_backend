@@ -25,7 +25,6 @@ import com.idle.kb_i_dle_backend.domain.income.repository.IncomeRepository;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
 import com.idle.kb_i_dle_backend.domain.outcome.repository.OutcomeUserRepository;
-
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
@@ -251,7 +250,6 @@ public class FinanceServiceImpl implements FinanceService {
                     } else {
                         coinRepository.findCoinPriceBy(coin.getCurrency());
                     }
-
 
                     if (purchasePrice > 0) {
                         double coinReturn = ((currentPrice / purchasePrice) * 100) - 100;

@@ -4,24 +4,16 @@ package com.idle.kb_i_dle_backend.domain.member.controller;
 import com.idle.kb_i_dle_backend.domain.member.dto.LoginDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberJoinDTO;
 import com.idle.kb_i_dle_backend.domain.member.repository.MemberRepository;
-import com.idle.kb_i_dle_backend.domain.member.service.MemberApiService;
-import com.idle.kb_i_dle_backend.domain.member.service.MemberInfoService;
 import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
-import com.idle.kb_i_dle_backend.domain.member.util.JwtProcessor;
 import com.idle.kb_i_dle_backend.global.dto.ErrorResponseDTO;
 import com.idle.kb_i_dle_backend.global.dto.SuccessResponseDTO;
-
-import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriComponentsBuilder;
 
 @Slf4j
 @RestController
@@ -62,7 +53,8 @@ public class MemberController {
     }
 
     @GetMapping("/naverCallback")
-    public ResponseEntity<?> naverCallback(@RequestParam("code") String code, @RequestParam("state") String state, HttpServletRequest request) {
+    public ResponseEntity<?> naverCallback(@RequestParam("code") String code, @RequestParam("state") String state,
+                                           HttpServletRequest request) {
         // 세션에서 저장된 state 가져오기
         String sessionState = (String) request.getSession().getAttribute("naverState");
 
@@ -92,7 +84,7 @@ public class MemberController {
     @GetMapping("/checkDupl/{id}")
     public ResponseEntity<?> checkDuplicateUsername(@PathVariable String id) {
         boolean result = memberService.checkDupl(id);
-        if (result == true){
+        if (result == true) {
             SuccessResponseDTO successResponse = new SuccessResponseDTO(true, result);
             return ResponseEntity.ok(successResponse);
         } else {
@@ -120,15 +112,15 @@ public class MemberController {
 
     @PostMapping("/find/id/auth")
     public ResponseEntity<?> verifyCode(@RequestBody Map<String, String> payload) {
-            Map<String, Object> result = memberService.verifyCode(payload.get("email"), payload.get("code"));
-            boolean isVerified = (boolean) result.get("verified");
-            if (isVerified) {
-                String id = memberRepository.findByEmail(payload.get("email")).getId();
-                SuccessResponseDTO successResponse = new SuccessResponseDTO(true, id);
-                return ResponseEntity.ok(successResponse);
-            } else {
-                return ResponseEntity.badRequest().body(Map.of("message", "잘못된 인증 코드입니다."));
-            }
+        Map<String, Object> result = memberService.verifyCode(payload.get("email"), payload.get("code"));
+        boolean isVerified = (boolean) result.get("verified");
+        if (isVerified) {
+            String id = memberRepository.findByEmail(payload.get("email")).getId();
+            SuccessResponseDTO successResponse = new SuccessResponseDTO(true, id);
+            return ResponseEntity.ok(successResponse);
+        } else {
+            return ResponseEntity.badRequest().body(Map.of("message", "잘못된 인증 코드입니다."));
+        }
     }
 
     @PostMapping("/find/pw")
@@ -160,7 +152,7 @@ public class MemberController {
             ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO("비밀번호 재설정 중 오류가 발생했습니다.");
             return ResponseEntity.badRequest().body(errorResponseDTO);
         }
-        }
+    }
 
     @GetMapping("/info")
     public ResponseEntity<?> getMemberInfoByNickname(HttpServletRequest request) {
