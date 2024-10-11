@@ -5,7 +5,6 @@ import com.idle.kb_i_dle_backend.domain.member.handler.CustomAccessDeniedHandler
 import com.idle.kb_i_dle_backend.domain.member.handler.CustomAuthenticationEntryPoint;
 import com.idle.kb_i_dle_backend.domain.member.service.CustomMemberDetailsService;
 import com.idle.kb_i_dle_backend.domain.member.util.JwtProcessor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -41,8 +40,6 @@ public class SecurityConfig {
     private final CustomAccessDeniedHandler accessDeniedHandler;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
-    @Value("${front.server.url}")
-    private String frontURL;
 
     public SecurityConfig(JwtProcessor jwtProcessor,
                           CustomAccessDeniedHandler accessDeniedHandler,
@@ -71,7 +68,6 @@ public class SecurityConfig {
         config.addAllowedOrigin("http://localhost:5173"); // 허용할 출처
         config.addAllowedOrigin("http://localhost:8080");
         config.addAllowedOrigin("https://nid.naver.com");
-        config.addAllowedOrigin(frontURL);
         config.addAllowedOrigin("https://kb-i-dle.github.io/richable_frontend");
         config.addAllowedOrigin("https://kb-i-dle.github.io");
         config.addAllowedOrigin("http://localhost:4173/richable_frontend");

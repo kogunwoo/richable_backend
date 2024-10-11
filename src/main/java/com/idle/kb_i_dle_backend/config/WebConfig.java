@@ -5,6 +5,7 @@ import com.idle.kb_i_dle_backend.domain.member.util.JwtProcessor;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -35,6 +36,8 @@ public class WebConfig implements WebMvcConfigurer {
         System.out.println("WebConfig created");
     }
 
+    @Value("${front.server.url}")
+    private String frontURL;
 
     @Bean
     public JwtProcessor jwtProcessor() {
@@ -77,6 +80,11 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedMethods("*")
                 .allowedOriginPatterns("*")
                 .allowedOrigins("http://localhost:5173")
+                .allowedOrigins(frontURL)
+                .allowedOrigins("https://kb-i-dle.github.io/richable_frontend")
+                .allowedOrigins("https://kb-i-dle.github.io")
+                .allowedOrigins("http://localhost:4173/richable_frontend")
+                .allowedOrigins("http://localhost:4173")
                 .allowCredentials(true); // 프론트엔드 도메인
     }
 
