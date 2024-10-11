@@ -85,6 +85,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOrigins("https://kb-i-dle.github.io")
                 .allowedOrigins("http://localhost:4173/richable_frontend")
                 .allowedOrigins("http://localhost:4173")
+                .allowedOrigins("*")
                 .allowCredentials(true); // 프론트엔드 도메인
     }
 
