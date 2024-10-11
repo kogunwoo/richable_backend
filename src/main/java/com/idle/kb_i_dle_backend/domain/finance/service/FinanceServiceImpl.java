@@ -107,18 +107,29 @@ public class FinanceServiceImpl implements FinanceService {
     @Override
     public List<AssetDTO> getFinancialAsset(int uid) {
         Member member = memberService.findMemberByUid(uid);
-        Long sumBankAssets =
-                assetSummaryRepository.findLatestByUidZeroMonthAgo(member).getCash() + assetSummaryRepository.findLatestByUidZeroMonthAgo(member).getSaving() +
-                        assetSummaryRepository.findLatestByUidZeroMonthAgo(member).getDeposit() +assetSummaryRepository.findLatestByUidZeroMonthAgo(member).getSubscription() +
-                        assetSummaryRepository.findLatestByUidZeroMonthAgo(member).getWithdrawal() ;
+        AssetSummary assetSummary = assetSummaryRepository.findLatestByUidZeroMonthAgo(member);
+
+        if (assetSummary == null) {
+            throw new RuntimeException("Asset summary not found for user: " + uid);
+        }
+
         List<AssetDTO> assetList = new ArrayList<>();
 
-        assetList.add(new AssetDTO("예적금",sumBankAssets));
-        assetList.add(new AssetDTO("주식", assetSummaryRepository.findLatestByUidZeroMonthAgo(member).getStock()));
-        assetList.add(new AssetDTO("코인", assetSummaryRepository.findLatestByUidZeroMonthAgo(member).getCoin()));
-        assetList.add(new AssetDTO("채권", assetSummaryRepository.findLatestByUidZeroMonthAgo(member).getBond()));
+        Long sumBankAssets = getOrDefault(assetSummary.getDeposit(), 0L) +
+                getOrDefault(assetSummary.getSaving(), 0L) +
+                getOrDefault(assetSummary.getSubscription(), 0L) +
+                getOrDefault(assetSummary.getWithdrawal(), 0L) +
+                getOrDefault(assetSummary.getCash(), 0L);
+
+        assetList.add(new AssetDTO("예적금", sumBankAssets));
+        assetList.add(new AssetDTO("주식", getOrDefault(assetSummary.getStock(), 0L)));
+        assetList.add(new AssetDTO("코인", getOrDefault(assetSummary.getCoin(), 0L)));
+        assetList.add(new AssetDTO("채권", getOrDefault(assetSummary.getBond(), 0L)));
 
         return assetList;
+    }
+    private Long getOrDefault(Long value, Long defaultValue) {
+        return value != null ? value : defaultValue;
     }
 
     // 6개월 금융 자산 변동 계산
