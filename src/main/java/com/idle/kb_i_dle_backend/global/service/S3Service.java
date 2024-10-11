@@ -33,11 +33,25 @@ public class S3Service {
      * @return
      * @throws IOException
      */
-    public String upload(MultipartFile file, String dirName) throws IOException {
-        File uploadFile = convert(file).orElseThrow(() -> new CustomException(ErrorCode.INVALID_FILE, "파일 변환중 오류"));
-        return upload(uploadFile, dirName);
+    public String upload(MultipartFile file, String dirName) {
+        Optional<File> uploadFile = convert(file);
+        if (uploadFile.isPresent()) {
+            return upload(uploadFile.get(), dirName);
+        } else {
+            throw new CustomException(ErrorCode.INVALID_FILE, "파일 변환중 오류");
+        }
+
     }
 
+    public String uploadProfile(MultipartFile file, String userId) {
+        Optional<File> uploadFile = convert(file);
+        if (uploadFile.isPresent()) {
+            return uploadProfile(uploadFile.get(), "profileImages", userId);
+        } else {
+            throw new CustomException(ErrorCode.INVALID_FILE, "파일 변환중 오류");
+        }
+
+    }
 
     /**
      * file s3에 업로드 후 변환과정중 생성된 파일 삭제
@@ -49,6 +63,17 @@ public class S3Service {
     private String upload(File uploadFile, String dirName) {
 
         String fileName = dirName + "/" + uploadFile.getName();
+        String uploadImageUrl = putS3(uploadFile, fileName);
+
+        removeNewFile(uploadFile); // convert() 과정에서 로컬에 생성된 파일 삭제
+
+        return uploadImageUrl;
+    }
+
+
+    private String uploadProfile(File uploadFile, String dirName, String userId) {
+
+        String fileName = dirName + "/" + userId;
         String uploadImageUrl = putS3(uploadFile, fileName);
 
         removeNewFile(uploadFile); // convert() 과정에서 로컬에 생성된 파일 삭제
@@ -96,23 +121,36 @@ public class S3Service {
      * @return
      * @throws IOException
      */
-    private Optional<File> convert(MultipartFile multipartFile) throws IOException {
+    private Optional<File> convert(MultipartFile multipartFile) {
 
         // 기존 파일 이름으로 새로운 File 객체 생성
         // 해당 객체는 프로그램이 실행되는 로컬 디렉토리(루트 디렉토리)에 위치하게 됨
-        File convertFile = new File(multipartFile.getOriginalFilename());
+        try {
+            File convertFile = new File(multipartFile.getOriginalFilename());
 
-        if (convertFile.createNewFile()) { // 해당 경로에 파일이 없을 경우, 새 파일 생성
+            if (convertFile.createNewFile()) { // 해당 경로에 파일이 없을 경우, 새 파일 생성
 
-            try (FileOutputStream fos = new FileOutputStream(convertFile)) {
+                try (FileOutputStream fos = new FileOutputStream(convertFile)) {
 
-                // multipartFile의 내용을 byte로 가져와서 write
-                fos.write(multipartFile.getBytes());
+                    // multipartFile의 내용을 byte로 가져와서 write
+                    fos.write(multipartFile.getBytes());
+                }
+                return Optional.of(convertFile);
             }
-            return Optional.of(convertFile);
+
+            // 새파일이 성공적으로 생성되지 않았다면, 비어있는 Optional 객체를 반환
+            return Optional.empty();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            throw new CustomException(ErrorCode.INVALID_FILE);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new CustomException(ErrorCode.INVALID_FILE);
         }
 
-        // 새파일이 성공적으로 생성되지 않았다면, 비어있는 Optional 객체를 반환
-        return Optional.empty();
+    }
+
+    public void deleteFile(String fileName) {
+        amazonS3Client.deleteObject(bucket, fileName);
     }
 }
