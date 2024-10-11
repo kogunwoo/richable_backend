@@ -10,6 +10,9 @@ import com.idle.kb_i_dle_backend.domain.finance.dto.MonthlyBalanceDTO;
 import com.idle.kb_i_dle_backend.domain.finance.dto.MonthlySavingRateDTO;
 import com.idle.kb_i_dle_backend.domain.finance.dto.StockReturnDTO;
 import com.idle.kb_i_dle_backend.domain.finance.dto.TotalChangeDTO;
+import com.idle.kb_i_dle_backend.domain.finance.entity.BondProduct;
+import com.idle.kb_i_dle_backend.domain.finance.entity.CoinProduct;
+import com.idle.kb_i_dle_backend.domain.finance.entity.StockProduct;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import java.util.Date;
 import java.util.List;
@@ -49,5 +52,10 @@ public interface FinanceService {
 
     List<Map<String, Object>> compareAssetsByCategoryWithAgeGroup(int uid);
 
+    List<BondProduct> findBondProductsWithNonNullPrices();
+
+    List<StockProduct> findStockProducts();
+
+    List<CoinProduct> findCoinProducts();
 
 }

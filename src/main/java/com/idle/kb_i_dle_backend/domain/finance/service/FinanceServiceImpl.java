@@ -21,6 +21,7 @@ import com.idle.kb_i_dle_backend.domain.finance.entity.StockProduct;
 import com.idle.kb_i_dle_backend.domain.finance.entity.StockProductPrice;
 import com.idle.kb_i_dle_backend.domain.finance.repository.AssetSummaryRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BankRepository;
+import com.idle.kb_i_dle_backend.domain.finance.repository.BondProductPriceRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BondProductRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BondRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.CoinProductPriceRepository;
@@ -45,6 +46,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -57,6 +59,7 @@ public class FinanceServiceImpl implements FinanceService {
     private final BankRepository bankRepository;
     private final BondRepository bondRepository;
     private final BondProductRepository bondProductRepository;
+    private final BondProductPriceRepository bondProductPriceRepository;
     private final CoinRepository coinRepository;
     private final CoinProductPriceRepository coinProductPriceRepository;
     private final SpotRepository spotRepository;
@@ -104,18 +107,29 @@ public class FinanceServiceImpl implements FinanceService {
     @Override
     public List<AssetDTO> getFinancialAsset(int uid) {
         Member member = memberService.findMemberByUid(uid);
-        Long sumBankAssets =
-                assetSummaryRepository.findLatestByUidZeroMonthAgo(member).getCash() + assetSummaryRepository.findLatestByUidZeroMonthAgo(member).getSaving() +
-                        assetSummaryRepository.findLatestByUidZeroMonthAgo(member).getDeposit() +assetSummaryRepository.findLatestByUidZeroMonthAgo(member).getSubscription() +
-                        assetSummaryRepository.findLatestByUidZeroMonthAgo(member).getWithdrawal() ;
+        AssetSummary assetSummary = assetSummaryRepository.findLatestByUidZeroMonthAgo(member);
+
+        if (assetSummary == null) {
+            throw new RuntimeException("Asset summary not found for user: " + uid);
+        }
+
         List<AssetDTO> assetList = new ArrayList<>();
 
-        assetList.add(new AssetDTO("예적금",sumBankAssets));
-        assetList.add(new AssetDTO("주식", assetSummaryRepository.findLatestByUidZeroMonthAgo(member).getStock()));
-        assetList.add(new AssetDTO("코인", assetSummaryRepository.findLatestByUidZeroMonthAgo(member).getCoin()));
-        assetList.add(new AssetDTO("채권", assetSummaryRepository.findLatestByUidZeroMonthAgo(member).getBond()));
+        Long sumBankAssets = getOrDefault(assetSummary.getDeposit(), 0L) +
+                getOrDefault(assetSummary.getSaving(), 0L) +
+                getOrDefault(assetSummary.getSubscription(), 0L) +
+                getOrDefault(assetSummary.getWithdrawal(), 0L) +
+                getOrDefault(assetSummary.getCash(), 0L);
+
+        assetList.add(new AssetDTO("예적금", sumBankAssets));
+        assetList.add(new AssetDTO("주식", getOrDefault(assetSummary.getStock(), 0L)));
+        assetList.add(new AssetDTO("코인", getOrDefault(assetSummary.getCoin(), 0L)));
+        assetList.add(new AssetDTO("채권", getOrDefault(assetSummary.getBond(), 0L)));
 
         return assetList;
+    }
+    private Long getOrDefault(Long value, Long defaultValue) {
+        return value != null ? value : defaultValue;
     }
 
     // 6개월 금융 자산 변동 계산
@@ -485,5 +499,18 @@ public class FinanceServiceImpl implements FinanceService {
         return cal.getTime();
     }
 
+    public List<BondProduct> findBondProductsWithNonNullPrices() {
+        List<BondProductPrice> bondProductPrices = bondProductPriceRepository.findAllNonNullValues();
+        List<String> isinCds = bondProductPrices.stream()
+                .map(BondProductPrice::getIsinCd)
+                .collect(Collectors.toList());
+        return bondProductRepository.findByBondProductPriceIsinCdIn(isinCds);
+    }
 
+    public List<StockProduct> findStockProducts() {
+        return stockProductRepository.findOrderByPriceDesc();
+    }
+    public List<CoinProduct> findCoinProducts() {
+        return coinRepository.findOrderByClosingPriceDesc();
+    }
 }

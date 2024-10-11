@@ -48,6 +48,9 @@ public interface CoinRepository extends JpaRepository<Coin, Long> {
     @Query("SELECT cl FROM CoinProduct cl ORDER BY CAST(cl.closingPrice AS double) DESC")
     List<CoinProduct> findTop5ByOrderByClosingPriceDesc();
 
+    @Query("SELECT cl FROM CoinProduct cl ORDER BY CAST(cl.closingPrice AS double) DESC")
+    List<CoinProduct> findOrderByClosingPriceDesc();
+
     // coin crud
 // 삭제되지 않은 금융 자산(Coin) 전체 조회
     List<Coin> findByUidAndDeleteDateIsNull(Member uid);
