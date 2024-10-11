@@ -1,4 +1,4 @@
-package com.idle.kb_i_dle_backend.domain.member.service;
+package com.idle.kb_i_dle_backend.domain.member.service.impl;
 
 import com.idle.kb_i_dle_backend.config.exception.CustomException;
 import com.idle.kb_i_dle_backend.domain.member.dto.CustomUserDetails;
@@ -10,26 +10,20 @@ import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import com.idle.kb_i_dle_backend.domain.member.entity.MemberAPI;
 import com.idle.kb_i_dle_backend.domain.member.exception.MemberException;
 import com.idle.kb_i_dle_backend.domain.member.repository.MemberRepository;
+import com.idle.kb_i_dle_backend.domain.member.service.EmailService;
+import com.idle.kb_i_dle_backend.domain.member.service.MemberApiService;
+import com.idle.kb_i_dle_backend.domain.member.service.MemberInfoService;
+import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
 import com.idle.kb_i_dle_backend.domain.member.util.JwtProcessor;
 import com.idle.kb_i_dle_backend.global.codes.ErrorCode;
-import java.util.Arrays;
-import java.util.UUID;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.math.BigInteger;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.UUID;
 import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -39,16 +33,19 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -112,7 +109,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public Map<String, Object> initiateNaverLogin(HttpServletRequest request) {
-        String state =  generateState();
+        String state = generateState();
         HttpSession session = request.getSession();
         session.setAttribute("naverState", state);
 
