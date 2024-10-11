@@ -73,6 +73,7 @@ public class SecurityConfig {
         config.addAllowedOrigin("https://nid.naver.com");
         config.addAllowedOrigin(frontURL);
         config.addAllowedOrigin("https://kb-i-dle.github.io/richable_frontend");
+        config.addAllowedOrigin("https://kb-i-dle.github.io");
         config.addAllowedOrigin("http://localhost:4173/richable_frontend");
         config.addAllowedOrigin("http://localhost:4173");
         config.addAllowedHeader("*"); // 모든 헤더 허용
