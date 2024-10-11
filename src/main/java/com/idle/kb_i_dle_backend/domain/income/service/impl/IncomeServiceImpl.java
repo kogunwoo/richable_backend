@@ -1,6 +1,7 @@
 package com.idle.kb_i_dle_backend.domain.income.service.impl;
 
 import com.idle.kb_i_dle_backend.config.exception.CustomException;
+import com.idle.kb_i_dle_backend.domain.finance.repository.AssetSummaryRepository;
 import com.idle.kb_i_dle_backend.domain.income.dto.IncomeDTO;
 import com.idle.kb_i_dle_backend.domain.income.entity.Income;
 import com.idle.kb_i_dle_backend.domain.income.repository.IncomeRepository;
@@ -22,6 +23,7 @@ public class IncomeServiceImpl implements IncomeService {
 
     private final MemberService memberService;
     private final IncomeRepository incomeRepository;
+    private final AssetSummaryRepository assetSummaryRepository;
 
     @Override
     public List<IncomeDTO> getIncomeList(Integer uid) throws Exception {
@@ -70,6 +72,7 @@ public class IncomeServiceImpl implements IncomeService {
     public IncomeDTO addIncome(Integer uid, IncomeDTO incomeDTO) throws ParseException {
         Member tempMember = memberService.findMemberByUid(uid);
         Income savedIncome = incomeRepository.save(IncomeDTO.convertToEntity(tempMember, incomeDTO));
+        assetSummaryRepository.insertOrUpdateAssetSummary(uid);
 
         return IncomeDTO.convertToDTO(savedIncome);
     }

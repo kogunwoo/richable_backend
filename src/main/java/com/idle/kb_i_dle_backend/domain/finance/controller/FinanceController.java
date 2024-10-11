@@ -8,10 +8,12 @@ import com.idle.kb_i_dle_backend.domain.finance.dto.FinancialSumDTO;
 import com.idle.kb_i_dle_backend.domain.finance.dto.MonthlyBalanceDTO;
 import com.idle.kb_i_dle_backend.domain.finance.dto.StockReturnDTO;
 import com.idle.kb_i_dle_backend.domain.finance.dto.TotalChangeDTO;
+import com.idle.kb_i_dle_backend.domain.finance.entity.BondProduct;
+import com.idle.kb_i_dle_backend.domain.finance.entity.CoinProduct;
+import com.idle.kb_i_dle_backend.domain.finance.entity.StockProduct;
 import com.idle.kb_i_dle_backend.domain.finance.service.FinanceService;
 import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
 import com.idle.kb_i_dle_backend.global.dto.SuccessResponseDTO;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -42,11 +44,7 @@ public class FinanceController {
         }
 
         FinancialSumDTO totalPrice = financeService.getFinancialAssetsSum(uid);
-
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("data", totalPrice);
-
-        SuccessResponseDTO Response = new SuccessResponseDTO(true, responseData);
+        SuccessResponseDTO Response = new SuccessResponseDTO(true, totalPrice);
 
         return ResponseEntity.ok(Response);
     }
@@ -58,11 +56,7 @@ public class FinanceController {
         Integer uid = memberService.getCurrentUid();
 
         List<AssetDTO> totalPrice = financeService.getFinancialAsset(uid);
-
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("data", totalPrice);
-
-        SuccessResponseDTO successResponse = new SuccessResponseDTO(true, responseData);
+        SuccessResponseDTO successResponse = new SuccessResponseDTO(true, totalPrice);
 
         return ResponseEntity.ok(successResponse);
     }
@@ -73,11 +67,7 @@ public class FinanceController {
         Integer uid = memberService.getCurrentUid();
 
         FinancialSumDTO totalPrice = financeService.getTotalAssetsSum(uid);
-
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("data", totalPrice);
-
-        SuccessResponseDTO successResponse = new SuccessResponseDTO(true, responseData);
+        SuccessResponseDTO successResponse = new SuccessResponseDTO(true, totalPrice);
 
         return ResponseEntity.ok(successResponse);
     }
@@ -89,11 +79,7 @@ public class FinanceController {
         Integer uid = memberService.getCurrentUid();
 
         List<FinancialChangeDTO> result = financeService.getSixMonthFinancialChanges(uid);
-
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("data", result);
-
-        SuccessResponseDTO successResponse = new SuccessResponseDTO(true, responseData);
+        SuccessResponseDTO successResponse = new SuccessResponseDTO(true, result);
 
         return ResponseEntity.ok(successResponse);
     }
@@ -172,8 +158,27 @@ public class FinanceController {
         SuccessResponseDTO Response = new SuccessResponseDTO(true, response);
 
         return ResponseEntity.ok(Response);
-
     }
 
+    @GetMapping("/product/bond")
+    public ResponseEntity<SuccessResponseDTO> getBondProductList() {
+        List<BondProduct> bondProducts = financeService.findBondProductsWithNonNullPrices();
+        SuccessResponseDTO response = new SuccessResponseDTO(true, bondProducts);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/product/stock")
+    public ResponseEntity<SuccessResponseDTO> getStockProductList() {
+        List<StockProduct> stockProducts = financeService.findStockProducts();
+        SuccessResponseDTO response = new SuccessResponseDTO(true, stockProducts);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/product/coin")
+    public ResponseEntity<SuccessResponseDTO> getCoinProductList() {
+        List<CoinProduct> coinProducts = financeService.findCoinProducts();
+        SuccessResponseDTO response = new SuccessResponseDTO(true, coinProducts);
+        return ResponseEntity.ok(response);
+    }
 
 }

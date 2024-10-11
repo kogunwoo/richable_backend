@@ -1,6 +1,7 @@
-package com.idle.kb_i_dle_backend.domain.member.service;
+package com.idle.kb_i_dle_backend.domain.member.service.impl;
 
-import com.idle.kb_i_dle_backend.domain.member.dto.CustomUser;
+import com.idle.kb_i_dle_backend.config.exception.CustomException;
+import com.idle.kb_i_dle_backend.domain.member.dto.CustomUserDetails;
 import com.idle.kb_i_dle_backend.domain.member.dto.LoginDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberInfoDTO;
@@ -9,19 +10,20 @@ import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import com.idle.kb_i_dle_backend.domain.member.entity.MemberAPI;
 import com.idle.kb_i_dle_backend.domain.member.exception.MemberException;
 import com.idle.kb_i_dle_backend.domain.member.repository.MemberRepository;
+import com.idle.kb_i_dle_backend.domain.member.service.EmailService;
+import com.idle.kb_i_dle_backend.domain.member.service.MemberApiService;
+import com.idle.kb_i_dle_backend.domain.member.service.MemberInfoService;
+import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
 import com.idle.kb_i_dle_backend.domain.member.util.JwtProcessor;
 import com.idle.kb_i_dle_backend.global.codes.ErrorCode;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.math.BigInteger;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.UUID;
 import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -29,12 +31,24 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
@@ -48,6 +62,8 @@ public class MemberServiceImpl implements MemberService {
     private final JwtProcessor jwtProcessor;
     private final MemberInfoService memberInfoService;
     private final MemberApiService memberApiService;
+    private final RestTemplate restTemplate;
+    private final HttpServletRequest request;
 
     @Value("${naver.client.id}")
     private String clientId;
@@ -68,10 +84,10 @@ public class MemberServiceImpl implements MemberService {
             Authentication authentication = authenticationManager.authenticate(authenticationToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            CustomUser customUser = (CustomUser) authentication.getPrincipal();
-            MemberDTO member = customUser.getMember();
+            CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+            Member member = customUserDetails.getMember();
             MemberInfoDTO userInfo = new MemberInfoDTO(member.getUid(), member.getId(),
-                    member.getEmail(), member.getNickname(), member.getAuth().toString());
+                    member.getEmail(), member.getNickname(), member.getAuth());
 
             String jwtToken = jwtProcessor.generateToken(userInfo.getId(), userInfo.getUid(), userInfo.getNickname(),
                     userInfo.getEmail());
@@ -92,14 +108,15 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public Map<String, Object> initiateNaverLogin(HttpServletRequest request) throws Exception {
+    public Map<String, Object> initiateNaverLogin(HttpServletRequest request) {
         String state = generateState();
         HttpSession session = request.getSession();
         session.setAttribute("naverState", state);
 
-        String naverAuthUrl = "https://nid.naver.com/oauth2.0/authorize?response_type=code"
+        String naverAuthUrl = "https://nid.naver.com/oauth2.0/authorize"
+                + "?response_type=code"
                 + "&client_id=" + clientId
-                + "&redirect_uri=" + URLEncoder.encode(redirectUri, "UTF-8")
+                + "&redirect_uri=" + redirectUri
                 + "&state=" + state;
 
         Map<String, Object> result = new HashMap<>();
@@ -109,80 +126,124 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public Map<String, Object> processNaverCallback(String code, String state, HttpServletRequest request)
-            throws Exception {
-        String tokenUrl = "https://nid.naver.com/oauth2.0/token?grant_type=authorization_code"
-                + "&client_id=" + clientId
-                + "&client_secret=" + clientSecret
-                + "&code=" + code
-                + "&state=" + state;
+    public Map<String, Object> processNaverCallback(String code, String state) {
+        try {
+            // 1. 액세스 토큰 얻기
+            String accessToken = getNaverAccessToken(code, state);
 
-        String accessToken = getHttpResponse(tokenUrl);
-        JSONObject userProfile = getUserProfile(accessToken);
+            // 2. 사용자 정보 가져오기
+            JSONObject userProfile = getUserProfile(accessToken);
 
-        JSONObject responseObj = userProfile.getJSONObject("response");
-        String email = responseObj.getString("email");
-        String nickname = responseObj.getString("nickname");
+            // 3. 사용자 정보 처리 및 회원가입/로그인
+            return processNaverUser(userProfile);
+        } catch (Exception e) {
+            log.error("Error processing Naver callback", e);
+            throw new MemberException(ErrorCode.NAVER_LOGIN_FAILED, "Failed to process Naver login");
+        }
+    }
 
-        MemberDTO memberDTO = findByEmail(email);
-        if (memberDTO == null) {
-            MemberJoinDTO joinDTO = MemberJoinDTO.builder()
-                    .email(email)
-                    .nickname(nickname)
-                    .build();
-            MemberJoin(joinDTO);
-            memberDTO = findByEmail(email);
+    private String getNaverAccessToken(String code, String state) {
+        String tokenUrl = "https://nid.naver.com/oauth2.0/token";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("grant_type", "authorization_code");
+        body.add("client_id", clientId);
+        body.add("client_secret", clientSecret);
+        body.add("code", code);
+        body.add("state", state);
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+
+        ResponseEntity<String> response = restTemplate.postForEntity(tokenUrl, request, String.class);
+
+        if (response.getStatusCode() == HttpStatus.OK) {
+            JSONObject jsonResponse = new JSONObject(response.getBody());
+            return jsonResponse.getString("access_token");
+        } else {
+            throw new MemberException(ErrorCode.NAVER_LOGIN_FAILED, "Failed to obtain access token");
+        }
+    }
+
+    private JSONObject getUserProfile(String accessToken) {
+        String profileUrl = "https://openapi.naver.com/v1/nid/me";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+
+        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(profileUrl, HttpMethod.GET, entity, String.class);
+
+        if (response.getStatusCode() == HttpStatus.OK) {
+            return new JSONObject(response.getBody());
+        } else {
+            throw new MemberException(ErrorCode.NAVER_LOGIN_FAILED, "Failed to get user profile");
+        }
+    }
+
+    private Map<String, Object> processNaverUser(JSONObject userProfile) {
+        JSONObject response = userProfile.getJSONObject("response");
+        String email = response.getString("email");
+        String nickname = response.getString("nickname");
+
+        Member member = memberRepository.findByEmail(email);
+        if (member == null) {
+            member = createNaverMember(email, nickname);
         }
 
-        String jwtToken = jwtProcessor.generateToken(memberDTO.getId(), memberDTO.getUid(), memberDTO.getNickname(),
-                memberDTO.getEmail());
+        String token = jwtProcessor.generateToken(member.getId(), member.getUid(), member.getNickname(),
+                member.getEmail());
+// SecurityContextHolder에 인증 정보 저장
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                member.getId(), null, Arrays.asList(new SimpleGrantedAuthority(member.getAuth()))
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        // 세션에 토큰 저장
         HttpSession session = request.getSession();
-        session.setAttribute("jwtToken", jwtToken);
+        session.setAttribute("authToken", token);
+
+        // MemberDTO 생성
+        MemberDTO memberDTO = MemberDTO.builder()
+                .uid(member.getUid())
+                .id(member.getId())
+                .email(member.getEmail())
+                .nickname(member.getNickname())
+                .auth(member.getAuth())
+                // 필요한 다른 필드들도 추가
+                .build();
+
+        // 사용자 정보를 MemberInfoDTO로 변환
+        MemberInfoDTO userInfo = new MemberInfoDTO(member.getUid(), member.getId(),
+                member.getEmail(), member.getNickname(), member.getAuth());
 
         Map<String, Object> result = new HashMap<>();
-        result.put("token", jwtToken);
-        result.put("redirectUrl", "http://localhost:5173");
+        result.put("token", token);
+        result.put("userInfo", userInfo);
         return result;
     }
 
-    private String getHttpResponse(String urlString) throws Exception {
-        URL url = new URL(urlString);
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestMethod("GET");
+    private Member createNaverMember(String email, String nickname) {
+        String id = email.split("@")[0];
+        String password = UUID.randomUUID().toString();
 
-        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-        String inputLine;
-        StringBuffer response = new StringBuffer();
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
-        }
-        in.close();
+        MemberJoinDTO memberJoinDTO = MemberJoinDTO.builder()
+                .id(id)
+                .password(password)
+                .email(email)
+                .nickname(nickname)
+                .auth("ROLE_MEMBER")
+                .agreementInfo(true)
+                .agreementFinance(true)
+                .build();
 
-        return response.toString();
-    }
+        Member member = Member.from(memberJoinDTO);
+        member.setPassword(passwordEncoder.encode(password));
 
-    private JSONObject getUserProfile(String accessToken) throws Exception {
-        String profileUrl = "https://openapi.naver.com/v1/nid/me";
-        URL url = new URL(profileUrl);
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestMethod("GET");
-        con.setRequestProperty("Authorization", "Bearer " + accessToken);
-
-        int responseCode = con.getResponseCode();
-        BufferedReader br;
-        if (responseCode == 200) {
-            br = new BufferedReader(new InputStreamReader(con.getInputStream()));
-        } else {
-            br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
-        }
-        String inputLine;
-        StringBuilder response = new StringBuilder();
-        while ((inputLine = br.readLine()) != null) {
-            response.append(inputLine);
-        }
-        br.close();
-
-        return new JSONObject(response.toString());
+        return memberRepository.save(member);
     }
 
     @Override
@@ -216,8 +277,64 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    @Transactional
     public void MemberJoin(MemberJoinDTO memberjoindto) {
+        try {
+            log.debug("Starting MemberJoin process for ID: {}", memberjoindto.getId());
 
+            if (memberjoindto.isAgreementInfo()) {
+                memberjoindto.setAgreementInfo(true);
+            } else {
+                memberjoindto.setAgreementInfo(false);
+            }
+            if (memberjoindto.isAgreementFinance()) {
+                memberjoindto.setAgreementFinance(true);
+            } else {
+                memberjoindto.setAgreementFinance(false);
+            }
+            if (memberjoindto.getAuth() == null || memberjoindto.getAuth().isEmpty()) {
+                memberjoindto.setAuth("ROLE_MEMBER");
+            }
+
+            log.debug("Checking if user exists");
+            if (memberRepository.existsById(memberjoindto.getId())) {
+                throw new IllegalStateException("User already exists");
+            }
+
+            log.debug("Validating nickname");
+            if (memberjoindto.getNickname() == null || memberjoindto.getNickname().length() > 50) {
+                throw new IllegalArgumentException("Nickname must not be null and should not exceed 50 characters");
+            }
+
+            log.debug("Validating ID");
+            if (memberjoindto.getId() == null || memberjoindto.getId().isEmpty()) {
+                throw new IllegalStateException("User ID is required");
+            }
+
+            log.debug("Encoding password");
+            String encodePassword = passwordEncoder.encode(memberjoindto.getPassword());
+
+            log.debug("Building User entity");
+            Member newMember = Member.builder()
+                    .id(memberjoindto.getId())
+                    .password(encodePassword)
+                    .nickname(memberjoindto.getNickname())
+                    .gender(String.valueOf(memberjoindto.getGender()))
+                    .email(memberjoindto.getEmail())
+                    .birth_year(memberjoindto.getBirth_year())
+                    .auth(memberjoindto.getAuth())
+
+                    .agreementInfo(memberjoindto.isAgreementInfo())
+                    .agreementFinance(memberjoindto.isAgreementFinance())
+                    .build();
+
+            log.debug("Saving new user: {}", newMember);
+            memberRepository.save(newMember);
+            log.debug("User saved successfully");
+        } catch (Exception e) {
+            log.error("Error in MemberJoin: ", e);
+            throw e;
+        }
     }
 
     @Override
@@ -229,6 +346,13 @@ public class MemberServiceImpl implements MemberService {
     public boolean updateUserAgreement(String id, Map<String, Boolean> agreementData) {
         boolean info = agreementData.get("info");
         boolean finance = agreementData.get("finance");
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Member not found with id: " + id));
+
+        member.setAgreementInfo(info);
+        member.setAgreementFinance(finance);
+
+        memberRepository.save(member);
         boolean result = checkAgree(info, finance, id);
         return result;
     }
@@ -445,7 +569,8 @@ public class MemberServiceImpl implements MemberService {
             log.error("Failed to delete member with nickname: {}. Error: {}", nickname, e.getMessage());
             throw e;
         } catch (Exception e) {
-            log.error("Unexpected error occurred while deleting member with nickname: {}. Error: {}", nickname, e.getMessage());
+            log.error("Unexpected error occurred while deleting member with nickname: {}. Error: {}", nickname,
+                    e.getMessage());
             throw new MemberException(ErrorCode.INTERNAL_SERVER_ERROR, "Failed to delete member");
         }
     }
@@ -485,6 +610,18 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public Integer getCurrentUid() {
-        return (Integer) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        try {
+            UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
+                    .getPrincipal();
+            Optional<Member> member = memberRepository.findById(userDetails.getUsername());
+
+            if (member.isEmpty()) {
+                throw new CustomException(ErrorCode.INVALID_MEMEBER);
+            }
+            return member.get().getUid();
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.INVALID_MEMEBER);
+
+        }
     }
 }

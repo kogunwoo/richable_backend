@@ -163,4 +163,19 @@ public class AssetController {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
+
+    // 입출금 계좌 조회
+    @GetMapping("/account/list")
+    public ResponseEntity<?> listOfAccount() {
+        try {
+            Integer uid = memberService.getCurrentUid();
+            Map<String, Object> accountData = new HashMap<>();
+            accountData.put("account", bankService.getAccount(uid));
+            SuccessResponseDTO response = new SuccessResponseDTO(true, accountData);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            ErrorResponseDTO response = new ErrorResponseDTO(e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+    }
 }
