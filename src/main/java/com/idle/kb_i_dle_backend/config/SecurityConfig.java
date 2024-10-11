@@ -89,6 +89,8 @@ public class SecurityConfig {
                                                    CustomMemberDetailsService userDetailsService) throws Exception {
         http
                 .csrf().disable()
+                .cors()
+                .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()

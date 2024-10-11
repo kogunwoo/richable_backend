@@ -21,6 +21,7 @@ import com.idle.kb_i_dle_backend.domain.finance.entity.StockProduct;
 import com.idle.kb_i_dle_backend.domain.finance.entity.StockProductPrice;
 import com.idle.kb_i_dle_backend.domain.finance.repository.AssetSummaryRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BankRepository;
+import com.idle.kb_i_dle_backend.domain.finance.repository.BondProductPriceRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BondProductRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BondRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.CoinProductPriceRepository;
@@ -45,6 +46,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -57,6 +59,7 @@ public class FinanceServiceImpl implements FinanceService {
     private final BankRepository bankRepository;
     private final BondRepository bondRepository;
     private final BondProductRepository bondProductRepository;
+    private final BondProductPriceRepository bondProductPriceRepository;
     private final CoinRepository coinRepository;
     private final CoinProductPriceRepository coinProductPriceRepository;
     private final SpotRepository spotRepository;
@@ -485,5 +488,18 @@ public class FinanceServiceImpl implements FinanceService {
         return cal.getTime();
     }
 
+    public List<BondProduct> findBondProductsWithNonNullPrices() {
+        List<BondProductPrice> bondProductPrices = bondProductPriceRepository.findAllNonNullValues();
+        List<String> isinCds = bondProductPrices.stream()
+                .map(BondProductPrice::getIsinCd)
+                .collect(Collectors.toList());
+        return bondProductRepository.findByBondProductPriceIsinCdIn(isinCds);
+    }
 
+    public List<StockProduct> findStockProducts() {
+        return stockProductRepository.findOrderByPriceDesc();
+    }
+    public List<CoinProduct> findCoinProducts() {
+        return coinRepository.findOrderByClosingPriceDesc();
+    }
 }
