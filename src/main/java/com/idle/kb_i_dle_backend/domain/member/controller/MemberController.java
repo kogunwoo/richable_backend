@@ -7,11 +7,14 @@ import com.idle.kb_i_dle_backend.domain.member.repository.MemberRepository;
 import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
 import com.idle.kb_i_dle_backend.global.dto.ErrorResponseDTO;
 import com.idle.kb_i_dle_backend.global.dto.SuccessResponseDTO;
+import java.net.URI;
+import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -53,25 +56,22 @@ public class MemberController {
     }
 
     @GetMapping("/naverCallback")
-    public ResponseEntity<?> naverCallback(@RequestParam("code") String code, @RequestParam("state") String state,
-                                           HttpServletRequest request) {
-        // 세션에서 저장된 state 가져오기
-        String sessionState = (String) request.getSession().getAttribute("naverState");
-
-        if (code == null || state == null) {
-            return ResponseEntity.badRequest().body(new ErrorResponseDTO("Invalid request parameters"));
-        }
-
+    public ResponseEntity naverCallback(@RequestParam("code") String code, @RequestParam("state") String state) {
         try {
             Map<String, Object> callbackResult = memberService.processNaverCallback(code, state);
-            // 리다이렉트 URL 추가
-            callbackResult.put("redirectUrl", "http://localhost:5173/");  // 또는 프론트엔드의 홈 URL
+            String token = (String) callbackResult.get("token");
 
-            return ResponseEntity.ok(new SuccessResponseDTO(true, callbackResult));
+            String frontendUrl = "http://localhost:5173";  // 프론트엔드 URL
+            String redirectUrl = frontendUrl + "/auth/naver?token=" + token;
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setLocation(URI.create(redirectUrl));
+
+            return new ResponseEntity<>(headers, HttpStatus.FOUND);
         } catch (Exception e) {
             log.error("Failed to process Naver callback", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ErrorResponseDTO("네이버 로그인 처리 중 오류가 발생했습니다."));
+                    .body(new ErrorResponseDTO("네이버 로그인 처리 중 오류가 발생했습니다: " + e.getMessage()));
         }
     }
 

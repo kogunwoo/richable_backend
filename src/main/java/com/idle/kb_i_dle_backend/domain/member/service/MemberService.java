@@ -11,9 +11,8 @@ public interface MemberService {
 
     Map<String, Object> login(LoginDTO loginDTO);
 
-    Map<String, Object> initiateNaverLogin(HttpServletRequest request) throws Exception;
-
-    Map<String, Object> processNaverCallback(String code, String state) throws Exception;
+    Map initiateNaverLogin(HttpServletRequest request);
+    Map processNaverCallback(String code, String state);
 
     String registerMember(MemberJoinDTO signupDTO);
 

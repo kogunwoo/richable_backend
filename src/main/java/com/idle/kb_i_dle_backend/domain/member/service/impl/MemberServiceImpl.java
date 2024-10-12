@@ -108,37 +108,51 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public Map<String, Object> initiateNaverLogin(HttpServletRequest request) {
-        String state = generateState();
-        HttpSession session = request.getSession();
-        session.setAttribute("naverState", state);
+    public Map initiateNaverLogin(HttpServletRequest request) {
+        String state = UUID.randomUUID().toString();
+        request.getSession().setAttribute("naverState", state);
 
-        String naverAuthUrl = "https://nid.naver.com/oauth2.0/authorize"
+        String authorizationUrl = "https://nid.naver.com/oauth2.0/authorize"
                 + "?response_type=code"
                 + "&client_id=" + clientId
                 + "&redirect_uri=" + redirectUri
                 + "&state=" + state;
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("redirectUrl", naverAuthUrl);
-        result.put("state", state);
-        return result;
+        return Map.of("redirectUrl", authorizationUrl);
     }
 
     @Override
-    public Map<String, Object> processNaverCallback(String code, String state) {
-        try {
-            // 1. 액세스 토큰 얻기
-            String accessToken = getNaverAccessToken(code, state);
+    public Map processNaverCallback(String code, String state) {
+        // 1. 액세스 토큰 얻기
+        String accessToken = getNaverAccessToken(code, state);
 
-            // 2. 사용자 정보 가져오기
-            JSONObject userProfile = getUserProfile(accessToken);
+        // 2. 사용자 정보 얻기
+        Map<String, Object> userInfo = getNaverUserInfo(accessToken);
 
-            // 3. 사용자 정보 처리 및 회원가입/로그인
-            return processNaverUser(userProfile);
-        } catch (Exception e) {
-            log.error("Error processing Naver callback", e);
-            throw new MemberException(ErrorCode.NAVER_LOGIN_FAILED, "Failed to process Naver login");
+        // 3. 회원 정보 확인 및 처리
+        Map<String, Object> response = (Map<String, Object>) userInfo.get("response");
+        String naverEmail = (String) response.get("email");
+
+        Member member = memberRepository.findByEmail(naverEmail);
+
+        if (member == null) {
+            // 새 회원 등록 필요
+            return Map.of(
+                    "isNewUser", true,
+                    "userInfo", userInfo
+            );
+        } else {
+            // 기존 회원 로그인 처리 (일반 로그인과 동일하게 처리)
+            CustomUserDetails userDetails = new CustomUserDetails(member);
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwtToken = jwtProcessor.generateToken(member.getId(), member.getUid(), member.getNickname(), member.getEmail());
+
+            return Map.of(
+                    "isNewUser", false,
+                    "token", jwtToken
+            );
         }
     }
 
@@ -167,21 +181,17 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
-    private JSONObject getUserProfile(String accessToken) {
-        String profileUrl = "https://openapi.naver.com/v1/nid/me";
-
+    private Map getNaverUserInfo(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
+        headers.set("Authorization", "Bearer " + accessToken);
 
-        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+        HttpEntity entity = new HttpEntity<>(headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(profileUrl, HttpMethod.GET, entity, String.class);
+        ResponseEntity response = restTemplate.exchange(
+                "https://openapi.naver.com/v1/nid/me", HttpMethod.GET, entity, Map.class);
+        log.error("response: "+ response.getBody()+ " / "+response);
 
-        if (response.getStatusCode() == HttpStatus.OK) {
-            return new JSONObject(response.getBody());
-        } else {
-            throw new MemberException(ErrorCode.NAVER_LOGIN_FAILED, "Failed to get user profile");
-        }
+        return (Map) response.getBody();
     }
 
     private Map<String, Object> processNaverUser(JSONObject userProfile) {
