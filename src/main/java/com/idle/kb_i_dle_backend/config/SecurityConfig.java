@@ -78,7 +78,6 @@ public class SecurityConfig {
         config.addAllowedMethod(HttpMethod.POST);
         config.addAllowedMethod(HttpMethod.PUT);
         config.addAllowedMethod(HttpMethod.DELETE);
-
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
