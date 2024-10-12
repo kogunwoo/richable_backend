@@ -212,13 +212,16 @@ public class FinanceServiceImpl implements FinanceService {
             for (Stock stock : stocks) {
                 StockProduct stockProduct = stockProductRepository.findByShortCode(String.valueOf(stock.getPdno()));
 
-                double currentPrice;
-                if (i == 0) {
-                    // 현재 가격 (StockProduct의 price 사용)
-                    currentPrice = stockProduct.getPrice() != null ? stockProduct.getPrice() : 0;
-                } else {
-                    // i개월 전 가격
-                    currentPrice = getPriceForMonth(stockProduct.getStockProductPrice(), i);
+                // stockProduct가 null이면 가격을 0으로 설정
+                double currentPrice = 0;
+                if (stockProduct != null) {
+                    if (i == 0) {
+                        // 현재 가격 (StockProduct의 price 사용)
+                        currentPrice = stockProduct.getPrice() != null ? stockProduct.getPrice() : 0;
+                    } else {
+                        // i개월 전 가격
+                        currentPrice = getPriceForMonth(stockProduct.getStockProductPrice(), i);
+                    }
                 }
 
                 double purchasePrice = stock.getAvgBuyPrice();
