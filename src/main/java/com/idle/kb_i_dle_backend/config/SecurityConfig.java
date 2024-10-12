@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -64,20 +63,9 @@ public class SecurityConfig {
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true); // 쿠키나 인증 정보 허용
-        config.addAllowedOrigin("http://localhost:5173"); // 허용할 출처
-        config.addAllowedOrigin("http://localhost:8080");
-        config.addAllowedOrigin("https://nid.naver.com");
-        config.addAllowedOrigin("https://kb-i-dle.github.io/richable_frontend");
-        config.addAllowedOrigin("https://kb-i-dle.github.io");
-        config.addAllowedOrigin("http://localhost:4173/richable_frontend");
-        config.addAllowedOrigin("http://localhost:4173");
+        config.setAllowCredentials(false); // 쿠키나 인증 정보 허용
         config.addAllowedOriginPattern("*");
         config.addAllowedHeader("*"); // 모든 헤더 허용
-        config.addAllowedMethod(HttpMethod.GET);
-        config.addAllowedMethod(HttpMethod.POST);
-        config.addAllowedMethod(HttpMethod.PUT);
-        config.addAllowedMethod(HttpMethod.DELETE);
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
