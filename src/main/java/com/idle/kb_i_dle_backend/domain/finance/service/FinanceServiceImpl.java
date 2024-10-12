@@ -460,15 +460,14 @@ public class FinanceServiceImpl implements FinanceService {
 
         // 4. 자산 카테고리별로 비교
         List<Map<String, Object>> assetComparisonList = new ArrayList<>();
-        addComparisonData("채권", userAssetSummary.getBond(), lowerBoundYear, upperBoundYear, assetComparisonList);
-        addComparisonData("예금", userAssetSummary.getDeposit(), lowerBoundYear, upperBoundYear, assetComparisonList);
-        addComparisonData("적금", userAssetSummary.getSaving(), lowerBoundYear, upperBoundYear, assetComparisonList);
-        addComparisonData("청약", userAssetSummary.getSubscription(), lowerBoundYear, upperBoundYear,
-                assetComparisonList);
-        addComparisonData("입출금", userAssetSummary.getWithdrawal(), lowerBoundYear, upperBoundYear, assetComparisonList);
-        addComparisonData("주식", userAssetSummary.getStock(), lowerBoundYear, upperBoundYear, assetComparisonList);
-        addComparisonData("현금", userAssetSummary.getCash(), lowerBoundYear, upperBoundYear, assetComparisonList);
-        addComparisonData("코인", userAssetSummary.getCoin(), lowerBoundYear, upperBoundYear, assetComparisonList);
+        addComparisonData("bond", userAssetSummary.getBond(), lowerBoundYear, upperBoundYear, assetComparisonList);
+        addComparisonData("deposit", userAssetSummary.getDeposit(), lowerBoundYear, upperBoundYear, assetComparisonList);
+        addComparisonData("saving", userAssetSummary.getSaving(), lowerBoundYear, upperBoundYear, assetComparisonList);
+        addComparisonData("subscription", userAssetSummary.getSubscription(), lowerBoundYear, upperBoundYear, assetComparisonList);
+        addComparisonData("withdrawal", userAssetSummary.getWithdrawal(), lowerBoundYear, upperBoundYear, assetComparisonList);
+        addComparisonData("stock", userAssetSummary.getStock(), lowerBoundYear, upperBoundYear, assetComparisonList);
+        addComparisonData("cash", userAssetSummary.getCash(), lowerBoundYear, upperBoundYear, assetComparisonList);
+        addComparisonData("coin", userAssetSummary.getCoin(), lowerBoundYear, upperBoundYear, assetComparisonList);
 
         return assetComparisonList;
     }
@@ -479,19 +478,20 @@ public class FinanceServiceImpl implements FinanceService {
             bsAmount = 0L;
         }
 
-        // 연령대의 평균 자산 구하기
-        Long avgAmount = assetSummaryRepository.findAverageAmountByAgeRange(lowerBoundYear, upperBoundYear);
+        // 연령대의 카테고리별 평균 자산 구하기
+        Long avgAmount = assetSummaryRepository.findAverageAmountByAgeRangeAndCategory(lowerBoundYear, upperBoundYear, category);
         Long deferAmount = bsAmount - avgAmount;
 
         // 각 카테고리별 결과값 추가
         Map<String, Object> comparisonData = new HashMap<>();
         comparisonData.put("bsAmount", bsAmount);
-        comparisonData.put("spotAvgAmount", avgAmount);
+        comparisonData.put("categoryAvgAmount", avgAmount);
         comparisonData.put("defer", deferAmount);
         comparisonData.put("category", category);
 
         assetComparisonList.add(comparisonData);
     }
+
     private Date getDateBeforeMonths(Date date, int months) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
