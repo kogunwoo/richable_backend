@@ -5,6 +5,7 @@ import com.idle.kb_i_dle_backend.domain.member.handler.CustomAccessDeniedHandler
 import com.idle.kb_i_dle_backend.domain.member.handler.CustomAuthenticationEntryPoint;
 import com.idle.kb_i_dle_backend.domain.member.service.CustomMemberDetailsService;
 import com.idle.kb_i_dle_backend.domain.member.util.JwtProcessor;
+import java.util.Arrays;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -66,7 +67,9 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowCredentials(true); // 쿠키나 인증 정보 허용
-        config.addAllowedOriginPattern("https://richable.site");
+
+        config.setAllowedOrigins(Arrays.asList("https://richable.site", "http://richable.site", "http://localhost:5173",
+                "http://localhost:4173", "*"));
 
         config.addAllowedHeader("*"); // 모든 헤더 허용
         config.addAllowedMethod(HttpMethod.GET);
