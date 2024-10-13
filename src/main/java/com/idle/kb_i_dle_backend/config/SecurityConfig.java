@@ -64,14 +64,17 @@ public class SecurityConfig {
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
+
         config.setAllowCredentials(true); // 쿠키나 인증 정보 허용
-        config.addAllowedOriginPattern("*");
+        config.addAllowedOriginPattern("https://richable.site");
+
         config.addAllowedHeader("*"); // 모든 헤더 허용
         config.addAllowedMethod(HttpMethod.GET);
         config.addAllowedMethod(HttpMethod.POST);
         config.addAllowedMethod(HttpMethod.PUT);
         config.addAllowedMethod(HttpMethod.DELETE);
         config.addAllowedMethod(HttpMethod.OPTIONS);
+
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
