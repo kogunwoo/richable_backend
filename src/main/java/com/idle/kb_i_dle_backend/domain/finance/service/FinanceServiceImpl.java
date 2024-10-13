@@ -395,7 +395,7 @@ public class FinanceServiceImpl implements FinanceService {
         for (Object[] income : incomeResults) {
             String month = (String) income[0];
             long totalIncome = ((BigDecimal) income[1]).longValueExact();
-            balanceMap.put(month, new MonthlyBalanceDTO(month, totalIncome, 0L, totalIncome));
+            balanceMap.put(month, new MonthlyBalanceDTO(month, totalIncome, 0L, totalIncome,(double) 100));
         }
 
         for (Object[] outcome : outcomeResults) {
@@ -405,9 +405,15 @@ public class FinanceServiceImpl implements FinanceService {
                 MonthlyBalanceDTO dto = balanceMap.get(month);
                 dto.setTotalOutcome(totalOutcome);
                 dto.setBalance(dto.getTotalIncome() - totalOutcome);
+                // totalIncome을 double로 변환하여 나눗셈에서 소수점 이하까지 계산
+                if (dto.getTotalIncome() > 0) {
+                    dto.setBalalnceRate((double)(dto.getTotalIncome() - totalOutcome) / dto.getTotalIncome() * 100);
+                } else {
+                    dto.setBalalnceRate((double) 0); // totalIncome이 0일 경우 0으로 설정
+                }
             } else {
                 balanceMap.put(month,
-                        new MonthlyBalanceDTO(month, 0L, totalOutcome, totalOutcome));
+                        new MonthlyBalanceDTO(month, 0L, totalOutcome, totalOutcome,(double) 0));
             }
         }
 
