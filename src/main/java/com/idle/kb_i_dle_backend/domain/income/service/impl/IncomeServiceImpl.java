@@ -101,6 +101,7 @@ public class IncomeServiceImpl implements IncomeService {
         isIncome.setMemo(incomeDTO.getMemo());
 
         Income savedIncome = incomeRepository.save(isIncome);
+        assetSummaryRepository.insertOrUpdateAssetSummary(uid);
         return IncomeDTO.convertToDTO(savedIncome);
     }
 
@@ -119,6 +120,7 @@ public class IncomeServiceImpl implements IncomeService {
         }
 
         incomeRepository.deleteByIndex(index);  // income 삭제
+        assetSummaryRepository.insertOrUpdateAssetSummary(uid);
 
         return index;
     }

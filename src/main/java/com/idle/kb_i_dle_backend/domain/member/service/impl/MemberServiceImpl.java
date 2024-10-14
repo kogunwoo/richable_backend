@@ -1,6 +1,7 @@
 package com.idle.kb_i_dle_backend.domain.member.service.impl;
 
 import com.idle.kb_i_dle_backend.config.exception.CustomException;
+import com.idle.kb_i_dle_backend.domain.finance.repository.AssetSummaryRepository;
 import com.idle.kb_i_dle_backend.domain.member.dto.CustomUserDetails;
 import com.idle.kb_i_dle_backend.domain.member.dto.LoginDTO;
 import com.idle.kb_i_dle_backend.domain.member.dto.MemberDTO;
@@ -64,6 +65,7 @@ public class MemberServiceImpl implements MemberService {
     private final MemberApiService memberApiService;
     private final RestTemplate restTemplate;
     private final HttpServletRequest request;
+    private final AssetSummaryRepository assetSummaryRepository;
 
     @Value("${naver.client.id}")
     private String clientId;
@@ -91,6 +93,9 @@ public class MemberServiceImpl implements MemberService {
 
             String jwtToken = jwtProcessor.generateToken(userInfo.getId(), userInfo.getUid(), userInfo.getNickname(),
                     userInfo.getEmail());
+
+            // 자산 리포트 업데이트
+            assetSummaryRepository.insertOrUpdateAssetSummary(userInfo.getUid());
 
             Map<String, Object> result = new HashMap<>();
             result.put("token", jwtToken);

@@ -3,6 +3,7 @@ package com.idle.kb_i_dle_backend.domain.finance.service.impl;
 import com.idle.kb_i_dle_backend.config.exception.CustomException;
 import com.idle.kb_i_dle_backend.domain.finance.dto.BankDTO;
 import com.idle.kb_i_dle_backend.domain.finance.entity.Bank;
+import com.idle.kb_i_dle_backend.domain.finance.repository.AssetSummaryRepository;
 import com.idle.kb_i_dle_backend.domain.finance.repository.BankRepository;
 import com.idle.kb_i_dle_backend.domain.finance.service.BankService;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
@@ -23,6 +24,7 @@ public class BankServiceImpl implements BankService {
 
     private final MemberService memberService;
     private final BankRepository bankRepository;
+    private final AssetSummaryRepository assetSummaryRepository;
 
     @Override
     public List<BankDTO> getBankList(Integer uid) {
@@ -46,6 +48,7 @@ public class BankServiceImpl implements BankService {
     public BankDTO addBank(Integer uid, BankDTO bankDTO) throws ParseException {
         Member member = memberService.findMemberByUid(uid);
         Bank savedBank = bankRepository.save(BankDTO.convertToEntity(member, bankDTO));
+        assetSummaryRepository.insertOrUpdateAssetSummary(uid);
 
         return BankDTO.convertToDTO(savedBank);
     }
@@ -68,6 +71,9 @@ public class BankServiceImpl implements BankService {
         isBank.setBalanceAmt(bankDTO.getBalanceAmt());
 
         Bank savedBank = bankRepository.save(isBank);
+
+        assetSummaryRepository.insertOrUpdateAssetSummary(uid);
+
         return BankDTO.convertToDTO(savedBank);
     }
 
@@ -89,6 +95,7 @@ public class BankServiceImpl implements BankService {
         isBank.setDeleteDate(new Date());
 
         Bank savedBank = bankRepository.save(isBank);
+        assetSummaryRepository.insertOrUpdateAssetSummary(uid);
         return BankDTO.convertToDTO(savedBank);
     }
 

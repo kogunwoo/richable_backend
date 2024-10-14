@@ -65,20 +65,13 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true); // 쿠키나 인증 정보 허용
-        config.addAllowedOrigin("http://localhost:5173"); // 허용할 출처
-        config.addAllowedOrigin("http://localhost:8080");
-        config.addAllowedOrigin("https://nid.naver.com");
-        config.addAllowedOrigin("https://kb-i-dle.github.io/richable_frontend");
-        config.addAllowedOrigin("https://kb-i-dle.github.io");
-        config.addAllowedOrigin("http://localhost:4173/richable_frontend");
-        config.addAllowedOrigin("http://localhost:4173");
         config.addAllowedOriginPattern("*");
         config.addAllowedHeader("*"); // 모든 헤더 허용
         config.addAllowedMethod(HttpMethod.GET);
         config.addAllowedMethod(HttpMethod.POST);
         config.addAllowedMethod(HttpMethod.PUT);
         config.addAllowedMethod(HttpMethod.DELETE);
-
+        config.addAllowedMethod(HttpMethod.OPTIONS);
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }

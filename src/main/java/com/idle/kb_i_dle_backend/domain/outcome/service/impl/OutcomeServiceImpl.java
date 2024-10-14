@@ -356,6 +356,7 @@ public class OutcomeServiceImpl implements OutcomeService {
         isOutcomeUser.setMemo(outcomeUserDTO.getMemo());
 
         OutcomeUser savedOutcome = outcomeUserRepository.save(isOutcomeUser);
+        assetSummaryRepository.insertOrUpdateAssetSummary(uid);
         return OutcomeUserDTO.convertToDTO(savedOutcome);
     }
 
@@ -373,6 +374,7 @@ public class OutcomeServiceImpl implements OutcomeService {
         }
 
         outcomeUserRepository.deleteByIndex(index);  // income 삭제
+        assetSummaryRepository.insertOrUpdateAssetSummary(uid);
 
         return index;
     }
