@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -72,11 +71,7 @@ public class SecurityConfig {
                 "http://localhost:4173"));
 
         config.addAllowedHeader("*"); // 모든 헤더 허용
-        config.addAllowedMethod(HttpMethod.GET);
-        config.addAllowedMethod(HttpMethod.POST);
-        config.addAllowedMethod(HttpMethod.PUT);
-        config.addAllowedMethod(HttpMethod.DELETE);
-        config.addAllowedMethod(HttpMethod.OPTIONS);
+        config.addAllowedMethod("*");
 
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
