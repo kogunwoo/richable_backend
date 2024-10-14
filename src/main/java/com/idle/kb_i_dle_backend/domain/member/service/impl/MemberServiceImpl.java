@@ -127,7 +127,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public Map processNaverCallback(String code, String state) {
+    public Map<String, Object> processNaverCallback(String code, String state) {
         // 1. 액세스 토큰 얻기
         String accessToken = getNaverAccessToken(code, state);
 
@@ -137,30 +137,38 @@ public class MemberServiceImpl implements MemberService {
         // 3. 회원 정보 확인 및 처리
         Map<String, Object> response = (Map<String, Object>) userInfo.get("response");
         String naverEmail = (String) response.get("email");
+        String nickname = (String) response.get("nickname");
+        String birth_year = (String) response.get("birthyear");
+        char gender = response.get("gender").toString().charAt(0);
 
         Member member = memberRepository.findByEmail(naverEmail);
 
         if (member == null) {
             // 새 회원 등록 필요
-            return Map.of(
-                    "isNewUser", true,
-                    "userInfo", userInfo
-            );
-        } else {
-            // 기존 회원 로그인 처리 (일반 로그인과 동일하게 처리)
+            member = createNaverMember(naverEmail, nickname,gender,birth_year);
             CustomUserDetails userDetails = new CustomUserDetails(member);
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String jwtToken = jwtProcessor.generateToken(member.getId(), member.getUid(), member.getNickname(), member.getEmail());
 
-            // 세션에 토큰 저장
-            HttpSession session = request.getSession();
-            session.setAttribute("authToken", jwtToken);
+            return Map.of(
+                    "isNewUser", false,
+                    "token", jwtToken,
+                    "userInfo", new MemberInfoDTO(member.getUid(), member.getId(), member.getEmail(), member.getNickname(), member.getAuth())
+            );
+        } else {
+            // 기존 회원 로그인 처리
+            CustomUserDetails userDetails = new CustomUserDetails(member);
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwtToken = jwtProcessor.generateToken(member.getId(), member.getUid(), member.getNickname(), member.getEmail());
 
             return Map.of(
                     "isNewUser", false,
-                    "token", jwtToken
+                    "token", jwtToken,
+                    "userInfo", new MemberInfoDTO(member.getUid(), member.getId(), member.getEmail(), member.getNickname(), member.getAuth())
             );
         }
     }
@@ -203,57 +211,17 @@ public class MemberServiceImpl implements MemberService {
         return (Map) response.getBody();
     }
 
-    private Map<String, Object> processNaverUser(JSONObject userProfile) {
-        JSONObject response = userProfile.getJSONObject("response");
-        String email = response.getString("email");
-        String nickname = response.getString("nickname");
-
-        Member member = memberRepository.findByEmail(email);
-        if (member == null) {
-            member = createNaverMember(email, nickname);
-        }
-
-        String token = jwtProcessor.generateToken(member.getId(), member.getUid(), member.getNickname(),
-                member.getEmail());
-// SecurityContextHolder에 인증 정보 저장
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                member.getId(), null, Arrays.asList(new SimpleGrantedAuthority(member.getAuth()))
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        // 세션에 토큰 저장
-        HttpSession session = request.getSession();
-        session.setAttribute("authToken", token);
-
-        // MemberDTO 생성
-        MemberDTO memberDTO = MemberDTO.builder()
-                .uid(member.getUid())
-                .id(member.getId())
-                .email(member.getEmail())
-                .nickname(member.getNickname())
-                .auth(member.getAuth())
-                // 필요한 다른 필드들도 추가
-                .build();
-
-        // 사용자 정보를 MemberInfoDTO로 변환
-        MemberInfoDTO userInfo = new MemberInfoDTO(member.getUid(), member.getId(),
-                member.getEmail(), member.getNickname(), member.getAuth());
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("token", token);
-        result.put("userInfo", userInfo);
-        return result;
-    }
-
-    private Member createNaverMember(String email, String nickname) {
+    private Member createNaverMember(String email, String nickname,char gender, String birth_year) {
         String id = email.split("@")[0];
         String password = UUID.randomUUID().toString();
 
         MemberJoinDTO memberJoinDTO = MemberJoinDTO.builder()
                 .id(id)
                 .password(password)
-                .email(email)
                 .nickname(nickname)
+                .gender(gender)
+                .email(email)
+                .birth_year(Integer.valueOf(birth_year))
                 .auth("ROLE_MEMBER")
                 .agreementInfo(true)
                 .agreementFinance(true)

@@ -47,6 +47,7 @@ public class MemberController {
     public ResponseEntity<?> naverlogin(HttpServletRequest request) {
         try {
             Map<String, Object> naverLoginResult = memberService.initiateNaverLogin(request);
+            log.error("result check for social login : "+naverLoginResult);
             return ResponseEntity.ok(new SuccessResponseDTO(true, naverLoginResult));
         } catch (Exception e) {
             log.error("Failed to initiate Naver login", e);
@@ -56,13 +57,12 @@ public class MemberController {
     }
 
     @GetMapping("/naverCallback")
-    public ResponseEntity naverCallback(@RequestParam("code") String code, @RequestParam("state") String state) {
+    public ResponseEntity<?> naverCallback(@RequestParam("code") String code, @RequestParam("state") String state) {
         try {
             Map<String, Object> callbackResult = memberService.processNaverCallback(code, state);
             String token = (String) callbackResult.get("token");
-
             String frontendUrl = "http://localhost:5173";  // 프론트엔드 URL
-            String redirectUrl = frontendUrl + "/auth/naver?token=" + token;
+            String redirectUrl = frontendUrl + "/auth/naver/callback?token=" + token;
 
             HttpHeaders headers = new HttpHeaders();
             headers.setLocation(URI.create(redirectUrl));
