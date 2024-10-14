@@ -1,7 +1,7 @@
 name: Spring Framework CI/CD with Gradle
 
 on:
-  pull_request:
+  push:
     branches: [ master ]
 
 jobs:
