@@ -265,18 +265,14 @@ public class FinanceServiceImpl implements FinanceService {
         Member member = memberService.findMemberByUid(uid);
         List<CoinReturnDTO> coinReturns = new ArrayList<>();
         List<Coin> coins = coinRepository.findAllByUidAndDeleteDateIsNull(member);
-
         for (int i = 0; i < 6; i++) {
             double totalCoinReturn = 0;
             int coinCount = 0;
-
             for (Coin coin : coins) {
                 CoinProduct coinProduct = coinRepository.findByCoinName(coin.getCurrency());
                 if (coinProduct == null) continue;
-
                 CoinProductPrice coinProductPrice = coinProduct.getCoinProductPrice();
                 if (coinProductPrice == null) continue;
-
                 double currentPrice;
                 if (i == 0) {
                     // 현재 가격 (CoinProduct의 closingPrice 사용)
@@ -285,7 +281,6 @@ public class FinanceServiceImpl implements FinanceService {
                     // i개월 전 가격
                     currentPrice = getPriceForMonth(coinProductPrice, i);
                 }
-
                 double purchasePrice = coin.getAvgBuyPrice();
 
                 if (purchasePrice > 0 && currentPrice > 0) {
@@ -294,7 +289,6 @@ public class FinanceServiceImpl implements FinanceService {
                     coinCount++;
                 }
             }
-
             if (coinCount > 0) {
                 double averageCoinReturn = totalCoinReturn / coinCount;
                 coinReturns.add(new CoinReturnDTO(i + 1, Double.parseDouble(df.format(averageCoinReturn))));
@@ -302,7 +296,6 @@ public class FinanceServiceImpl implements FinanceService {
                 coinReturns.add(new CoinReturnDTO(i + 1, 0.0));
             }
         }
-
         return coinReturns;
     }
 

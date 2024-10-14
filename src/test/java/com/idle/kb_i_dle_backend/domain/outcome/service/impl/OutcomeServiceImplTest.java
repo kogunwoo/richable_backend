@@ -20,7 +20,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @ExtendWith(MockitoExtension.class)
-
 class OutcomeServiceImplTest {
     @Mock
     private MemberService memberService;

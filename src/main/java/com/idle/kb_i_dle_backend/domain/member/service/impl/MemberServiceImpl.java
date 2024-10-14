@@ -154,6 +154,10 @@ public class MemberServiceImpl implements MemberService {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String jwtToken = jwtProcessor.generateToken(member.getId(), member.getUid(), member.getNickname(), member.getEmail());
 
+            // 세션에 토큰 저장
+            HttpSession session = request.getSession();
+            session.setAttribute("authToken", jwtToken);
+
             return Map.of(
                     "isNewUser", false,
                     "token", jwtToken
