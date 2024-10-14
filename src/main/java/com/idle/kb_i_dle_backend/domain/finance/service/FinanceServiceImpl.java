@@ -33,6 +33,7 @@ import com.idle.kb_i_dle_backend.domain.finance.repository.StockProductRepositor
 import com.idle.kb_i_dle_backend.domain.finance.repository.StockRepository;
 import com.idle.kb_i_dle_backend.domain.income.repository.IncomeRepository;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
+import com.idle.kb_i_dle_backend.domain.member.repository.MemberRepository;
 import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
 import com.idle.kb_i_dle_backend.domain.outcome.repository.OutcomeUserRepository;
 
@@ -49,7 +50,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -70,6 +73,7 @@ public class FinanceServiceImpl implements FinanceService {
     private final IncomeRepository incomeRepository;
     private final OutcomeUserRepository outComeUserRepository;
     private final AssetSummaryRepository assetSummaryRepository;
+    private final MemberRepository memberRepository;
 
     private final MemberService memberService;
 
@@ -522,4 +526,21 @@ public class FinanceServiceImpl implements FinanceService {
     public List<CoinProduct> findCoinProducts() {
         return coinRepository.findOrderByClosingPriceDesc();
     }
+
+    // AssetSummary업데이트 스케쥴러
+    @Scheduled(cron = "0 0 06 1 * ?") // 매월 1일 오전 6시에 실행
+    @Transactional
+    public void scheduleAssetSummaryUpdate() {
+        log.info("Starting scheduled asset summary update for all users");
+        memberRepository.findAll().forEach(member -> {
+            try {
+                assetSummaryRepository.insertOrUpdateAssetSummary(member.getUid());
+                log.info("Updated asset summary for user: {}", member.getUid());
+            } catch (Exception e) {
+                log.error("Error updating asset summary for user: {}", member.getUid(), e);
+            }
+        });
+        log.info("Completed scheduled asset summary update for all users");
+    }
+
 }
