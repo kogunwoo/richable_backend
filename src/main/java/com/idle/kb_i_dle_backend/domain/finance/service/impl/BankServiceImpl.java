@@ -8,6 +8,7 @@ import com.idle.kb_i_dle_backend.domain.finance.repository.BankRepository;
 import com.idle.kb_i_dle_backend.domain.finance.service.BankService;
 import com.idle.kb_i_dle_backend.domain.member.entity.Member;
 import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
+import com.idle.kb_i_dle_backend.domain.member.util.AESUtil;
 import com.idle.kb_i_dle_backend.global.codes.ErrorCode;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -26,6 +27,8 @@ public class BankServiceImpl implements BankService {
     private final BankRepository bankRepository;
     private final AssetSummaryRepository assetSummaryRepository;
 
+    private static final String ENCRYPTION_SECRET = "TPk93NCNEQKs66+Ht89m+qVM8WkXoysjxanI7qh9hK0=";
+
     @Override
     public List<BankDTO> getBankList(Integer uid) {
         Member member = memberService.findMemberByUid(uid);
@@ -38,6 +41,8 @@ public class BankServiceImpl implements BankService {
         List<BankDTO> bankList = new ArrayList<>();
         for (Bank b : banks) {
             BankDTO bankDTO = BankDTO.convertToDTO(b);
+            bankDTO.setAccountNum(
+                    Long.valueOf(AESUtil.decrypt(String.valueOf(bankDTO.getAccountNum()),ENCRYPTION_SECRET)));
             bankList.add(bankDTO);
         }
 
@@ -47,6 +52,7 @@ public class BankServiceImpl implements BankService {
     @Override
     public BankDTO addBank(Integer uid, BankDTO bankDTO) throws ParseException {
         Member member = memberService.findMemberByUid(uid);
+        bankDTO.setAccountNum(Long.valueOf(AESUtil.encrypt(String.valueOf(bankDTO.getAccountNum()),ENCRYPTION_SECRET)));
         Bank savedBank = bankRepository.save(BankDTO.convertToEntity(member, bankDTO));
         assetSummaryRepository.insertOrUpdateAssetSummary(uid);
 

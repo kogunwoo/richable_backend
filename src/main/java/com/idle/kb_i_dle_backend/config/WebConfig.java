@@ -1,6 +1,7 @@
 package com.idle.kb_i_dle_backend.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.idle.kb_i_dle_backend.domain.member.util.ExecutionTimeAspect;
 import com.idle.kb_i_dle_backend.domain.member.util.JwtProcessor;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -124,5 +125,10 @@ public class WebConfig implements WebMvcConfigurer {
         registry
                 .addResourceHandler("/" + dirName + "/**")
                 .addResourceLocations("file:/" + uploadPath + "/");
+    }
+
+    @Bean
+    public ExecutionTimeAspect executionTimeAspect() {
+        return new ExecutionTimeAspect();
     }
 }

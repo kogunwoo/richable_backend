@@ -12,6 +12,7 @@ public interface MemberService {
     Map<String, Object> login(LoginDTO loginDTO);
 
     Map initiateNaverLogin(HttpServletRequest request);
+
     Map processNaverCallback(String code, String state);
 
     String registerMember(MemberJoinDTO signupDTO);
