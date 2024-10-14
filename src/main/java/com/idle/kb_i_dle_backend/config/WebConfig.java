@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -72,6 +73,19 @@ public class WebConfig implements WebMvcConfigurer {
         resolver.setPrefix("/WEB-INF/views/");
         resolver.setSuffix(".jsp");
         return resolver;
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        // CORS 정책 오류 해결
+        registry.addMapping("/**")
+                .allowedOrigins("https://www.richable.site", "http://richable.site", "http://localhost:5173",
+                        "http://localhost:4173")  // 허용할 Origin
+                .allowedOriginPatterns("*")
+                .allowedMethods("*")
+                .allowedHeaders("*")
+                .allowCredentials(true);  // 쿠키 및 인증 정보를 포함할 수 있도록 설정
+
     }
 
     @Bean
