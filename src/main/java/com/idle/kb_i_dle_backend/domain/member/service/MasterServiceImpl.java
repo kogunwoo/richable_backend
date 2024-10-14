@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.scheduling.annotation.Scheduled;
 import java.util.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -44,6 +45,7 @@ public class MasterServiceImpl implements MasterService {
 
     @Override
     @Transactional
+    @Scheduled(cron = "0 0 18 * ?")
     public void updateStockPrices() {
         List<StockPrice> stocks = stockPriceRepository.findAllLatestStockInfo();
         ExecutorService executorService = Executors.newFixedThreadPool(20);
@@ -107,6 +109,7 @@ public class MasterServiceImpl implements MasterService {
 
     @Override
     @Transactional
+    @Scheduled(cron = "0 0 10 * * *") // 매일 오전 10시에 실행
     public void updateCoinPrices() {
         String response = restTemplate.getForObject(coinMarketUrl, String.class);
 

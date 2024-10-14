@@ -21,6 +21,7 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration
 @EnableWebMvc
@@ -30,6 +31,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 })
 @PropertySource("classpath:application.properties")
 @EnableAspectJAutoProxy
+@EnableScheduling // 스케쥴링 어노테이션
 public class WebConfig implements WebMvcConfigurer {
 
     public WebConfig() {

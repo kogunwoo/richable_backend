@@ -39,6 +39,7 @@ public class MasterControrller {
     }
 
     // 코인 가격 업데이트
+
     @GetMapping("/update/coin")
     public ResponseEntity<?> updateCoinPrice(HttpServletRequest request) {
 
