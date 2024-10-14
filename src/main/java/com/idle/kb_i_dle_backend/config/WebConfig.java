@@ -79,6 +79,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOrigins("https://www.richable.site", "http://richable.site", "http://localhost:5173",
                         "http://localhost:4173")  // 허용할 Origin
+                .allowedOriginPatterns("*")
                 .allowedMethods("*")
                 .allowedHeaders("*")
                 .allowCredentials(true);  // 쿠키 및 인증 정보를 포함할 수 있도록 설정

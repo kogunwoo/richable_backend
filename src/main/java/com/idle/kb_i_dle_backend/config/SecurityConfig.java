@@ -69,6 +69,7 @@ public class SecurityConfig {
 
         config.setAllowedOrigins(Arrays.asList("https://richable.site", "http://richable.site", "http://localhost:5173",
                 "http://localhost:4173"));
+        config.addAllowedOriginPattern("*");
 
         config.addAllowedHeader("*"); // 모든 헤더 허용
         config.addAllowedMethod("*");
