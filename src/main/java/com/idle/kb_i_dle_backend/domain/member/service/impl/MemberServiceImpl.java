@@ -122,6 +122,7 @@ public class MemberServiceImpl implements MemberService {
                 + "&client_id=" + clientId
                 + "&redirect_uri=" + redirectUri
                 + "&state=" + state;
+        log.info("initiateNaverLogin");
 
         return Map.of("redirectUrl", authorizationUrl);
     }
@@ -129,18 +130,19 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public Map<String, Object> processNaverCallback(String code, String state) {
         // 1. 액세스 토큰 얻기
+        log.info("processNaverCallback");
         String accessToken = getNaverAccessToken(code, state);
-
+        log.info("getNaverAccessToken");
         // 2. 사용자 정보 얻기
         Map<String, Object> userInfo = getNaverUserInfo(accessToken);
-
+        log.info("getNaverUserInfo");
         // 3. 회원 정보 확인 및 처리
         Map<String, Object> response = (Map<String, Object>) userInfo.get("response");
         String naverEmail = (String) response.get("email");
         String nickname = (String) response.get("nickname");
         String birth_year = (String) response.get("birthyear");
         char gender = response.get("gender").toString().charAt(0);
-
+        log.info("response check step");
         Member member = memberRepository.findByEmail(naverEmail);
 
         if (member == null) {
