@@ -5,6 +5,7 @@ import com.idle.kb_i_dle_backend.domain.member.util.JwtProcessor;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -35,6 +36,8 @@ public class WebConfig implements WebMvcConfigurer {
         System.out.println("WebConfig created");
     }
 
+    @Value("${front.server.url}")
+    private String frontURL;
 
     @Bean
     public JwtProcessor jwtProcessor() {
@@ -74,10 +77,13 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         // CORS 정책 오류 해결
         registry.addMapping("/**")
-                .allowedMethods("*")
+                .allowedOrigins("https://www.richable.site", "http://richable.site", "http://localhost:5173",
+                        "http://localhost:4173")  // 허용할 Origin
                 .allowedOriginPatterns("*")
-                .allowedOrigins("http://localhost:5173")
-                .allowCredentials(true); // 프론트엔드 도메인
+                .allowedMethods("*")
+                .allowedHeaders("*")
+                .allowCredentials(true);  // 쿠키 및 인증 정보를 포함할 수 있도록 설정
+
     }
 
     @Bean

@@ -169,10 +169,10 @@ public class AssetController {
     public ResponseEntity<?> listOfAccount() {
         try {
             Integer uid = memberService.getCurrentUid();
-                Map<String, Object> accountData = new HashMap<>();
-                accountData.put("account", bankService.getAccount(uid));
-                SuccessResponseDTO response = new SuccessResponseDTO(true, accountData);
-                return new ResponseEntity<>(response, HttpStatus.OK);
+            Map<String, Object> accountData = new HashMap<>();
+            accountData.put("account", bankService.getAccount(uid));
+            SuccessResponseDTO response = new SuccessResponseDTO(true, accountData);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             ErrorResponseDTO response = new ErrorResponseDTO(e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);

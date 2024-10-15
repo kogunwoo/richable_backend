@@ -5,10 +5,11 @@ import com.idle.kb_i_dle_backend.domain.member.handler.CustomAccessDeniedHandler
 import com.idle.kb_i_dle_backend.domain.member.handler.CustomAuthenticationEntryPoint;
 import com.idle.kb_i_dle_backend.domain.member.service.CustomMemberDetailsService;
 import com.idle.kb_i_dle_backend.domain.member.util.JwtProcessor;
+import java.util.Arrays;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,6 +25,7 @@ import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 @EnableWebSecurity
+@PropertySource("classpath:application.properties")
 @ComponentScan(basePackages = {
         "com.idle.kb_i_dle_backend.domain.member.service",
         "com.idle.kb_i_dle_backend.domain.member.controller",
@@ -37,6 +39,7 @@ public class SecurityConfig {
     private final JwtProcessor jwtProcessor;
     private final CustomAccessDeniedHandler accessDeniedHandler;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+
 
     public SecurityConfig(JwtProcessor jwtProcessor,
                           CustomAccessDeniedHandler accessDeniedHandler,
@@ -61,15 +64,15 @@ public class SecurityConfig {
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
+
         config.setAllowCredentials(true); // 쿠키나 인증 정보 허용
-        config.addAllowedOrigin("http://localhost:5173"); // 허용할 출처
-        config.addAllowedOrigin("http://localhost:8080");
-        config.addAllowedOrigin("https://nid.naver.com");
+
+        config.setAllowedOrigins(Arrays.asList("https://richable.site", "http://richable.site", "http://localhost:5173",
+                "http://localhost:4173"));
+        config.addAllowedOriginPattern("*");
+
         config.addAllowedHeader("*"); // 모든 헤더 허용
-        config.addAllowedMethod(HttpMethod.GET);
-        config.addAllowedMethod(HttpMethod.POST);
-        config.addAllowedMethod(HttpMethod.PUT);
-        config.addAllowedMethod(HttpMethod.DELETE);
+        config.addAllowedMethod("*");
 
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
@@ -89,7 +92,8 @@ public class SecurityConfig {
                                                    CustomMemberDetailsService userDetailsService) throws Exception {
         http
                 .csrf().disable()
-                .cors().and()
+                .cors()
+                .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
