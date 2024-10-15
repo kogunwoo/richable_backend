@@ -60,4 +60,6 @@ public interface FinanceService {
 
     void scheduleAssetSummaryUpdate();
 
+    List<StockProduct> findStockProducts(int limit);
+
 }

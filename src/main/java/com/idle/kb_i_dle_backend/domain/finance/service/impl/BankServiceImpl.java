@@ -42,7 +42,7 @@ public class BankServiceImpl implements BankService {
         for (Bank b : banks) {
             BankDTO bankDTO = BankDTO.convertToDTO(b);
             bankDTO.setAccountNum(
-                    Long.valueOf(AESUtil.decrypt(String.valueOf(bankDTO.getAccountNum()),ENCRYPTION_SECRET)));
+                    AESUtil.decrypt(String.valueOf(bankDTO.getAccountNum()),ENCRYPTION_SECRET));
             bankList.add(bankDTO);
         }
 
@@ -52,7 +52,7 @@ public class BankServiceImpl implements BankService {
     @Override
     public BankDTO addBank(Integer uid, BankDTO bankDTO) throws ParseException {
         Member member = memberService.findMemberByUid(uid);
-        bankDTO.setAccountNum(Long.valueOf(AESUtil.encrypt(String.valueOf(bankDTO.getAccountNum()),ENCRYPTION_SECRET)));
+        bankDTO.setAccountNum(AESUtil.encrypt(String.valueOf(bankDTO.getAccountNum()),ENCRYPTION_SECRET));
         Bank savedBank = bankRepository.save(BankDTO.convertToEntity(member, bankDTO));
         assetSummaryRepository.insertOrUpdateAssetSummary(uid);
 

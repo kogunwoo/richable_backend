@@ -35,7 +35,6 @@ class IncomeServiceImplTest {
 
     @InjectMocks
     private IncomeServiceImpl incomeService;
-
     @Test
     void addIncome() throws ParseException {
         // Given
@@ -44,20 +43,11 @@ class IncomeServiceImplTest {
         member.setUid(uid);
 
         IncomeDTO incomeDTO = new IncomeDTO();
-        incomeDTO.setType("월급");
-        incomeDTO.setIncomeDate("2024-10-14");
-        incomeDTO.setPrice(5000L);
-        incomeDTO.setContents("월급");
-        incomeDTO.setMemo("10월 월급");
-
+        incomeDTO.setType("월급");        incomeDTO.setIncomeDate("2024-10-14");        incomeDTO.setPrice(5000L);        incomeDTO.setContents("월급");        incomeDTO.setMemo("10월 월급");
         Income savedIncome = new Income();
-        savedIncome.setIndex(1);
-        savedIncome.setUid(member);
-        savedIncome.setType(incomeDTO.getType());
-        savedIncome.setDate(new SimpleDateFormat("yyyy-MM-dd").parse(incomeDTO.getIncomeDate()));
-        savedIncome.setAmount(incomeDTO.getPrice());
-        savedIncome.setDescript(incomeDTO.getContents());
-        savedIncome.setMemo(incomeDTO.getMemo());
+
+        savedIncome.setIndex(1);        savedIncome.setUid(member);        savedIncome.setType(incomeDTO.getType());        savedIncome.setDate(new SimpleDateFormat("yyyy-MM-dd").parse(incomeDTO.getIncomeDate()));
+        savedIncome.setAmount(incomeDTO.getPrice());        savedIncome.setDescript(incomeDTO.getContents());        savedIncome.setMemo(incomeDTO.getMemo());
 
         when(memberService.findMemberByUid(uid)).thenReturn(member);
         when(incomeRepository.save(any(Income.class))).thenReturn(savedIncome);
