@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.scheduling.annotation.Scheduled;
 import java.util.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -44,14 +45,13 @@ public class MasterServiceImpl implements MasterService {
 
     @Override
     @Transactional
+    @Scheduled(cron = "0 0 19 * * *") // 주식 시장이 끝나고 update
     public void updateStockPrices() {
         List<StockPrice> stocks = stockPriceRepository.findAllLatestStockInfo();
         ExecutorService executorService = Executors.newFixedThreadPool(20);
 
         // 현재 날짜를 "yyyyMMdd" 형식의 문자열로 변환
-        String currentDate = "20241007";
-//                LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-
+        String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
         try {
             List<Callable<Void>> tasks = stocks.stream().map(stock -> (Callable<Void>) () -> {
@@ -101,12 +101,61 @@ public class MasterServiceImpl implements MasterService {
             executorService.shutdown();
         }
     }
+    @Override
+    @Transactional
+    public void updateStockPricesBefore() {
+        List<StockPrice> stocks = stockPriceRepository.findAllLatestStockInfo();
+
+        // 현재 날짜를 "yyyyMMdd" 형식의 문자열로 변환
+        String currentDate =  LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+        try {
+            for (StockPrice stock : stocks) {
+                try {
+                    String requestUrl = apiUrl + "?serviceKey=" + key +
+                            "&numOfRows=1&pageNo=1&resultType=json&basDt=" + currentDate + "&isinCd=" + stock.getStandard_code();
+
+                    URL url = new URL(requestUrl);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("GET");
+                    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+
+                    try (BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
+                        StringBuilder response = new StringBuilder();
+
+                        String line;
+                        while ((line = rd.readLine()) != null) {
+                            response.append(line);
+                        }
+                        log.error("API Response: {}", response.toString());
+
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        JsonNode rootNode = objectMapper.readTree(response.toString());
+                        JsonNode items = rootNode.path("response").path("body").path("items").path("item");
+
+                        for (JsonNode item : items) {
+                            String standardCode = item.path("isinCd").asText();
+                            // 현재 날짜를 java.util.Date 객체로 변환
+                            Date date = java.sql.Date.valueOf(LocalDate.parse(currentDate, DateTimeFormatter.ofPattern("yyyyMMdd")));
+                            int price = item.path("clpr").asInt();
+                            stockPriceRepository.insertStockPrice(price, standardCode, date);
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("Error updating stock prices", e);
+                }
+        }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Value("${coin_market.url}")
     private String coinMarketUrl;
 
     @Override
     @Transactional
+    @Scheduled(cron = "0 0 10 * * *") // 매일 오전 10시에 실행 //cron 표현식 0: 분 (0분), 0: 시간 (0시),10: 일 (10시), 1: 월의 날짜 (1일),*: 월 (모든 월),?: 요일 (특정 요일 지정하지 않음)
     public void updateCoinPrices() {
         String response = restTemplate.getForObject(coinMarketUrl, String.class);
 
