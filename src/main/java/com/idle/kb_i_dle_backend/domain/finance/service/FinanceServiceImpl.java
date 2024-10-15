@@ -51,6 +51,9 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -517,6 +520,13 @@ public class FinanceServiceImpl implements FinanceService {
     public List<StockProduct> findStockProducts() {
         return stockProductRepository.findOrderByPriceDesc();
     }
+
+    public List<StockProduct> findStockProducts(int limit) {
+        Pageable pageable = PageRequest.of(0, limit); // 첫 번째 페이지부터 시작, 최대 'limit'만큼 가져옴
+        Page<StockProduct> stockProductPage = stockProductRepository.findStockProductsWithPaging(pageable);
+        return stockProductPage.getContent(); // 결과를 리스트로 변환
+    }
+
     public List<CoinProduct> findCoinProducts() {
         return coinRepository.findOrderByClosingPriceDesc();
     }
