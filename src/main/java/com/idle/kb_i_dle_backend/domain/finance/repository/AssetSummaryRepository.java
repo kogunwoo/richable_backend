@@ -16,6 +16,27 @@ public interface AssetSummaryRepository extends JpaRepository<AssetSummary, Inte
     @Query(value = "SELECT AVG(a.total_amount) FROM asset.asset_summary a JOIN user_info.user_info u ON a.uid = u.uid WHERE u.birth_year BETWEEN :startYear AND :endYear", nativeQuery = true)
     Long findAverageAmountByAgeRange(@Param("startYear") int startYear, @Param("endYear") int endYear);
 
+    @Query(value = """
+        SELECT AVG(CASE 
+            WHEN :category = 'bond' THEN a.bond
+            WHEN :category = 'deposit' THEN a.deposit
+            WHEN :category = 'saving' THEN a.saving
+            WHEN :category = 'subscription' THEN a.subscription
+            WHEN :category = 'withdrawal' THEN a.withdrawal
+            WHEN :category = 'cash' THEN a.cash
+            WHEN :category = 'stock' THEN a.stock
+            WHEN :category = 'coin' THEN a.coin
+        END) 
+        FROM asset.asset_summary a 
+        JOIN user_info.user_info u ON a.uid = u.uid 
+        WHERE u.birth_year BETWEEN :startYear AND :endYear
+    """, nativeQuery = true)
+    Long findAverageAmountByAgeRangeAndCategory(
+            @Param("startYear") int startYear,
+            @Param("endYear") int endYear,
+            @Param("category") String category
+    );
+
     @Query(value = "SELECT * FROM asset.asset_summary WHERE uid = :uid ORDER BY update_date DESC LIMIT 1", nativeQuery = true)
     AssetSummary findLatestByUid(@Param("uid") Member uid);
 

@@ -11,9 +11,9 @@ public interface MemberService {
 
     Map<String, Object> login(LoginDTO loginDTO);
 
-    Map<String, Object> initiateNaverLogin(HttpServletRequest request) throws Exception;
+    Map initiateNaverLogin(HttpServletRequest request);
 
-    Map<String, Object> processNaverCallback(String code, String state) throws Exception;
+    Map processNaverCallback(String code, String state);
 
     String registerMember(MemberJoinDTO signupDTO);
 
@@ -22,6 +22,8 @@ public interface MemberService {
     boolean checkDupl(String id);
 
     Member findMemberByUid(int id);
+
+    Member findMemberByNickname(String nickname);
 
     void MemberJoin(MemberJoinDTO memberjoindto);
 
