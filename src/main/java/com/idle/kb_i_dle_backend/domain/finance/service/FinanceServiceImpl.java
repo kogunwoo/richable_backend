@@ -47,6 +47,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -387,7 +388,7 @@ public class FinanceServiceImpl implements FinanceService {
         List<Object[]> incomeResults = incomeRepository.findMonthlyIncomeByUid(uid);
         List<Object[]> outcomeResults = outComeUserRepository.findMonthlyOutcomeByUid(uid);
 
-        Map<String, MonthlyBalanceDTO> balanceMap = new HashMap<>();
+        TreeMap<String, MonthlyBalanceDTO> balanceMap = new TreeMap<>();
 
         for (Object[] income : incomeResults) {
             String month = (String) income[0];
