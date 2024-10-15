@@ -59,6 +59,7 @@ public class IncomeController {
     @PostMapping("/add")
     public ResponseEntity<?> addIncome(@RequestBody IncomeDTO incomeDTO) {
         try {
+            System.out.println(incomeDTO);
             Integer uid = memberService.getCurrentUid();
             SuccessResponseDTO response = new SuccessResponseDTO(true, incomeService.addIncome(uid, incomeDTO));
             return new ResponseEntity<>(response, HttpStatus.OK);
