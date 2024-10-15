@@ -97,7 +97,7 @@ public class SecurityConfig {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/member/login", "/member/register", "/member/navercallback", "/member/naverlogin", "/auth/naver/callback").permitAll()
+                .antMatchers("/member/login", "/member/register", "/member/navercallback", "/member/naverlogin", "/auth/naver/callback","member/**").permitAll()
                 .antMatchers("/invest/**").authenticated()  // /invest/** 경로에 대해 인증 요구
                 .antMatchers("/finance/**").authenticated()
                 .antMatchers("/goal/**").authenticated()
