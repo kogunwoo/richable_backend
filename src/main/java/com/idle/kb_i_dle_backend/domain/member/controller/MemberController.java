@@ -8,7 +8,6 @@ import com.idle.kb_i_dle_backend.domain.member.service.MemberService;
 import com.idle.kb_i_dle_backend.global.dto.ErrorResponseDTO;
 import com.idle.kb_i_dle_backend.global.dto.SuccessResponseDTO;
 import java.net.URI;
-import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -44,20 +43,20 @@ public class MemberController {
     }
 
     @GetMapping("/naverlogin")
-    public ResponseEntity<?> naverlogin(HttpServletRequest request) {
+    public ResponseEntity<SuccessResponseDTO> naverlogin(HttpServletRequest request) {
         try {
             Map<String, Object> naverLoginResult = memberService.initiateNaverLogin(request);
-            log.error("result check for social login : "+naverLoginResult);
+            log.error("result check for social login : " + naverLoginResult);
             return ResponseEntity.ok(new SuccessResponseDTO(true, naverLoginResult));
         } catch (Exception e) {
             log.error("Failed to initiate Naver login", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ErrorResponseDTO("네이버 로그인 초기화 중 오류가 발생했습니다."));
+            String result = "네이버 로그인 초기화 중 오류가 발생했습니다.";
+            return (ResponseEntity<SuccessResponseDTO>) ResponseEntity.internalServerError();
         }
     }
 
     @GetMapping("/naverCallback")
-    public ResponseEntity<?> naverCallback(@RequestParam("code") String code, @RequestParam("state") String state) {
+    public ResponseEntity<?> xnaverCallback(@RequestParam("code") String code, @RequestParam("state") String state) {
         try {
             Map<String, Object> callbackResult = memberService.processNaverCallback(code, state);
             String token = (String) callbackResult.get("token");
