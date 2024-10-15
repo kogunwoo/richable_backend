@@ -68,7 +68,7 @@ public class SecurityConfig {
         config.setAllowCredentials(true); // 쿠키나 인증 정보 허용
 
         config.setAllowedOrigins(Arrays.asList("https://richable.site", "http://richable.site", "http://localhost:5173",
-                "http://localhost:4173"));
+                "http://localhost:4173","https://richable-backend"));
         config.addAllowedOriginPattern("*");
 
         config.addAllowedHeader("*"); // 모든 헤더 허용
