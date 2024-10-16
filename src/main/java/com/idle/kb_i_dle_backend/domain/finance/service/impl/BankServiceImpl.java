@@ -55,7 +55,7 @@ public class BankServiceImpl implements BankService {
         bankDTO.setAccountNum(AESUtil.encrypt(String.valueOf(bankDTO.getAccountNum()),ENCRYPTION_SECRET));
         Bank savedBank = bankRepository.save(BankDTO.convertToEntity(member, bankDTO));
         assetSummaryRepository.insertOrUpdateAssetSummary(uid);
-        assetSummaryRepository.deleteDuplicateAssetSummary(uid);
+        //assetSummaryRepository.deleteDuplicateAssetSummary();
 
         return BankDTO.convertToDTO(savedBank);
     }
@@ -80,7 +80,7 @@ public class BankServiceImpl implements BankService {
         Bank savedBank = bankRepository.save(isBank);
 
         assetSummaryRepository.insertOrUpdateAssetSummary(uid);
-        assetSummaryRepository.deleteDuplicateAssetSummary(uid);
+        //assetSummaryRepository.deleteDuplicateAssetSummary();
 
         return BankDTO.convertToDTO(savedBank);
     }
@@ -104,7 +104,7 @@ public class BankServiceImpl implements BankService {
 
         Bank savedBank = bankRepository.save(isBank);
         assetSummaryRepository.insertOrUpdateAssetSummary(uid);
-        assetSummaryRepository.deleteDuplicateAssetSummary(uid);
+        //assetSummaryRepository.deleteDuplicateAssetSummary();
         return BankDTO.convertToDTO(savedBank);
     }
 
