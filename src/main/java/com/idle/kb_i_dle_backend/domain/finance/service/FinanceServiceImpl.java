@@ -539,7 +539,7 @@ public class FinanceServiceImpl implements FinanceService {
         memberRepository.findAll().forEach(member -> {
             try {
                 assetSummaryRepository.insertOrUpdateAssetSummary(member.getUid());
-                assetSummaryRepository.deleteDuplicateAssetSummary(member.getUid());
+                //assetSummaryRepository.deleteDuplicateAssetSummary();
                 log.info("Updated asset summary for user: {}", member.getUid());
             } catch (Exception e) {
                 log.error("Error updating asset summary for user: {}", member.getUid(), e);

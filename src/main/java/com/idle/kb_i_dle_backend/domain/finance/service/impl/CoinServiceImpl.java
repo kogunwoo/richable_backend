@@ -48,7 +48,7 @@ public class CoinServiceImpl implements CoinService {
         Member member = memberService.findMemberByUid(uid);
         Coin savedCoin = coinRepository.save(CoinDTO.convertToEntity(member, coinDTO));
         assetSummaryRepository.insertOrUpdateAssetSummary(uid);
-        assetSummaryRepository.deleteDuplicateAssetSummary(uid);
+        //assetSummaryRepository.deleteDuplicateAssetSummary();
         return CoinDTO.convertToDTO(savedCoin);
     }
 
@@ -72,7 +72,7 @@ public class CoinServiceImpl implements CoinService {
 
         Coin savedCoin = coinRepository.save(isCoin);
         assetSummaryRepository.insertOrUpdateAssetSummary(uid);
-        assetSummaryRepository.deleteDuplicateAssetSummary(uid);
+        //assetSummaryRepository.deleteDuplicateAssetSummary();
         return CoinDTO.convertToDTO(savedCoin);
     }
 
@@ -94,7 +94,7 @@ public class CoinServiceImpl implements CoinService {
 
         Coin savedCoin = coinRepository.save(isCoin);
         assetSummaryRepository.insertOrUpdateAssetSummary(uid);
-        assetSummaryRepository.deleteDuplicateAssetSummary(uid);
+        //assetSummaryRepository.deleteDuplicateAssetSummary();
         return CoinDTO.convertToDTO(savedCoin);
     }
 }
