@@ -104,7 +104,7 @@ public class SecurityConfig {
                 .antMatchers("/outcome/**").authenticated()
                 .antMatchers("/asset/**").authenticated()
                 .antMatchers("/member/info").authenticated()
-                .antMatchers("/member/login", "/member/register", "/member/navercallback", "/member/naverlogin", "/auth/naver/callback","member/**").permitAll()
+                .antMatchers("/member/login", "/member/register", "/member/navercallback", "/member/naverlogin", "/auth/naver/callback","/member/**").permitAll()
                 .antMatchers("/master/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
 //                .antMatchers("/member/login", "/member/register", "/member/naverlogin", "/member/naverCallback").permitAll()  // 로그인 및 회원가입 관련 경로는 모두 허용
