@@ -97,13 +97,14 @@ public class SecurityConfig {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/member/login", "/member/register", "/member/navercallback", "/member/naverlogin", "/auth/naver/callback","member/**").permitAll()
                 .antMatchers("/invest/**").authenticated()  // /invest/** 경로에 대해 인증 요구
                 .antMatchers("/finance/**").authenticated()
                 .antMatchers("/goal/**").authenticated()
                 .antMatchers("/income/**").authenticated()
                 .antMatchers("/outcome/**").authenticated()
                 .antMatchers("/asset/**").authenticated()
+                .antMatchers("/member/info").authenticated()
+                .antMatchers("/member/login", "/member/register", "/member/navercallback", "/member/naverlogin", "/auth/naver/callback","/member/**").permitAll()
                 .antMatchers("/master/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
 //                .antMatchers("/member/login", "/member/register", "/member/naverlogin", "/member/naverCallback").permitAll()  // 로그인 및 회원가입 관련 경로는 모두 허용
