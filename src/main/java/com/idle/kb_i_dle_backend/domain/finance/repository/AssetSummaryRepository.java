@@ -115,4 +115,25 @@ public interface AssetSummaryRepository extends JpaRepository<AssetSummary, Inte
         """, nativeQuery = true)
     void insertOrUpdateAssetSummary(@Param("uid") int uid);
 
+    @Modifying
+    @Transactional
+    @Query(value = """
+    DELETE t1
+    FROM asset.asset_summary t1
+    JOIN asset.asset_summary t2
+    ON t1.index = t2.index
+    AND DATE(t1.update_date) = DATE(t2.update_date)
+    AND t1.bond = t2.bond
+    AND t1.deposit = t2.deposit
+    AND t1.saving = t2.saving
+    AND t1.subscription = t2.subscription
+    AND t1.withdrawal = t2.withdrawal
+    AND t1.stock = t2.stock
+    AND t1.coin = t2.coin
+    AND t1.total_amount = t2.total_amount
+    WHERE t1.index > t2.index
+""", nativeQuery = true)
+    void deleteDuplicateAssetSummary(@Param("uid") int uid);
+
+
 }

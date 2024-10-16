@@ -49,6 +49,7 @@ public class StockServiceImpl implements StockService {
         Member member = memberService.findMemberByUid(uid);
         Stock savedStock = stockRepository.save(StockDTO.convertToEntity(member, stockDTO));
         assetSummaryRepository.insertOrUpdateAssetSummary(uid);
+        assetSummaryRepository.deleteDuplicateAssetSummary(uid);
         return StockDTO.convertToDTO(savedStock);
     }
 
@@ -71,6 +72,7 @@ public class StockServiceImpl implements StockService {
 
         Stock savedStock = stockRepository.save(isStock);
         assetSummaryRepository.insertOrUpdateAssetSummary(uid);
+        assetSummaryRepository.deleteDuplicateAssetSummary(uid);
         return StockDTO.convertToDTO(savedStock);
     }
 
@@ -91,6 +93,7 @@ public class StockServiceImpl implements StockService {
 
         Stock savedStock = stockRepository.save(isStock);
         assetSummaryRepository.insertOrUpdateAssetSummary(uid);
+        assetSummaryRepository.deleteDuplicateAssetSummary(uid);
         return StockDTO.convertToDTO(savedStock);
     }
 }
