@@ -48,6 +48,7 @@ public class BondServiceImpl implements BondService {
         Member member = memberService.findMemberByUid(uid);
         Bond savedBond = bondRepository.save(BondDTO.convertToEntity(member, bondDTO));
         assetSummaryRepository.insertOrUpdateAssetSummary(uid);
+        assetSummaryRepository.deleteDuplicateAssetSummary(uid);
         return BondDTO.convertToDTO(savedBond);
     }
 
@@ -70,6 +71,7 @@ public class BondServiceImpl implements BondService {
 
         Bond savedBond = bondRepository.save(isBond);
         assetSummaryRepository.insertOrUpdateAssetSummary(uid);
+        assetSummaryRepository.deleteDuplicateAssetSummary(uid);
         return BondDTO.convertToDTO(savedBond);
     }
 
@@ -91,6 +93,7 @@ public class BondServiceImpl implements BondService {
 
         Bond savedBond = bondRepository.save(isBond);
         assetSummaryRepository.insertOrUpdateAssetSummary(uid);
+        assetSummaryRepository.deleteDuplicateAssetSummary(uid);
         return BondDTO.convertToDTO(savedBond);
     }
 }

@@ -96,6 +96,7 @@ public class MemberServiceImpl implements MemberService {
 
             // 자산 리포트 업데이트
             assetSummaryRepository.insertOrUpdateAssetSummary(userInfo.getUid());
+            assetSummaryRepository.deleteDuplicateAssetSummary(userInfo.getUid());
 
             Map<String, Object> result = new HashMap<>();
             result.put("token", jwtToken);
