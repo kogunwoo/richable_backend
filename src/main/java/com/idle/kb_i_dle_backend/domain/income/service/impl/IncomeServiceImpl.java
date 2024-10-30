@@ -118,6 +118,7 @@ public class IncomeServiceImpl implements IncomeService {
         } catch (Exception e) {
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "Failed to update income.", e);
         }
+
     }
     @Transactional
     @Override
