@@ -91,8 +91,8 @@ public class IncomeServiceImpl implements IncomeService {
         } catch (Exception e) {
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "Failed to add income.", e);
         }
-    }
 
+    }
     @Transactional
     @Override
     public IncomeDTO updateIncome(Integer uid, IncomeDTO incomeDTO) {
@@ -119,7 +119,6 @@ public class IncomeServiceImpl implements IncomeService {
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "Failed to update income.", e);
         }
     }
-
     @Transactional
     @Override
     public Integer deleteIncomeByUidAndIndex(Integer uid, Integer index) {

@@ -80,7 +80,7 @@ public class WebConfig implements WebMvcConfigurer {
         // CORS 정책 오류 해결
         registry.addMapping("/**")
                 .allowedOrigins("https://www.richable.site", "http://richable.site", "http://localhost:5173",
-                        "http://localhost:4173")  // 허용할 Origin
+                        "http://localhost:4173","https://richable-backend")  // 허용할 Origin
                 .allowedOriginPatterns("*")
                 .allowedMethods("*")
                 .allowedHeaders("*")

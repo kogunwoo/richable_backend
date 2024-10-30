@@ -55,12 +55,12 @@ public class MemberController {
         }
     }
 
-    @GetMapping("/naverCallback")
-    public ResponseEntity<?> xnaverCallback(@RequestParam("code") String code, @RequestParam("state") String state) {
+    @GetMapping("/navercallback")
+    public ResponseEntity<?> naverCallback(@RequestParam("code") String code, @RequestParam("state") String state) {
         try {
             Map<String, Object> callbackResult = memberService.processNaverCallback(code, state);
             String token = (String) callbackResult.get("token");
-            String frontendUrl = "http://localhost:5173";  // 프론트엔드 URL
+            String frontendUrl = "https://www.richable.site";  // 프론트엔드 URL
             String redirectUrl = frontendUrl + "/auth/naver/callback?token=" + token;
 
             HttpHeaders headers = new HttpHeaders();
