@@ -28,6 +28,9 @@ public enum ErrorCode {
     // com.google.gson JSON 파싱 실패
     JSON_PARSE_ERROR(400, "G006", "JsonParseException"),
 
+    //특정 오류에 대한 세부 정보를 정의함
+    PARSE_ERROR(400, "G013", "Parse Error occurred"),
+
     // com.fasterxml.jackson.core Processing Error
     JACKSON_PROCESS_ERROR(400, "G007", "com.fasterxml.jackson.core Exception"),
 
