@@ -115,4 +115,10 @@ public interface AssetSummaryRepository extends JpaRepository<AssetSummary, Inte
         """, nativeQuery = true)
     void insertOrUpdateAssetSummary(@Param("uid") int uid);
 
+//    @Modifying
+//    @Transactional
+//    @Query(value = " select * FROM asset.asset_summary", nativeQuery = true)
+//    void deleteDuplicateAssetSummary();
+
+
 }

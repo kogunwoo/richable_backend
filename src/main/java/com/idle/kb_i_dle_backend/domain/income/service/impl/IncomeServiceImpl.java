@@ -79,6 +79,7 @@ public class IncomeServiceImpl implements IncomeService {
     }
 
     @Override
+<<<<<<< HEAD
     public IncomeDTO addIncome(Integer uid, IncomeDTO incomeDTO) {
         try {
             Member tempMember = memberService.findMemberByUid(uid);
@@ -91,6 +92,14 @@ public class IncomeServiceImpl implements IncomeService {
         } catch (Exception e) {
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "Failed to add income.", e);
         }
+=======
+    public IncomeDTO addIncome(Integer uid, IncomeDTO incomeDTO) throws ParseException {
+        Member tempMember = memberService.findMemberByUid(uid);
+        Income savedIncome = incomeRepository.save(IncomeDTO.convertToEntity(tempMember, incomeDTO));
+        assetSummaryRepository.insertOrUpdateAssetSummary(uid);
+        //assetSummaryRepository.deleteDuplicateAssetSummary();
+        return IncomeDTO.convertToDTO(savedIncome);
+>>>>>>> d978d5daab6d080657dff15962936675374b6814
     }
 
     @Transactional
@@ -118,6 +127,21 @@ public class IncomeServiceImpl implements IncomeService {
         } catch (Exception e) {
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "Failed to update income.", e);
         }
+<<<<<<< HEAD
+=======
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        isIncome.setType(incomeDTO.getType());
+        isIncome.setDate(dateFormat.parse(incomeDTO.getIncomeDate()));
+        isIncome.setAmount(incomeDTO.getPrice());
+        isIncome.setDescript(incomeDTO.getContents());
+        isIncome.setMemo(incomeDTO.getMemo());
+
+        Income savedIncome = incomeRepository.save(isIncome);
+        assetSummaryRepository.insertOrUpdateAssetSummary(uid);
+        //assetSummaryRepository.deleteDuplicateAssetSummary();
+        return IncomeDTO.convertToDTO(savedIncome);
+>>>>>>> d978d5daab6d080657dff15962936675374b6814
     }
 
     @Transactional
@@ -137,5 +161,14 @@ public class IncomeServiceImpl implements IncomeService {
         } catch (Exception e) {
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "Failed to delete income.", e);
         }
+<<<<<<< HEAD
+=======
+
+        incomeRepository.deleteByIndex(index);  // income 삭제
+        assetSummaryRepository.insertOrUpdateAssetSummary(uid);
+        //assetSummaryRepository.deleteDuplicateAssetSummary();
+
+        return index;
+>>>>>>> d978d5daab6d080657dff15962936675374b6814
     }
 }
