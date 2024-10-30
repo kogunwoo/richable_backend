@@ -91,7 +91,6 @@ public class IncomeServiceImpl implements IncomeService {
         } catch (Exception e) {
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "Failed to add income.", e);
         }
-
     }
     @Transactional
     @Override
@@ -137,5 +136,6 @@ public class IncomeServiceImpl implements IncomeService {
         } catch (Exception e) {
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "Failed to delete income.", e);
         }
+
     }
 }
