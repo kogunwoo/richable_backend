@@ -223,6 +223,18 @@ KOSIS 데이터를 통해 월 별 소비를 대한민국 평균과 비교, 초�
 <br/>
 
 ## 7. 배포 방법
+blue/green deploy 를 참고하여 만들었습니다. 👉 [배포 방법 자세히 보기](https://realcold0.tistory.com/101)
+```
+IN EC2
+
+Docker:  27.3.1
+
+ubuntu: 24.04 LTS
+
+nginx : 1.27.2 (latest in docker hub)
+
+Github action
+```
 
 <br/>
 
