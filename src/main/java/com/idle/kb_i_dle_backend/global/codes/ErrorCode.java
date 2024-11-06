@@ -80,7 +80,6 @@ public enum ErrorCode {
     INVALID_GOAL(200, "G04", "Invalid Goal"),
 
     //INCOME
-
     //Bond
 
     INVALID_BOND(200, "BO01", "user dont have bond"),
@@ -97,7 +96,19 @@ public enum ErrorCode {
     INVALID_STOCK(200, "ST01", "USER DONT HAVE STOCK"),
 
     //INCOME
-    INVALID_INCOME(200, "I01", "USER DONT HAVE INCOME"),
+    INCOME_PARSE_ERROR(400, "I06", "Income date parse error"),
+
+    INVALID_INCOME(404, "I01", "User does not have income data"),
+
+    NO_INCOME_DATA(404, "I02", "No income data found"),
+
+    INCOME_CREATION_FAILED(500, "I03", "Failed to create income"),
+
+    INCOME_UPDATE_FAILED(500, "I04", "Failed to update income"),
+
+    INCOME_DELETION_FAILED(500, "I05", "Failed to delete income"),
+
+
 
     //Invest
 

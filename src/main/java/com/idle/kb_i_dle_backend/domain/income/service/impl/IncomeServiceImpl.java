@@ -33,109 +33,103 @@ public class IncomeServiceImpl implements IncomeService {
 
     @Override
     public List<IncomeDTO> getIncomeList(Integer uid) {
-        try {
-            Member tempMember = memberService.findMemberByUid(uid);
-            List<Income> incomes = incomeRepository.findByUid(tempMember);
+        Member tempMember = memberService.findMemberByUid(uid);
+        List<Income> incomes = incomeRepository.findByUid(tempMember);
 
-            if (incomes.isEmpty()) {
-                throw new CustomException(ErrorCode.INVALID_INCOME, "No income data found.");
-            }
-
-            List<IncomeDTO> incomeList = new ArrayList<>();
-            for (Income i : incomes) {
-                IncomeDTO incomeDTO = IncomeDTO.convertToDTO(i);
-                incomeList.add(incomeDTO);
-            }
-
-            return incomeList;
-        } catch (Exception e) {
-            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "Failed to retrieve income list.", e);
+        if (incomes.isEmpty()) {
+            throw new CustomException(ErrorCode.NO_INCOME_DATA, "소득 데이터를 찾을 수 없습니다.");
         }
+
+        List<IncomeDTO> incomeList = new ArrayList<>();
+        for (Income i : incomes) {
+            incomeList.add(IncomeDTO.convertToDTO(i));
+        }
+        return incomeList;
     }
 
     @Override
     public long getIncomeSumInMonth(Integer uid, int year, int month) {
-        try {
-            Member tempUser = memberService.findMemberByUid(uid);
-            List<Income> incomes = incomeRepository.findByUidAndYearAndMonth(tempUser, year, month);
-            return incomes.stream().mapToLong(Income::getAmount).sum();
-        } catch (Exception e) {
-            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "Failed to calculate monthly income sum.", e);
+        Member tempUser = memberService.findMemberByUid(uid);
+        List<Income> incomes = incomeRepository.findByUidAndYearAndMonth(tempUser, year, month);
+
+        if (incomes.isEmpty()) {
+            throw new CustomException(ErrorCode.NO_INCOME_DATA, "지정된 월에 대한 소득 데이터가 없습니다.");
         }
+
+        return incomes.stream().mapToLong(Income::getAmount).sum();
     }
 
     @Override
     public IncomeDTO getIncomeByIndex(Integer uid, Integer index) {
-        try {
-            Member tempMember = memberService.findMemberByUid(uid);
-            Income isIncome = incomeRepository.findByIndex(index)
-                    .orElseThrow(() -> new CustomException(ErrorCode.INVALID_INCOME, "Income not found with index: " + index));
+        Member tempMember = memberService.findMemberByUid(uid);
+        Income isIncome = incomeRepository.findByIndex(index)
+                .orElseThrow(() -> new CustomException(ErrorCode.NO_INCOME_DATA, "지정된 인덱스로 소득 데이터를 찾을 수 없습니다: " + index));
 
-            validateOwnership(isIncome.getUid(), tempMember);
-            return IncomeDTO.convertToDTO(isIncome);
-        } catch (Exception e) {
-            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "Failed to retrieve income by index.", e);
-        }
+        validateOwnership(isIncome.getUid(), tempMember);
+        return IncomeDTO.convertToDTO(isIncome);
     }
 
     @Override
     public IncomeDTO addIncome(Integer uid, IncomeDTO incomeDTO) {
         try {
             Member tempMember = memberService.findMemberByUid(uid);
-            Income savedIncome = incomeRepository.save(IncomeDTO.convertToEntity(tempMember, incomeDTO));
+            Income incomeEntity = IncomeDTO.convertToEntity(tempMember, incomeDTO);
+            Income savedIncome = incomeRepository.save(incomeEntity);
             assetSummaryRepository.insertOrUpdateAssetSummary(uid);
 
             return IncomeDTO.convertToDTO(savedIncome);
         } catch (ParseException e) {
-            throw new CustomException(ErrorCode.PARSE_ERROR, "Failed to parse income date.", e);
+            throw new CustomException(ErrorCode.INCOME_PARSE_ERROR, "소득 날짜를 분석하지 못했습니다.", e);
         } catch (Exception e) {
-            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "Failed to add income.", e);
+            throw new CustomException(ErrorCode.INCOME_CREATION_FAILED, "소득을 추가하지 못했습니다.", e);
         }
     }
+
     @Transactional
     @Override
     public IncomeDTO updateIncome(Integer uid, IncomeDTO incomeDTO) {
+        Member member = memberService.findMemberByUid(uid);
+        Income existingIncome = incomeRepository.findByIndex(incomeDTO.getIncomeId())
+                .orElseThrow(() -> new CustomException(ErrorCode.NO_INCOME_DATA, "ID로 소득을 찾을수 없습니다.: " + incomeDTO.getIncomeId()));
+
+        validateOwnership(existingIncome.getUid(), member);
+
         try {
-            Member member = memberService.findMemberByUid(uid);
-            Income isIncome = incomeRepository.findByIndex(incomeDTO.getIncomeId())
-                    .orElseThrow(() -> new CustomException(ErrorCode.INVALID_INCOME, "Income not found with id: " + incomeDTO.getIncomeId()));
-
-            validateOwnership(isIncome.getUid(), member);
-
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            isIncome.setType(incomeDTO.getType());
-            isIncome.setDate(dateFormat.parse(incomeDTO.getIncomeDate()));
-            isIncome.setAmount(incomeDTO.getPrice());
-            isIncome.setDescript(incomeDTO.getContents());
-            isIncome.setMemo(incomeDTO.getMemo());
-
-            Income savedIncome = incomeRepository.save(isIncome);
-            assetSummaryRepository.insertOrUpdateAssetSummary(uid);
-            return IncomeDTO.convertToDTO(savedIncome);
+            existingIncome.setDate(dateFormat.parse(incomeDTO.getIncomeDate()));
         } catch (ParseException e) {
-            throw new CustomException(ErrorCode.PARSE_ERROR, "Failed to parse income date.", e);
-        } catch (Exception e) {
-            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "Failed to update income.", e);
+            throw new CustomException(ErrorCode.INCOME_PARSE_ERROR, "소득 날짜를 분석하지 못했습니다.", e);
         }
 
+        existingIncome.setType(incomeDTO.getType());
+        existingIncome.setAmount(incomeDTO.getPrice());
+        existingIncome.setDescript(incomeDTO.getContents());
+        existingIncome.setMemo(incomeDTO.getMemo());
+
+        Income savedIncome = incomeRepository.save(existingIncome);
+        if (savedIncome == null) {
+            throw new CustomException(ErrorCode.INCOME_UPDATE_FAILED, "소득 수정을 실패했습니다.");
+        }
+        assetSummaryRepository.insertOrUpdateAssetSummary(uid);
+        return IncomeDTO.convertToDTO(savedIncome);
     }
+
     @Transactional
     @Override
     public Integer deleteIncomeByUidAndIndex(Integer uid, Integer index) {
+        Member tempMember = memberService.findMemberByUid(uid);
+        Income isIncome = incomeRepository.findByIndex(index)
+                .orElseThrow(() -> new CustomException(ErrorCode.NO_INCOME_DATA, "인덱스에서 소득을 찾을수 없습니다.: " + index));
+
+        validateOwnership(isIncome.getUid(), tempMember);
+
         try {
-            Member tempMember = memberService.findMemberByUid(uid);
-            Income isIncome = incomeRepository.findByIndex(index)
-                    .orElseThrow(() -> new CustomException(ErrorCode.INVALID_INCOME, "Income not found with index: " + index));
-
-            validateOwnership(isIncome.getUid(), tempMember);
-
             incomeRepository.deleteByIndex(index);
             assetSummaryRepository.insertOrUpdateAssetSummary(uid);
-
-            return index;
         } catch (Exception e) {
-            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "Failed to delete income.", e);
+            throw new CustomException(ErrorCode.INCOME_DELETION_FAILED, "소득을 삭제하지 못했습니다..", e);
         }
 
+        return index;
     }
 }

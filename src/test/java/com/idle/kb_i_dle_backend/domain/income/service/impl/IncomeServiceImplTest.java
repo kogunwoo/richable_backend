@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.idle.kb_i_dle_backend.config.WebConfig;
-import com.idle.kb_i_dle_backend.domain.income.aspect.IncomeLoggingAspect;
 import com.idle.kb_i_dle_backend.domain.income.dto.IncomeDTO;
 import com.idle.kb_i_dle_backend.domain.income.entity.Income;
 import com.idle.kb_i_dle_backend.domain.income.repository.IncomeRepository;
@@ -139,6 +138,7 @@ class IncomeServiceImplTest {
     }
     @Test
     void getIncomeList() throws ParseException {
+        //Given
         Integer uid = 40;
         Member member = new Member();
         member.setUid(uid);
@@ -158,8 +158,10 @@ class IncomeServiceImplTest {
         when(memberService.findMemberByUid(uid)).thenReturn(member);
         when(incomeRepository.findByUid(member)).thenReturn(incomes);
 
+        //when
         List<IncomeDTO> result = incomeService.getIncomeList(uid);
 
+        //Then
         assertThat(result).isNotEmpty();
         assertThat(result.get(0).getIncomeId()).isEqualTo(1);
 
@@ -168,6 +170,7 @@ class IncomeServiceImplTest {
     }
     @Test
     void getIncomeSumInMonth() {
+        //Given
         Integer uid = 40;
         Member member = new Member();
         member.setUid(uid);
@@ -181,9 +184,10 @@ class IncomeServiceImplTest {
 
         when(memberService.findMemberByUid(uid)).thenReturn(member);
         when(incomeRepository.findByUidAndYearAndMonth(member, 2024, 10)).thenReturn(incomes);
-
+        //When
         long sum = incomeService.getIncomeSumInMonth(uid, 2024, 10);
 
+        //Then
         assertThat(sum).isEqualTo(8000L);
 
         verify(memberService).findMemberByUid(uid);
@@ -191,6 +195,7 @@ class IncomeServiceImplTest {
     }
     @Test
     void getIncomeByIndex() throws ParseException {
+        //Given
         Integer uid = 40;
         Integer index = 1;
         Member member = new Member();
@@ -206,8 +211,10 @@ class IncomeServiceImplTest {
         when(memberService.findMemberByUid(uid)).thenReturn(member);
         when(incomeRepository.findByIndex(index)).thenReturn(Optional.of(income));
 
+        //When
         IncomeDTO result = incomeService.getIncomeByIndex(uid, index);
 
+        //Then
         assertThat(result).isNotNull();
         assertThat(result.getIncomeId()).isEqualTo(index);
 
@@ -216,6 +223,7 @@ class IncomeServiceImplTest {
     }
     @Test
     void deleteIncomeByUidAndIndex() {
+        //Given
         Integer uid = 40;
         Integer index = 1;
         Member member = new Member();
@@ -227,9 +235,12 @@ class IncomeServiceImplTest {
 
         when(memberService.findMemberByUid(uid)).thenReturn(member);
         when(incomeRepository.findByIndex(index)).thenReturn(Optional.of(income));
+        //When
 
         Integer deletedIndex = incomeService.deleteIncomeByUidAndIndex(uid, index);
 
+
+        //Then
         assertThat(deletedIndex).isEqualTo(index);
 
         verify(memberService).findMemberByUid(uid);
